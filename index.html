@@ -8008,9 +8008,39 @@
           await loadBoard();
         }
       } else {
+        if (_realtimeChannel) { _sb.removeChannel(_realtimeChannel); _realtimeChannel = null; }
         currentUser = null; applications = []; renderBoard(); showLogin();
       }
     });
+  }
+
+  // ── REALTIME ─────────────────────────────────────────────────────────────────
+  let _realtimeChannel = null;
+
+  function setupRealtime() {
+    if (_realtimeChannel) _sb.removeChannel(_realtimeChannel);
+    _realtimeChannel = _sb
+      .channel('board-sync')
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'applications', filter: `user_id=eq.${currentUser.id}` },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            if (!applications.find(a => a.id === payload.new.id)) {
+              applications.unshift(payload.new);
+              document.getElementById('apps-logged').textContent = applications.length;
+              renderBoard();
+            }
+          } else if (payload.eventType === 'UPDATE') {
+            const idx = applications.findIndex(a => a.id === payload.new.id);
+            if (idx !== -1) { applications[idx] = payload.new; renderBoard(); }
+          } else if (payload.eventType === 'DELETE') {
+            applications = applications.filter(a => a.id !== payload.old.id);
+            document.getElementById('apps-logged').textContent = applications.length;
+            renderBoard();
+          }
+        }
+      )
+      .subscribe();
   }
 
   // ── BOARD CRUD ───────────────────────────────────────────────────────────────
@@ -8020,6 +8050,7 @@
     if (error) { console.error('loadBoard:', error); return; }
     applications = data || [];
     document.getElementById('apps-logged').textContent = applications.length;
+    setupRealtime();
     renderBoard();
   }
 

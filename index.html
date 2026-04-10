@@ -7994,14 +7994,20 @@
   }
 
   async function initAuth() {
-    const { data: { session } } = await _sb.auth.getSession();
-    if (session?.user) { currentUser = session.user; hideLogin(); await loadBoard(); }
-    else { showLogin(); renderBoard(); }
+    // Show login by default — onAuthStateChange is the single source of truth.
+    // INITIAL_SESSION fires on every page load (including magic link redirects)
+    // before getSession() could even resolve, so this avoids the race condition.
+    showLogin();
 
     _sb.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session?.user) {
-        currentUser = session.user; hideLogin(); await loadBoard();
-      } else if (event === 'SIGNED_OUT') {
+      if (session?.user) {
+        currentUser = session.user;
+        hideLogin();
+        // Load board on first sign-in or page reload with active session
+        if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') {
+          await loadBoard();
+        }
+      } else {
         currentUser = null; applications = []; renderBoard(); showLogin();
       }
     });

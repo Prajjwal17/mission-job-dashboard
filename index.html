@@ -489,6 +489,73 @@
 
   .submit-btn:hover { opacity: 0.9; }
 
+
+  /* ── AI Tools ── */
+  .ai-settings-bar {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .ai-settings-bar label { font-size: 0.78rem; color: var(--muted); font-family: 'JetBrains Mono'; white-space: nowrap; }
+  .ai-key-input {
+    flex: 1; min-width: 260px; background: var(--bg); border: 1px solid var(--border);
+    color: var(--text); padding: 8px 12px; border-radius: 6px; font-family: 'JetBrains Mono';
+    font-size: 0.78rem;
+  }
+  .ai-key-input:focus { outline: none; border-color: var(--accent2); }
+  .ai-save-btn {
+    background: rgba(6,182,212,0.15); border: 1px solid rgba(6,182,212,0.4); color: var(--accent2);
+    padding: 7px 16px; border-radius: 6px; font-size: 0.78rem; font-weight: 700;
+    cursor: pointer; font-family: 'JetBrains Mono'; white-space: nowrap;
+  }
+  .ai-tools-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 900px) { .ai-tools-grid { grid-template-columns: 1fr; } }
+  .ai-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .ai-card-title {
+    font-family: 'Bebas Neue'; font-size: 1.3rem; letter-spacing: 1px;
+  }
+  .ai-card-title.cover { color: var(--accent2); }
+  .ai-card-title.ats   { color: var(--accent3); }
+  .ai-card p { font-size: 0.8rem; color: var(--muted); margin: 0; }
+  .jd-select {
+    width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text);
+    padding: 8px 10px; border-radius: 6px; font-family: 'DM Sans'; font-size: 0.82rem; cursor: pointer;
+  }
+  .jd-textarea {
+    width: 100%; min-height: 140px; background: var(--surface); border: 1px solid var(--border);
+    color: var(--text); padding: 10px 12px; border-radius: 6px; font-family: 'DM Sans';
+    font-size: 0.82rem; resize: vertical; box-sizing: border-box;
+  }
+  .jd-textarea:focus, .jd-select:focus { outline: none; border-color: var(--accent2); }
+  .ai-generate-btn {
+    padding: 10px; border: none; border-radius: 8px; font-weight: 700;
+    font-family: 'DM Sans'; font-size: 0.88rem; cursor: pointer; transition: opacity 0.2s;
+  }
+  .ai-generate-btn:hover { opacity: 0.85; }
+  .ai-generate-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .ai-generate-btn.cover { background: linear-gradient(135deg, var(--accent2), #0284c7); color: #fff; }
+  .ai-generate-btn.ats   { background: linear-gradient(135deg, var(--accent3), #d97706); color: #fff; }
+  .ai-output {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    padding: 14px; font-size: 0.82rem; line-height: 1.65; color: var(--text);
+    min-height: 80px; white-space: pre-wrap; font-family: 'DM Sans'; display: none;
+  }
+  .ai-output.visible { display: block; }
+  .ai-copy-btn {
+    background: none; border: 1px solid var(--border); color: var(--muted); padding: 5px 12px;
+    border-radius: 6px; font-size: 0.72rem; cursor: pointer; font-family: 'JetBrains Mono';
+    align-self: flex-end; display: none;
+  }
+  .ai-copy-btn.visible { display: block; }
+  .ai-copy-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+  .ai-score-badge {
+    display: inline-block; padding: 4px 12px; border-radius: 100px; font-family: 'JetBrains Mono';
+    font-size: 0.75rem; font-weight: 700; margin-bottom: 8px;
+  }
+  .ai-thinking { color: var(--muted); font-style: italic; font-size: 0.8rem; }
+
   @media (max-width: 600px) {
     .company-list-grid, .curated-grid, .dashboard-grid { grid-template-columns: 1fr; }
     .header-inner { flex-direction: column; }
@@ -624,6 +691,7 @@
     <button class="nav-pill" data-section="companies">🌐 All Companies (625)</button>
     <button class="nav-pill" data-section="drives">🔥 Job Drives (202)</button>
     <button class="nav-pill" data-section="tracker">📋 My Board</button>
+    <button class="nav-pill" data-section="aitools">🤖 AI Tools</button>
     <button class="nav-pill" data-section="prep">🎓 Preparation Guide</button>
   </div>
 
@@ -7248,6 +7316,52 @@
     </div>
   </div>
 
+
+  <!-- SECTION: AI TOOLS -->
+  <div id="aitools" class="section">
+
+    <!-- API Key Settings -->
+    <div class="ai-settings-bar">
+      <label>GROQ API KEY</label>
+      <input id="groq-key-input" class="ai-key-input" type="password" placeholder="gsk_..." />
+      <button class="ai-save-btn" onclick="saveGroqKey()">Save Key</button>
+      <span style="font-size:0.72rem;color:var(--muted);font-family:'JetBrains Mono';">
+        Free at <a href="https://console.groq.com" target="_blank" style="color:var(--accent2);">console.groq.com</a>
+        &nbsp;→&nbsp; Create API Key
+      </span>
+    </div>
+
+    <div class="ai-tools-grid">
+
+      <!-- Cover Letter Generator -->
+      <div class="ai-card">
+        <div class="ai-card-title cover">✉ Cover Letter Generator</div>
+        <p>Paste a job description or pick from your tracked applications. Gets a personalized cover letter highlighting your most relevant achievements.</p>
+        <select class="jd-select" id="cover-jd-select" onchange="fillJdFromBoard('cover-jd-input', this)">
+          <option value="">— Pick from My Board (optional) —</option>
+        </select>
+        <textarea class="jd-textarea" id="cover-jd-input" placeholder="Paste the Job Description here..."></textarea>
+        <button class="ai-generate-btn cover" id="cover-btn" onclick="generateCoverLetter()">Generate Cover Letter</button>
+        <div class="ai-output" id="cover-output"></div>
+        <button class="ai-copy-btn" id="cover-copy" onclick="copyOutput('cover-output', 'cover-copy')">Copy</button>
+      </div>
+
+      <!-- ATS Resume Optimizer -->
+      <div class="ai-card">
+        <div class="ai-card-title ats">🎯 ATS Resume Optimizer</div>
+        <p>Analyzes your resume against the JD — gives an ATS score, missing keywords, specific bullet rewrites, and red flags to fix before applying.</p>
+        <select class="jd-select" id="ats-jd-select" onchange="fillJdFromBoard('ats-jd-input', this)">
+          <option value="">— Pick from My Board (optional) —</option>
+        </select>
+        <textarea class="jd-textarea" id="ats-jd-input" placeholder="Paste the Job Description here..."></textarea>
+        <button class="ai-generate-btn ats" id="ats-btn" onclick="generateATSAnalysis()">Optimize for ATS</button>
+        <div class="ai-output" id="ats-output"></div>
+        <button class="ai-copy-btn" id="ats-copy" onclick="copyOutput('ats-output', 'ats-copy')">Copy</button>
+      </div>
+
+    </div>
+  </div>
+
   <!-- SECTION 5: PREPARATION GUIDE -->
   <div id="prep" class="section">
     <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 32px;">
@@ -8202,6 +8316,159 @@
   // ── INIT ─────────────────────────────────────────────────────────────────────
   renderDriveGrid('all');
   initAuth();
+
+  // ── AI TOOLS ─────────────────────────────────────────────────────────────────
+  const MASTER_RESUME = "# Prajjwal Pandey\n\n**Phone:** +91 8278674540 | **Email:** prajjwalp1707@gmail.com\n**LinkedIn:** linkedin.com/in/prajjwal-pandey | **GitHub:** github.com/Prajjwal17\n**Location:** Sitapur, Uttar Pradesh\n\n---\n\n## SUMMARY\n\nApplied AI Engineer and ECE student at VIT specializing in Agentic AI and RAG architectures. Bridges the gap between hardware and software by building autonomous multi-agent systems and real-time signal processing tools. Proven track record of transforming manual workflows into automated AI-driven pipelines with a focus on scalability and system reliability.\n\n---\n\n## SKILLS\n\n**AI & Data:** Agentic AI, LangChain, RAG, PyTorch, Data Analysis, Automation Testing\n\n**Languages & Frameworks:** Python, SQL, JavaScript, React, Three.js, C++, C\n\n**Engineering & Tools:** Signal Processing, Embedded Systems (STM32/ESP32), Docker, Firebase, Git, NetSim, Microcontroller Programming\n\n---\n\n## ACCOMPLISHMENTS\n\n- **AI Automation:** Engineered a 5-agent LangChain pipeline, reducing manual application time by 15+ hrs/week.\n- **Performance Optimization:** Achieved a 40% reduction in processing latency via automated end-to-end EDA pipelines.\n- **System Engineering:** Reduced signal processing latency by 30% by migrating system architecture from STM32 to ESP32.\n- **Operational Impact:** Increased plant operational uptime by 15% through the standardization of DCS protocols.\n\n---\n\n## EXPERIENCE\n\n### Data Analyst Intern \u2014 Trainity\n*July 2023 \u2013 Dec. 2023*\n- Architected end-to-end EDA pipelines for automated data cleaning, successfully reducing processing latency by 40% for 5+ internal stakeholders.\n- Translated 20+ complex datasets into actionable Power BI executive dashboards, enhancing decision-making speed by 25%.\n\n### Instrumentation & Control Intern \u2014 Radico Khaitan Limited\n*Oct. 2023 \u2013 Nov. 2023*\n- Standardized maintenance documentation and DCS protocols for on-site engineering teams, achieving a 15% increase in plant operational uptime.\n- Executed daily production monitoring protocols to ensure smooth industrial operations and efficient workstation organization.\n\n---\n\n## PROJECTS\n\n### AI-Powered Job Application Pipeline (Agentic AI)\n*Feb. 2026 \u2013 Present*\n- Developed an autonomous 5-agent pipeline utilizing LangChain and Playwright with RAG integration, achieving a 70% increase in resume-to-JD alignment scores across 50+ test cases.\n- Implemented full orchestration across scraper, tailor, PDF-gen, and mailer agents with local Ollama Mistral for cost-efficient operation.\n- Built strategic HR contact management system processing 1,695+ verified HR contacts with automated cold email personalization.\n\n### Teerth \u2014 3D Cultural Exploration Web App\n*Jan. 2026 \u2013 Present*\n- Solo-developed a 3D platform using Three.js and WebGL, optimizing rendering performance by 40% to maintain a stable 60FPS on mobile devices.\n- Implemented immersive cultural site exploration with real-time asset optimization and interactive UI logic.\n\n### Capstone: Portable FMCW Radar & GPS System\n*July 2025 \u2013 Nov. 2025*\n- Optimized hardware communication by migrating to ESP32 and integrated a 16-bit ADC, achieving 98.5% signal integrity for real-time target detection visualized on Mapbox.\n- Reduced signal processing latency by 30% through architecture optimization and embedded systems design.\n\n### Smart Traffic Management System\n*Aug. 2024 \u2013 Nov. 2024*\n- Developed a scalable traffic optimization system for Delhi-NCR using YOLOv5 for real-time vehicle detection and linear regression for congestion forecasting.\n- Engineered an AI-driven dynamic signal algorithm and dashboard, reducing simulated vehicle idle times and emissions.\n\n### Network Simulation & Analysis (Academic)\n*2024*\n- Simulated complex network topologies in NetSim to identify bottlenecks, improving theoretical packet delivery ratios by 20% in high-congestion scenarios.\n\n---\n\n## EDUCATION\n\n**B.Tech, Electronics and Communication Engineering**\nVellore Institute of Technology (VIT), Vellore\n*July 2021 \u2013 May 2026*\n\n---\n\n## CERTIFICATIONS\n\n- **The Data Scientist's Toolbox** \u2014 Johns Hopkins University via Coursera | Dec 2023\n- **SQL Basic Certification** \u2014 HackerRank | Aug 2023\n\n---\n\n## KEY TECHNOLOGIES\n\nPython | JavaScript | React | Three.js | PyTorch | LangChain | Docker | Firebase | Git | Power BI | YOLOv5 | SQL | C++ | STM32/ESP32 | WebGL | Playwright\n";
+
+  function saveGroqKey() {
+    const key = document.getElementById('groq-key-input').value.trim();
+    if (!key) return;
+    localStorage.setItem('groqKey', key);
+    document.getElementById('groq-key-input').value = '';
+    document.getElementById('groq-key-input').placeholder = 'Key saved!';
+    setTimeout(() => document.getElementById('groq-key-input').placeholder = 'gsk_...', 2000);
+  }
+
+  function loadGroqKey() {
+    const k = localStorage.getItem('groqKey') || '';
+    if (k) document.getElementById('groq-key-input').placeholder = 'Key saved (hidden)';
+    return k;
+  }
+
+  function fillJdFromBoard(textareaId, select) {
+    const val = select.value;
+    if (!val) return;
+    const app = applications.find(a => a.title === val);
+    if (app) {
+      document.getElementById(textareaId).value =
+        'Job Title: ' + app.title + '\nSource: ' + (app.source||'') + '\nLink: ' + (app.link||'') +
+        '\n\n(Paste the full job description here)';
+    }
+    select.value = '';
+  }
+
+  function populateBoardSelects() {
+    const opts = applications.map(a =>
+      '<option value="' + escHtml(a.title) + '">' + escHtml(a.title) + (a.source ? ' — ' + escHtml(a.source) : '') + '</option>'
+    ).join('');
+    ['cover-jd-select','ats-jd-select'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = '<option value="">— Pick from My Board (optional) —</option>' + opts;
+    });
+  }
+
+  async function callGroq(systemPrompt, userContent) {
+    const key = loadGroqKey();
+    if (!key) throw new Error('No Groq API key. Get one free at console.groq.com → paste it in the key box above.');
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user',   content: userContent }
+        ],
+        temperature: 0.7,
+        max_tokens: 1500
+      })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error?.message || 'Groq API error: ' + res.status);
+    }
+    const data = await res.json();
+    return data.choices[0].message.content;
+  }
+
+  async function generateCoverLetter() {
+    const jd = document.getElementById('cover-jd-input').value.trim();
+    if (!jd) { alert('Paste a job description first.'); return; }
+    const btn = document.getElementById('cover-btn');
+    const out = document.getElementById('cover-output');
+    const copyBtn = document.getElementById('cover-copy');
+    btn.disabled = true; btn.textContent = 'Generating...';
+    out.className = 'ai-output visible';
+    out.textContent = 'Writing your cover letter...';
+    copyBtn.className = 'ai-copy-btn';
+    try {
+      const system = `You are an expert career coach writing cover letters for job seekers.
+Write in first person as the candidate. Be compelling, specific, and human — never generic.
+Keep it under 280 words. Highlight 2-3 achievements that directly match the JD requirements.
+End with a confident, enthusiastic call to action. No "Dear Hiring Manager" cliche openers —
+start with a strong hook sentence instead.`;
+      const user = `MY RESUME:\n${MASTER_RESUME}\n\nJOB DESCRIPTION:\n${jd}\n\nWrite the cover letter now.`;
+      const result = await callGroq(system, user);
+      out.textContent = result;
+      copyBtn.className = 'ai-copy-btn visible';
+    } catch(e) {
+      out.textContent = 'Error: ' + e.message;
+    }
+    btn.disabled = false; btn.textContent = 'Generate Cover Letter';
+  }
+
+  async function generateATSAnalysis() {
+    const jd = document.getElementById('ats-jd-input').value.trim();
+    if (!jd) { alert('Paste a job description first.'); return; }
+    const btn = document.getElementById('ats-btn');
+    const out = document.getElementById('ats-output');
+    const copyBtn = document.getElementById('ats-copy');
+    btn.disabled = true; btn.textContent = 'Analyzing...';
+    out.className = 'ai-output visible';
+    out.textContent = 'Scanning resume against JD...';
+    copyBtn.className = 'ai-copy-btn';
+    try {
+      const system = `You are an expert ATS resume optimizer and career strategist.
+Analyze the candidate's resume against the job description. Be direct, specific, and brutally honest.
+Always reference actual text from both documents. Give exact before/after rewrites, not vague advice.`;
+      const user = `MY RESUME:\n${MASTER_RESUME}\n\nJOB DESCRIPTION:\n${jd}
+
+Provide your analysis in this exact format:
+
+ATS MATCH SCORE: [X/100]
+[One sentence explaining the score]
+
+MISSING KEYWORDS:
+[List each keyword/phrase from JD not in resume, one per line with a dash]
+
+SUMMARY REWRITE:
+[Rewrite the summary line specifically for this JD — keep under 3 sentences]
+
+BULLET REWRITES (top 3 most impactful):
+• BEFORE: [exact current bullet]
+  AFTER:  [improved version with JD keywords woven in]
+
+SKILLS TO ADD:
+[Specific skills/tools from JD to add to the skills section]
+
+RED FLAGS:
+[Anything that might hurt this application — gaps, mismatches, missing info]
+
+QUICK WIN:
+[The single most impactful change to make right now]`;
+      const result = await callGroq(system, user);
+      out.textContent = result;
+      copyBtn.className = 'ai-copy-btn visible';
+    } catch(e) {
+      out.textContent = 'Error: ' + e.message;
+    }
+    btn.disabled = false; btn.textContent = 'Optimize for ATS';
+  }
+
+  function copyOutput(outputId, btnId) {
+    const text = document.getElementById(outputId).textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById(btnId);
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy', 2000);
+    });
+  }
+
+  // Repopulate board selects whenever board renders
+  const _origRenderBoard = renderBoard;
+  renderBoard = function() { _origRenderBoard(); populateBoardSelects(); };
+  loadGroqKey();
+
 </script>
 </body>
 </html>

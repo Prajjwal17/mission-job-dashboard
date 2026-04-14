@@ -368,6 +368,45 @@
 
   .domain-section { margin-bottom: 40px; }
 
+  /* ── Smart Fit Filter ── */
+  .fit-analysis-bar {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 16px; margin-bottom: 14px;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+  }
+  .fit-run-btn {
+    background: linear-gradient(135deg, var(--accent), #8b5cf6);
+    color: #fff; border: none; padding: 7px 14px; border-radius: 6px;
+    font-size: 0.78rem; font-weight: 700; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; transition: opacity 0.2s; white-space: nowrap;
+  }
+  .fit-run-btn:hover { opacity: 0.88; }
+  .fit-run-btn:disabled { opacity: 0.45; cursor: default; }
+  .fit-status-text { font-size: 0.72rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .fit-filter-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .fit-filter-btn {
+    padding: 4px 12px; border-radius: 100px; font-size: 0.72rem; font-weight: 600;
+    border: 1px solid var(--border); background: transparent; color: var(--muted);
+    cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif;
+  }
+  .fit-filter-btn.active  { border-color: var(--accent); color: #fff; background: rgba(124,58,237,0.2); }
+  .fit-filter-btn.strong  { border-color: rgba(16,185,129,0.4); color: #10b981; }
+  .fit-filter-btn.strong.active { background: rgba(16,185,129,0.15); border-color: #10b981; }
+  .fit-filter-btn.moderate { border-color: rgba(245,158,11,0.4); color: var(--accent3); }
+  .fit-filter-btn.moderate.active { background: rgba(245,158,11,0.12); border-color: var(--accent3); }
+  .fit-filter-btn.weak    { border-color: rgba(244,63,94,0.4); color: #f43f5e; }
+  .fit-filter-btn.weak.active { background: rgba(244,63,94,0.1); border-color: #f43f5e; }
+  .fit-chip {
+    display: inline-block; font-size: 0.62rem; font-family: 'JetBrains Mono', monospace;
+    padding: 1px 6px; border-radius: 3px; font-weight: 600; margin-top: 4px;
+  }
+  .fit-chip-S { background: rgba(16,185,129,0.12); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
+  .fit-chip-M { background: rgba(245,158,11,0.1);  color: var(--accent3); border: 1px solid rgba(245,158,11,0.3); }
+  .fit-chip-W { background: rgba(244,63,94,0.08);  color: #f43f5e; border: 1px solid rgba(244,63,94,0.25); }
+  .company-card.fit-strong   { border-color: rgba(16,185,129,0.35); }
+  .company-card.fit-moderate { border-color: rgba(245,158,11,0.3); }
+  .company-card.fit-weak     { border-color: rgba(244,63,94,0.25); }
+
   .domain-header {
     display: flex; align-items: center; gap: 12px;
     margin-bottom: 16px;
@@ -1625,6 +1664,20 @@
   <div id="companies" class="section">
     <div class="search-box">
       <input type="text" id="company-search" placeholder="🔍 Search companies by name (e.g., Google, Razorpay, Fractal)..." />
+    </div>
+
+    <!-- Smart Fit Analysis Bar -->
+    <div class="fit-analysis-bar">
+      <span style="font-family:'Bebas Neue';font-size:0.95rem;letter-spacing:1px;color:var(--accent);">🤖 AI FIT ANALYSIS</span>
+      <button class="fit-run-btn" id="fit-run-btn" onclick="runFitAnalysis()">Analyse All 625 Companies</button>
+      <span class="fit-status-text" id="fit-status-text"></span>
+      <div class="fit-filter-row" id="fit-filter-row" style="display:none;">
+        <button class="fit-filter-btn active" data-fit="all"  onclick="setFitFilter('all')">All</button>
+        <button class="fit-filter-btn strong"  data-fit="S"   onclick="setFitFilter('S')">💚 Strong Fit</button>
+        <button class="fit-filter-btn moderate" data-fit="M"  onclick="setFitFilter('M')">🟡 Moderate</button>
+        <button class="fit-filter-btn weak"    data-fit="W"   onclick="setFitFilter('W')">🔴 Weak</button>
+        <button class="fit-filter-btn" style="margin-left:6px;font-size:0.65rem;" onclick="clearFitAnalysis()">↺ Re-run</button>
+      </div>
     </div>
 
     <div class="filter-bar">
@@ -9088,6 +9141,122 @@ Use realistic Indian market data. If it's a global company with India office, us
       }
     });
   }
+
+  // ── SMART FIT FILTER ─────────────────────────────────────────────────────────
+  const FIT_PROFILE = `Applied AI Engineer, ECE VIT 2026. Skills: Agentic AI, LangChain, RAG, PyTorch, Signal Processing, Embedded Systems (ESP32/STM32), Python, React, Three.js, Power BI, Data Analysis, Automation. Projects: 5-agent job pipeline, 3D web app (Three.js/WebGL), FMCW Radar (ESP32), Smart Traffic (YOLOv5). Internship: Data Analyst (Trainity), I&C Engineer (Radico Khaitan).`;
+  let activeFitFilter = 'all';
+
+  async function runFitAnalysis() {
+    const key = loadGroqKey();
+    if (!key) { alert('Add your Groq API key in the AI Tools tab first.'); return; }
+
+    const cards = Array.from(document.querySelectorAll('.company-card'));
+    const companies = cards.map(c => ({
+      key:    c.dataset.company || '',
+      domain: c.dataset.domain  || '',
+      name:   c.querySelector('.company-card-name')?.title || c.dataset.company || ''
+    })).filter(c => c.key);
+
+    const BATCH = 60;
+    const batches = [];
+    for (let i = 0; i < companies.length; i += BATCH) batches.push(companies.slice(i, i + BATCH));
+
+    const btn      = document.getElementById('fit-run-btn');
+    const statusEl = document.getElementById('fit-status-text');
+    btn.disabled   = true;
+    const results  = {};
+
+    for (let b = 0; b < batches.length; b++) {
+      statusEl.textContent = `Analysing ${b * BATCH + 1}–${Math.min((b+1)*BATCH, companies.length)} of ${companies.length}…`;
+      const list = batches[b].map(c => `${c.key}|${c.name}|${c.domain}`).join('\n');
+      try {
+        const raw = await callGroq(
+          `Rate each company S (Strong fit), M (Moderate fit), or W (Weak fit) for this candidate.
+Candidate profile: ${FIT_PROFILE}
+Domains: pm=Product Mgmt, sa=Solutions Architect, ai=AI/GenAI, ai-llm=Agentic/LLM, bi=BI & Analytics, ds=Data Science, cv=Computer Vision, fsd=Full-Stack Dev, mkt=Marketing, pgm=Program Mgmt, regional=Regional.
+Return ONLY compact JSON — {"company-key":"S/M/W",...} — no extra text, no markdown.`,
+          `Companies (key|name|domain):\n${list}`
+        );
+        const json = raw.trim().replace(/^```(?:json)?|```$/gm, '').trim();
+        Object.assign(results, JSON.parse(json));
+      } catch(e) { /* skip failed batch, continue */ }
+    }
+
+    localStorage.setItem('companyFitScores', JSON.stringify(results));
+    const today = new Date().toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'});
+    localStorage.setItem('companyFitDate', today);
+    btn.disabled = false;
+    statusEl.textContent = `Last run: ${today}`;
+    applyFitBadges(results);
+    document.getElementById('fit-filter-row').style.display = 'flex';
+  }
+
+  function applyFitBadges(scores) {
+    document.querySelectorAll('.company-card').forEach(card => {
+      const key = card.dataset.company;
+      const fit = scores[key];
+      card.classList.remove('fit-strong','fit-moderate','fit-weak');
+      card.removeAttribute('data-fit');
+      const old = card.querySelector('.fit-chip');
+      if (old) old.remove();
+      if (!fit) return;
+      card.dataset.fit = fit;
+      card.classList.add(fit==='S'?'fit-strong': fit==='M'?'fit-moderate':'fit-weak');
+      const chip = document.createElement('span');
+      chip.className = 'fit-chip fit-chip-' + fit;
+      chip.textContent = fit==='S' ? '💚 Strong' : fit==='M' ? '🟡 Moderate' : '🔴 Weak';
+      card.appendChild(chip);
+    });
+    applyFitVisibility();
+  }
+
+  function applyFitVisibility() {
+    document.querySelectorAll('.company-card').forEach(card => {
+      if (activeFitFilter === 'all') { card.classList.remove('hidden'); return; }
+      const fit = card.dataset.fit;
+      if (fit === activeFitFilter) card.classList.remove('hidden');
+      else card.classList.add('hidden');
+    });
+    // Hide domain sections where all cards are hidden
+    document.querySelectorAll('.domain-section').forEach(sec => {
+      const anyVisible = Array.from(sec.querySelectorAll('.company-card'))
+        .some(c => !c.classList.contains('hidden') && c.style.display !== 'none');
+      sec.style.display = anyVisible ? '' : 'none';
+    });
+  }
+
+  function setFitFilter(fit) {
+    activeFitFilter = fit;
+    document.querySelectorAll('.fit-filter-btn').forEach(b =>
+      b.classList.toggle('active', b.dataset.fit === fit));
+    applyFitVisibility();
+  }
+
+  function clearFitAnalysis() {
+    localStorage.removeItem('companyFitScores');
+    localStorage.removeItem('companyFitDate');
+    document.querySelectorAll('.company-card').forEach(c => {
+      c.classList.remove('fit-strong','fit-moderate','fit-weak','hidden');
+      c.removeAttribute('data-fit');
+      const ch = c.querySelector('.fit-chip'); if (ch) ch.remove();
+    });
+    document.getElementById('fit-filter-row').style.display = 'none';
+    document.getElementById('fit-status-text').textContent = '';
+    activeFitFilter = 'all';
+  }
+
+  function loadFitBadges() {
+    const stored = localStorage.getItem('companyFitScores');
+    const date   = localStorage.getItem('companyFitDate');
+    if (!stored) return;
+    try {
+      applyFitBadges(JSON.parse(stored));
+      document.getElementById('fit-filter-row').style.display = 'flex';
+      if (date) document.getElementById('fit-status-text').textContent = `Last run: ${date}`;
+    } catch(e) {}
+  }
+
+  loadFitBadges();
 
   // ── INTERVIEW STORY BANK ─────────────────────────────────────────────────────
   function loadStories() {

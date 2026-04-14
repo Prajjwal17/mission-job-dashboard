@@ -8543,11 +8543,10 @@ QUICK WIN:
     if (e.target === document.getElementById('quickTrackModal')) closeQuickTrackModal();
   });
 
-  document.getElementById('quickTrackForm').addEventListener('submit', async function(e) {
+  document.getElementById('quickTrackForm').addEventListener('submit', function(e) {
     e.preventDefault();
-    const btn = this.querySelector('button[type=submit]');
-    btn.textContent = 'Adding…'; btn.disabled = true;
-    await insertApp({
+    if (!currentUser) { showLogin(); return; }
+    const appData = {
       title:  document.getElementById('qt-title').value,
       salary: '',
       source: document.getElementById('qt-source').value,
@@ -8555,10 +8554,30 @@ QUICK WIN:
       status: document.getElementById('qt-status').value,
       date:   document.getElementById('qt-date').value,
       notes:  document.getElementById('qt-notes').value.trim()
-    });
+    };
+    // Optimistic update — show result instantly, sync in background
+    const tempId = 'opt_' + Date.now();
+    const optimistic = { ...appData, id: tempId, user_id: currentUser.id };
+    applications.unshift(optimistic);
+    document.getElementById('apps-logged').textContent = applications.length;
+    renderBoard();
     closeQuickTrackModal();
-    btn.textContent = '✓ Add to My Board'; btn.disabled = false;
     refreshCuratedCardStates();
+    // Persist to Supabase in background
+    _sb.from('applications')
+      .insert({ ...appData, user_id: currentUser.id })
+      .select().single()
+      .then(({ data, error }) => {
+        const idx = applications.findIndex(a => a.id === tempId);
+        if (error) {
+          console.error('Quick track save failed:', error);
+          if (idx !== -1) applications.splice(idx, 1);
+        } else if (data) {
+          if (idx !== -1) applications[idx] = data;
+        }
+        document.getElementById('apps-logged').textContent = applications.length;
+        renderBoard();
+      });
   });
 
   function injectTrackButtons() {

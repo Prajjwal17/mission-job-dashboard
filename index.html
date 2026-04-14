@@ -804,6 +804,39 @@
   }
   .fit-verdict { font-size: 0.78rem; color: var(--text); font-style: italic; line-height: 1.45; }
 
+  /* ── Salary Intelligence ── */
+  .salary-btn {
+    width: 100%; padding: 7px 12px; margin-bottom: 14px;
+    background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3);
+    color: var(--accent3); border-radius: 6px; font-size: 0.78rem; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif;
+  }
+  .salary-btn:hover { background: rgba(245,158,11,0.2); border-color: var(--accent3); }
+  .salary-btn:disabled { opacity: 0.5; cursor: default; }
+  .salary-box {
+    background: rgba(245,158,11,0.06);
+    border: 1px solid rgba(245,158,11,0.2);
+    border-radius: 8px; padding: 12px 14px; margin-bottom: 14px; display: none;
+  }
+  .salary-range {
+    font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem;
+    color: var(--accent3); margin-bottom: 6px; line-height: 1;
+  }
+  .salary-breakdown {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px;
+  }
+  .salary-chip {
+    font-size: 0.67rem; font-family: 'JetBrains Mono', monospace;
+    padding: 2px 8px; border-radius: 4px;
+    background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2);
+    color: var(--accent3);
+  }
+  .salary-anchor {
+    font-size: 0.76rem; color: var(--text); line-height: 1.4;
+    border-top: 1px solid rgba(245,158,11,0.15); padding-top: 8px; margin-top: 4px;
+  }
+  .salary-anchor strong { color: var(--accent3); }
+
   /* ── Application Board (Tracker) ── */
   .board-topbar {
     display: flex; justify-content: space-between; align-items: center;
@@ -8182,6 +8215,14 @@
       <input type="hidden" id="qt-link" />
       <input type="hidden" id="qt-source" />
 
+      <!-- Salary Intelligence -->
+      <button type="button" class="salary-btn" id="qt-salary-btn" onclick="researchSalary()">💰 Research Comp & Salary Range</button>
+      <div class="salary-box" id="qt-salary-box">
+        <div class="salary-range" id="qt-salary-range"></div>
+        <div class="salary-breakdown" id="qt-salary-breakdown"></div>
+        <div class="salary-anchor" id="qt-salary-anchor"></div>
+      </div>
+
       <!-- Job Fit Score -->
       <div id="qt-score-box" class="fit-score-box" style="display:none;">
         <div id="qt-score-loading" class="fit-score-loading">
@@ -8721,6 +8762,10 @@ QUICK WIN:
     document.getElementById('qt-notes').value = '';
     document.getElementById('qt-status').value = 'Applied';
     document.getElementById('quickTrackModal').classList.add('show');
+    // Reset salary box
+    document.getElementById('qt-salary-box').style.display = 'none';
+    document.getElementById('qt-salary-btn').disabled = false;
+    document.getElementById('qt-salary-btn').textContent = '💰 Research Comp & Salary Range';
     scoreJobFit(title);
   }
 
@@ -8759,6 +8804,43 @@ Grades: A=excellent, B=good, C=moderate, D=weak, F=poor. Dims are 0-100.`,
   }
 
   function closeQuickTrackModal() { document.getElementById('quickTrackModal').classList.remove('show'); }
+
+  async function researchSalary() {
+    const title = document.getElementById('qt-title').value;
+    const btn   = document.getElementById('qt-salary-btn');
+    const box   = document.getElementById('qt-salary-box');
+    const key   = loadGroqKey();
+    if (!key) { alert('Add your Groq API key in the AI Tools tab first.'); return; }
+
+    btn.disabled = true;
+    btn.textContent = '⟳ Researching…';
+
+    try {
+      const raw = await callGroq(
+        `You are a compensation research expert for the Indian job market (2025-2026).
+Return ONLY valid JSON, no markdown, no extra text:
+{
+  "range": "₹X – ₹Y LPA",
+  "breakdown": ["Base: ₹X LPA", "Bonus: X%", "Equity: X%", "Benefits: ESOP/Health/etc"],
+  "anchor": "One sentence negotiation anchor — what to say to push the offer higher."
+}
+Use realistic Indian market data. If it's a global company with India office, use their India comp bands.`,
+        `Role: ${title}\nLocation: India (Bengaluru/Remote preference)`
+      );
+      const json = raw.trim().replace(/^```(?:json)?|```$/gm, '').trim();
+      const d = JSON.parse(json);
+      document.getElementById('qt-salary-range').textContent = d.range;
+      document.getElementById('qt-salary-breakdown').innerHTML =
+        d.breakdown.map(b => `<span class="salary-chip">${b}</span>`).join('');
+      document.getElementById('qt-salary-anchor').innerHTML =
+        `<strong>Negotiation anchor:</strong> ${d.anchor}`;
+      box.style.display = 'block';
+      btn.style.display = 'none';
+    } catch(e) {
+      btn.disabled = false;
+      btn.textContent = '💰 Research Comp & Salary Range';
+    }
+  }
 
   window.addEventListener('click', e => {
     if (e.target === document.getElementById('quickTrackModal')) closeQuickTrackModal();

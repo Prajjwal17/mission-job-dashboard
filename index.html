@@ -631,6 +631,49 @@
   .drive-track-btn:hover:not(.tracked) { background: rgba(124,58,237,0.2); }
   .drive-track-btn.tracked { background: rgba(16,185,129,0.13); color: #10b981; border-color: rgba(16,185,129,0.35); cursor: default; pointer-events: none; }
 
+  /* ── Job Fit Score ── */
+  .fit-score-box {
+    background: rgba(124,58,237,0.06);
+    border: 1px solid rgba(124,58,237,0.22);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+  }
+  .fit-score-loading {
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-family: 'JetBrains Mono', monospace;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .fit-spin { display: inline-block; animation: fitSpin 1s linear infinite; }
+  @keyframes fitSpin { to { transform: rotate(360deg); } }
+  .fit-grade-row { display: flex; align-items: flex-start; gap: 14px; }
+  .fit-grade {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.6rem;
+    line-height: 1;
+    min-width: 38px;
+    text-align: center;
+  }
+  .grade-a { color: #10b981; }
+  .grade-b { color: #06b6d4; }
+  .grade-c { color: #f59e0b; }
+  .grade-d { color: #f97316; }
+  .grade-f { color: #ef4444; }
+  .fit-dims { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
+  .fit-dim-tag {
+    font-size: 0.67rem;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .fit-verdict { font-size: 0.78rem; color: var(--text); font-style: italic; line-height: 1.45; }
+
   /* ── Application Board (Tracker) ── */
   .board-topbar {
     display: flex; justify-content: space-between; align-items: center;
@@ -8000,6 +8043,23 @@
       </div>
       <input type="hidden" id="qt-link" />
       <input type="hidden" id="qt-source" />
+
+      <!-- Job Fit Score -->
+      <div id="qt-score-box" class="fit-score-box" style="display:none;">
+        <div id="qt-score-loading" class="fit-score-loading">
+          <span class="fit-spin">⟳</span> Scoring fit against your resume…
+        </div>
+        <div id="qt-score-result" style="display:none;">
+          <div class="fit-grade-row">
+            <div class="fit-grade" id="qt-grade">A</div>
+            <div style="flex:1;">
+              <div class="fit-dims" id="qt-dims"></div>
+              <div class="fit-verdict" id="qt-verdict"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <button type="submit" class="submit-btn">✓ Add to My Board</button>
     </form>
   </div>
@@ -8523,6 +8583,41 @@ QUICK WIN:
     document.getElementById('qt-notes').value = '';
     document.getElementById('qt-status').value = 'Applied';
     document.getElementById('quickTrackModal').classList.add('show');
+    scoreJobFit(title);
+  }
+
+  async function scoreJobFit(title) {
+    const box     = document.getElementById('qt-score-box');
+    const loading = document.getElementById('qt-score-loading');
+    const result  = document.getElementById('qt-score-result');
+    const key = loadGroqKey();
+    if (!key) { box.style.display = 'none'; return; }
+
+    box.style.display   = 'block';
+    loading.style.display = 'flex';
+    result.style.display  = 'none';
+
+    try {
+      const raw = await callGroq(
+        `You are a career advisor. Score a job opportunity against a candidate's resume.
+Return ONLY valid JSON, no markdown, no extra text:
+{"grade":"A","dims":{"Role Match":85,"Skills":90,"Level Fit":75,"Growth":80,"Location":70},"verdict":"One concise sentence about the fit."}
+Grades: A=excellent, B=good, C=moderate, D=weak, F=poor. Dims are 0-100.`,
+        `Job: ${title}\n\nResume:\n${MASTER_RESUME}`
+      );
+      const json = raw.trim().replace(/^```(?:json)?|```$/gm, '').trim();
+      const d = JSON.parse(json);
+      const gradeEl = document.getElementById('qt-grade');
+      gradeEl.textContent = d.grade;
+      gradeEl.className = 'fit-grade grade-' + d.grade.toLowerCase();
+      document.getElementById('qt-dims').innerHTML = Object.entries(d.dims)
+        .map(([k, v]) => `<span class="fit-dim-tag">${k}: ${v}</span>`).join('');
+      document.getElementById('qt-verdict').textContent = d.verdict;
+      loading.style.display = 'none';
+      result.style.display  = 'block';
+    } catch(e) {
+      box.style.display = 'none';
+    }
   }
 
   function closeQuickTrackModal() { document.getElementById('quickTrackModal').classList.remove('show'); }

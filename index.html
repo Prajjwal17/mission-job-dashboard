@@ -117,6 +117,136 @@
     margin-bottom: 32px;
   }
 
+  /* ── Analytics ── */
+  #analytics-section { margin-bottom: 24px; }
+  .analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+  }
+  .analytics-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+  }
+  .analytics-card-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-bottom: 14px;
+    text-transform: uppercase;
+  }
+  .bar-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 0.75rem;
+  }
+  .bar-label {
+    width: 100px;
+    flex-shrink: 0;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .bar-track {
+    flex: 1;
+    height: 8px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.6s ease;
+  }
+  .bar-count {
+    width: 26px;
+    text-align: right;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    flex-shrink: 0;
+  }
+  .analytics-stat-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .analytics-stat {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    text-align: center;
+  }
+  .analytics-stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .analytics-stat-label {
+    font-size: 0.67rem;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .analytics-empty {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 20px 0;
+  }
+  .timeline-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+  }
+  .timeline-bar-wrap {
+    width: 100%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    height: 60px;
+  }
+  .timeline-bar {
+    width: 70%;
+    border-radius: 3px 3px 0 0;
+    min-height: 2px;
+    transition: height 0.5s ease;
+  }
+  .timeline-label {
+    font-size: 0.6rem;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--muted);
+    text-align: center;
+  }
+  .timeline-count {
+    font-size: 0.6rem;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent2);
+  }
+  .timeline-grid {
+    display: flex;
+    gap: 4px;
+    align-items: flex-end;
+    padding-top: 8px;
+  }
+
   .stat-box {
     background: var(--card);
     border: 1px solid var(--border);
@@ -780,6 +910,14 @@
         <div class="stat-number" id="apps-logged">0</div>
         <div class="stat-label">Applications Logged</div>
       </div>
+    </div>
+
+    <!-- Analytics Section -->
+    <div id="analytics-section" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:24px;">
+      <h3 style="color:var(--accent2);margin-bottom:4px;font-family:'Bebas Neue';font-size:1.1rem;">📊 Application Analytics</h3>
+      <p style="color:var(--muted);font-size:0.75rem;font-family:'JetBrains Mono';margin-bottom:14px;">Live from your board · updates as you track</p>
+      <div class="analytics-stat-row" id="analytics-stats"></div>
+      <div class="analytics-grid" id="analytics-charts"></div>
     </div>
 
     <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
@@ -8747,6 +8885,107 @@ Grades: A=excellent, B=good, C=moderate, D=weak, F=poor. Dims are 0-100.`,
     });
   }
 
+  // ── APPLICATION ANALYTICS ────────────────────────────────────────────────────
+  function renderAnalytics() {
+    const statsEl  = document.getElementById('analytics-stats');
+    const chartsEl = document.getElementById('analytics-charts');
+    if (!statsEl || !chartsEl) return;
+
+    if (!applications.length) {
+      statsEl.innerHTML  = '';
+      chartsEl.innerHTML = '<div class="analytics-empty">Track your first application to see analytics.</div>';
+      return;
+    }
+
+    // ── Stat counts ──
+    const total     = applications.length;
+    const now       = new Date();
+    const weekAgo   = new Date(now - 7 * 864e5);
+    const thisWeek  = applications.filter(a => a.date && new Date(a.date) >= weekAgo).length;
+    const responded = applications.filter(a => ['Shortlisted','Interview lined up','Selected'].includes(a.status)).length;
+    const respRate  = total ? Math.round(responded / total * 100) : 0;
+    const srcCounts = {};
+    applications.forEach(a => { const s = a.source || 'Unknown'; srcCounts[s] = (srcCounts[s]||0)+1; });
+    const topSrc    = Object.entries(srcCounts).sort((a,b)=>b[1]-a[1])[0]?.[0] || '—';
+
+    statsEl.innerHTML = [
+      ['color:var(--accent2)', total,      'Total Tracked'],
+      ['color:var(--accent3)', thisWeek,   'This Week'],
+      ['color:var(--accent4)', respRate+'%','Response Rate'],
+      ['color:var(--accent)',  topSrc,     'Top Source'],
+    ].map(([col, val, lbl]) => `
+      <div class="analytics-stat">
+        <div class="analytics-stat-num" style="${col}">${val}</div>
+        <div class="analytics-stat-label">${lbl}</div>
+      </div>`).join('');
+
+    // ── Helpers ──
+    function barChart(title, entries, color) {
+      const max = Math.max(...entries.map(e=>e[1]), 1);
+      return `<div class="analytics-card">
+        <div class="analytics-card-title">${title}</div>
+        ${entries.map(([label, count]) => `
+          <div class="bar-row">
+            <div class="bar-label" title="${label}">${label}</div>
+            <div class="bar-track"><div class="bar-fill" style="width:${Math.round(count/max*100)}%;background:${color}"></div></div>
+            <div class="bar-count">${count}</div>
+          </div>`).join('')}
+      </div>`;
+    }
+
+    // ── Status funnel ──
+    const STATUS_COLORS = {
+      'Applied':'#06b6d4','To Apply':'#94a3b8','Shortlisted':'#f59e0b',
+      'Interview lined up':'#a78bfa','Selected':'#10b981','Rejected':'#f43f5e'
+    };
+    const statusEntries = Object.entries(
+      applications.reduce((acc, a) => { acc[a.status||'Unknown']=(acc[a.status||'Unknown']||0)+1; return acc; }, {})
+    ).sort((a,b)=>b[1]-a[1]);
+
+    // ── Top sources ──
+    const sourceEntries = Object.entries(srcCounts).sort((a,b)=>b[1]-a[1]).slice(0,6);
+
+    // ── Timeline (last 14 days) ──
+    const days = Array.from({length:14},(_,i)=>{
+      const d = new Date(now - (13-i)*864e5);
+      return d.toISOString().slice(0,10);
+    });
+    const dayCounts = {};
+    applications.forEach(a => { if (a.date) dayCounts[a.date] = (dayCounts[a.date]||0)+1; });
+    const maxDay = Math.max(...days.map(d=>dayCounts[d]||0), 1);
+    const timelineHtml = `<div class="analytics-card" style="grid-column:span 2;">
+      <div class="analytics-card-title">Applications — Last 14 Days</div>
+      <div class="timeline-grid">
+        ${days.map(d => {
+          const cnt = dayCounts[d]||0;
+          const h   = Math.max(Math.round(cnt/maxDay*60), cnt?4:2);
+          const lbl = d.slice(5);
+          return `<div class="timeline-col">
+            <div class="timeline-count">${cnt||''}</div>
+            <div class="timeline-bar-wrap"><div class="timeline-bar" style="height:${h}px;background:${cnt?'var(--accent2)':'rgba(255,255,255,0.06)'}"></div></div>
+            <div class="timeline-label">${lbl}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+
+    // ── Status with per-bar colours ──
+    const statusHtml = `<div class="analytics-card">
+      <div class="analytics-card-title">Status Funnel</div>
+      ${statusEntries.map(([status, count]) => {
+        const max2 = Math.max(...statusEntries.map(e=>e[1]),1);
+        const col  = STATUS_COLORS[status]||'var(--accent)';
+        return `<div class="bar-row">
+          <div class="bar-label" title="${status}">${status}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${Math.round(count/max2*100)}%;background:${col}"></div></div>
+          <div class="bar-count">${count}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+
+    chartsEl.innerHTML = timelineHtml + statusHtml + barChart('Top Sources', sourceEntries, 'var(--accent)');
+  }
+
   const _origRenderBoard = renderBoard;
   renderBoard = function() {
     _origRenderBoard();
@@ -8754,6 +8993,7 @@ Grades: A=excellent, B=good, C=moderate, D=weak, F=poor. Dims are 0-100.`,
     refreshCuratedCardStates();
     refreshCompanyCardStates();
     refreshDriveCardStates();
+    renderAnalytics();
   };
   loadGroqKey();
 

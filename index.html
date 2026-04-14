@@ -329,6 +329,27 @@
 
   .apply-btn:hover { background: linear-gradient(135deg, rgba(6,182,212,0.3), rgba(6,182,212,0.1)); border-color: var(--accent2); }
 
+  .card-track-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    background: rgba(124,58,237,0.1);
+    color: var(--accent);
+    border: 1px solid rgba(124,58,237,0.28);
+    padding: 7px 12px;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+    width: 100%;
+    letter-spacing: 0.3px;
+  }
+  .card-track-btn:hover:not(.tracked) { background: rgba(124,58,237,0.22); border-color: var(--accent); }
+  .card-track-btn.tracked { background: rgba(16,185,129,0.13); color: #10b981; border-color: rgba(16,185,129,0.35); cursor: default; pointer-events: none; }
+
   .company-list-grid {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   }
@@ -7943,6 +7964,45 @@
 </div>
 
 
+<!-- Quick Track Modal (for curated cards) -->
+<div id="quickTrackModal" class="modal">
+  <div class="modal-content" style="max-width:420px;">
+    <div class="modal-header">
+      <h2>Track Application</h2>
+      <button class="close-btn" onclick="closeQuickTrackModal()">&times;</button>
+    </div>
+    <p style="font-size:0.8rem;color:var(--muted);margin:-8px 0 18px;font-family:'JetBrains Mono';">Quick-add to My Board. Fill in optional details.</p>
+    <form id="quickTrackForm">
+      <div class="form-group">
+        <label>Job / Company</label>
+        <input type="text" id="qt-title" readonly style="opacity:0.72;cursor:default;" />
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select id="qt-status">
+          <option value="Applied" selected>Applied</option>
+          <option value="To Apply">To Apply</option>
+          <option value="Shortlisted">Shortlisted</option>
+          <option value="Interview lined up">Interview lined up</option>
+          <option value="Selected">Selected</option>
+          <option value="Rejected">Rejected</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Date</label>
+        <input type="date" id="qt-date" />
+      </div>
+      <div class="form-group">
+        <label>Notes (optional)</label>
+        <input type="text" id="qt-notes" placeholder="e.g. via LinkedIn, referral, applied via portal…" />
+      </div>
+      <input type="hidden" id="qt-link" />
+      <input type="hidden" id="qt-source" />
+      <button type="submit" class="submit-btn">✓ Add to My Board</button>
+    </form>
+  </div>
+</div>
+
 <!-- Auth Overlay -->
 <div id="auth-overlay" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:9999;align-items:center;justify-content:center;">
   <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:40px 36px;max-width:420px;width:90%;text-align:center;">
@@ -8465,8 +8525,92 @@ QUICK WIN:
   }
 
   // Repopulate board selects whenever board renders
+  // ── QUICK TRACK (curated cards) ──────────────────────────────────────────────
+  function openQuickTrackModal(title, link, source) {
+    if (!currentUser) { showLogin(); return; }
+    document.getElementById('qt-title').value = title;
+    document.getElementById('qt-link').value = link || '';
+    document.getElementById('qt-source').value = source || 'Curated Roles';
+    document.getElementById('qt-date').value = new Date().toISOString().slice(0, 10);
+    document.getElementById('qt-notes').value = '';
+    document.getElementById('qt-status').value = 'Applied';
+    document.getElementById('quickTrackModal').classList.add('show');
+  }
+
+  function closeQuickTrackModal() { document.getElementById('quickTrackModal').classList.remove('show'); }
+
+  window.addEventListener('click', e => {
+    if (e.target === document.getElementById('quickTrackModal')) closeQuickTrackModal();
+  });
+
+  document.getElementById('quickTrackForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = this.querySelector('button[type=submit]');
+    btn.textContent = 'Adding…'; btn.disabled = true;
+    await insertApp({
+      title:  document.getElementById('qt-title').value,
+      salary: '',
+      source: document.getElementById('qt-source').value,
+      link:   document.getElementById('qt-link').value,
+      status: document.getElementById('qt-status').value,
+      date:   document.getElementById('qt-date').value,
+      notes:  document.getElementById('qt-notes').value.trim()
+    });
+    closeQuickTrackModal();
+    btn.textContent = '✓ Add to My Board'; btn.disabled = false;
+    refreshCuratedCardStates();
+  });
+
+  function injectTrackButtons() {
+    document.querySelectorAll('.curated-card').forEach(card => {
+      if (card.querySelector('.card-track-btn')) return;
+      const companyEl = card.querySelector('.company-name');
+      const roleEl    = card.querySelector('.role-title');
+      const applyEl   = card.querySelector('.apply-btn');
+      if (!companyEl || !roleEl) return;
+      const company = companyEl.textContent.trim();
+      const role    = roleEl.textContent.trim();
+      const link    = applyEl ? applyEl.href : '';
+      const title   = role + ' @ ' + company;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'card-track-btn';
+      btn.dataset.cardTitle = title;
+      btn.dataset.cardLink  = link;
+      btn.textContent = '+ Track / Mark Applied';
+      btn.addEventListener('click', () => openQuickTrackModal(title, link, company));
+      card.appendChild(btn);
+    });
+  }
+
+  function refreshCuratedCardStates() {
+    document.querySelectorAll('.card-track-btn').forEach(btn => {
+      const title   = btn.dataset.cardTitle;
+      const tracked = applications.find(a => a.title === title);
+      if (tracked) {
+        btn.classList.add('tracked');
+        btn.textContent = '✓ ' + (tracked.status || 'Tracked');
+      } else {
+        if (btn.classList.contains('tracked')) {
+          btn.classList.remove('tracked');
+          btn.textContent = '+ Track / Mark Applied';
+          btn.replaceWith(btn.cloneNode(true)); // reset listener
+          // re-attach listener on the new node
+          const fresh = document.querySelector('[data-card-title="' + CSS.escape(title) + '"]');
+          if (fresh) fresh.addEventListener('click', () => openQuickTrackModal(
+            fresh.dataset.cardTitle, fresh.dataset.cardLink,
+            fresh.dataset.cardTitle.split(' @ ')[1] || 'Curated Roles'
+          ));
+        }
+      }
+    });
+  }
+
+  injectTrackButtons();
+  refreshCuratedCardStates();
+
   const _origRenderBoard = renderBoard;
-  renderBoard = function() { _origRenderBoard(); populateBoardSelects(); };
+  renderBoard = function() { _origRenderBoard(); populateBoardSelects(); refreshCuratedCardStates(); };
   loadGroqKey();
 
 </script>

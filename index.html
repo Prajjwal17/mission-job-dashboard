@@ -400,7 +400,8 @@
     white-space: nowrap;
   }
 
-  .log-btn:hover { background: rgba(6,182,212,0.2); }
+  .log-btn:hover:not(.tracked) { background: rgba(6,182,212,0.2); }
+  .log-btn.tracked { background: rgba(16,185,129,0.15); color: #10b981; border-color: rgba(16,185,129,0.4); cursor: default; pointer-events: none; font-size: 0.7rem; }
 
   .apply-btn-small {
     display: inline-block;
@@ -627,7 +628,8 @@
     color: var(--accent); border-radius: 6px; font-size: 0.75rem; font-weight: 600;
     cursor: pointer; transition: all 0.2s;
   }
-  .drive-track-btn:hover { background: rgba(124,58,237,0.2); }
+  .drive-track-btn:hover:not(.tracked) { background: rgba(124,58,237,0.2); }
+  .drive-track-btn.tracked { background: rgba(16,185,129,0.13); color: #10b981; border-color: rgba(16,185,129,0.35); cursor: default; pointer-events: none; }
 
   /* ── Application Board (Tracker) ── */
   .board-topbar {
@@ -8107,9 +8109,10 @@
         + (hasLink
             ? '<a href="' + j.link + '" target="_blank" class="drive-apply-btn">Apply →</a>'
             : '<span class="drive-apply-btn" style="opacity:0.4;cursor:default;">No Link</span>')
-        + '<button class="drive-track-btn" onclick="trackDriveJob(' + idx + ')">+ Track</button>'
+        + '<button class="drive-track-btn" data-drive-title="' + escHtml(j.title) + '" data-drive-source="' + escHtml(j.source) + '" onclick="trackDriveJob(' + idx + ')">+ Track</button>'
         + '</div></div>';
     }).join('') || '<div style="color:var(--muted);padding:32px;">No jobs in this category.</div>';
+    refreshDriveCardStates();
   }
 
   document.querySelectorAll('.drive-filter-btn').forEach(btn => {
@@ -8310,28 +8313,13 @@
     document.getElementById('tracker').classList.add('active');
   }
 
-  async function trackDriveJob(driveIdx) {
-    if (!currentUser) { showLogin(); return; }
+  function trackDriveJob(driveIdx) {
     const j = DRIVE_JOBS[driveIdx];
-    const exists = applications.find(a => a.title === j.title && a.source === j.source);
-    if (exists) { alert('Already tracked: ' + j.title); switchToBoard(); return; }
-    await insertApp({
-      title: j.title, salary: j.salary, source: j.source, link: j.link,
-      status: 'To Apply', date: new Date().toISOString().slice(0, 10), notes: ''
-    });
-    switchToBoard();
+    openQuickTrackModal(j.title, j.link, j.source);
   }
 
   function logApplication(company, domain, website) {
-    if (!currentUser) { switchToBoard(); return; }
-    const exists = applications.find(a => a.title === company);
-    if (!exists) {
-      insertApp({
-        title: company, salary: '', source: domain || '', link: website || '',
-        status: 'To Apply', date: new Date().toISOString().slice(0, 10), notes: ''
-      });
-    }
-    switchToBoard();
+    openQuickTrackModal(company, website, domain);
   }
 
   // Board filter tabs
@@ -8628,8 +8616,50 @@ QUICK WIN:
   injectTrackButtons();
   refreshCuratedCardStates();
 
+  // ── COMPANY CARD STATE REFRESH ───────────────────────────────────────────────
+  function refreshCompanyCardStates() {
+    document.querySelectorAll('.log-btn').forEach(btn => {
+      const match = btn.getAttribute('onclick')?.match(/logApplication\('([^']+)'/);
+      if (!match) return;
+      const company = match[1];
+      const tracked = applications.find(a => a.title === company);
+      if (tracked) {
+        btn.classList.add('tracked');
+        btn.textContent = '✓ ' + (tracked.status || 'Tracked');
+        btn.title = tracked.status || 'Tracked';
+      } else {
+        btn.classList.remove('tracked');
+        btn.textContent = '📋';
+        btn.title = '';
+      }
+    });
+  }
+
+  // ── DRIVE CARD STATE REFRESH ─────────────────────────────────────────────────
+  function refreshDriveCardStates() {
+    document.querySelectorAll('.drive-track-btn').forEach(btn => {
+      const title  = btn.dataset.driveTitle;
+      const source = btn.dataset.driveSource;
+      if (!title) return;
+      const tracked = applications.find(a => a.title === title && a.source === source);
+      if (tracked) {
+        btn.classList.add('tracked');
+        btn.textContent = '✓ ' + (tracked.status || 'Tracked');
+      } else {
+        btn.classList.remove('tracked');
+        btn.textContent = '+ Track';
+      }
+    });
+  }
+
   const _origRenderBoard = renderBoard;
-  renderBoard = function() { _origRenderBoard(); populateBoardSelects(); refreshCuratedCardStates(); };
+  renderBoard = function() {
+    _origRenderBoard();
+    populateBoardSelects();
+    refreshCuratedCardStates();
+    refreshCompanyCardStates();
+    refreshDriveCardStates();
+  };
   loadGroqKey();
 
 </script>

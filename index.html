@@ -668,8 +668,87 @@
   .ai-card-title {
     font-family: 'Bebas Neue'; font-size: 1.3rem; letter-spacing: 1px;
   }
-  .ai-card-title.cover { color: var(--accent2); }
-  .ai-card-title.ats   { color: var(--accent3); }
+  .ai-card-title.cover  { color: var(--accent2); }
+  .ai-card-title.ats    { color: var(--accent3); }
+  .ai-card-title.story  { color: var(--accent4); }
+  .ai-card-title.match  { color: var(--accent);  }
+
+  /* ── Story Bank ── */
+  .story-bank-card { grid-column: 1 / -1; }
+  .story-bank-body { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 900px) { .story-bank-body { grid-template-columns: 1fr; } }
+  .story-list { display: flex; flex-direction: column; gap: 8px; }
+  .story-item {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 12px;
+  }
+  .story-item-header {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 8px; cursor: pointer;
+  }
+  .story-item-title {
+    font-weight: 600; font-size: 0.82rem; color: var(--text); flex: 1;
+  }
+  .story-item-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
+  .story-tag {
+    font-size: 0.65rem; font-family: 'JetBrains Mono', monospace;
+    padding: 1px 6px; border-radius: 3px;
+    background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.25);
+    color: var(--accent4);
+  }
+  .story-item-body {
+    font-size: 0.78rem; color: var(--muted); line-height: 1.5;
+    margin-top: 8px; white-space: pre-wrap; display: none;
+  }
+  .story-del-btn {
+    background: none; border: none; color: var(--muted); cursor: pointer;
+    font-size: 0.9rem; padding: 2px 5px; border-radius: 4px; transition: color 0.2s; flex-shrink: 0;
+  }
+  .story-del-btn:hover { color: #f43f5e; }
+  .story-add-form { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+  .story-input {
+    background: var(--surface); border: 1px solid var(--border); color: var(--text);
+    padding: 8px 10px; border-radius: 6px; font-family: 'DM Sans'; font-size: 0.82rem;
+    width: 100%; box-sizing: border-box;
+  }
+  .story-input:focus { outline: none; border-color: var(--accent4); }
+  .story-textarea {
+    background: var(--surface); border: 1px solid var(--border); color: var(--text);
+    padding: 8px 10px; border-radius: 6px; font-family: 'DM Sans'; font-size: 0.8rem;
+    width: 100%; min-height: 100px; resize: vertical; box-sizing: border-box; line-height: 1.5;
+  }
+  .story-textarea:focus { outline: none; border-color: var(--accent4); }
+  .story-save-btn {
+    background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3);
+    color: var(--accent4); padding: 7px 14px; border-radius: 6px; font-size: 0.8rem;
+    font-weight: 600; cursor: pointer; font-family: 'DM Sans'; transition: all 0.2s;
+  }
+  .story-save-btn:hover { background: rgba(16,185,129,0.25); }
+  .story-cancel-btn {
+    background: none; border: 1px solid var(--border); color: var(--muted);
+    padding: 7px 14px; border-radius: 6px; font-size: 0.8rem; cursor: pointer;
+    font-family: 'DM Sans'; transition: all 0.2s;
+  }
+  .story-add-btn {
+    background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.25);
+    color: var(--accent4); padding: 7px 12px; border-radius: 6px; font-size: 0.78rem;
+    font-weight: 600; cursor: pointer; font-family: 'DM Sans'; transition: all 0.2s; margin-top: 4px;
+  }
+  .story-add-btn:hover { background: rgba(16,185,129,0.2); }
+  .match-result-block {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 12px 14px; margin-top: 6px;
+  }
+  .match-story-title {
+    font-weight: 700; font-size: 0.82rem; color: var(--accent4); margin-bottom: 4px;
+  }
+  .match-story-reason {
+    font-size: 0.76rem; color: var(--muted); line-height: 1.4; margin-bottom: 6px;
+  }
+  .match-talking-points {
+    font-size: 0.75rem; color: var(--text); line-height: 1.5;
+    border-top: 1px solid var(--border); padding-top: 6px; white-space: pre-wrap;
+  }
   .ai-card p { font-size: 0.8rem; color: var(--muted); margin: 0; }
   .jd-select {
     width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text);
@@ -7596,6 +7675,49 @@
         <button class="ai-copy-btn" id="ats-copy" onclick="copyOutput('ats-output', 'ats-copy')">Copy</button>
       </div>
 
+      <!-- Interview Story Bank -->
+      <div class="ai-card story-bank-card">
+        <div class="ai-card-title story">🎤 Interview Story Bank</div>
+        <p>Store your STAR stories once. Pick a job below and Groq matches your best 2–3 stories to that role with tailored talking points.</p>
+        <div class="story-bank-body">
+
+          <!-- Left: story list + add -->
+          <div>
+            <div style="font-size:0.72rem;color:var(--muted);font-family:'JetBrains Mono';margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">Your Stories (<span id="story-count">0</span>)</div>
+            <div class="story-list" id="story-list">
+              <div style="color:var(--muted);font-size:0.8rem;font-family:'JetBrains Mono';">No stories yet. Add your first one →</div>
+            </div>
+            <button class="story-add-btn" id="story-add-toggle" onclick="toggleStoryForm()" style="margin-top:10px;">+ Add Story</button>
+            <div class="story-add-form" id="story-add-form" style="display:none;">
+              <input  class="story-input"    id="story-new-title" placeholder="Story title (e.g. Led RAG pipeline overhaul)" />
+              <input  class="story-input"    id="story-new-tags"  placeholder="Tags: comma-separated (e.g. AI, leadership, data)" />
+              <textarea class="story-textarea" id="story-new-body"
+                placeholder="Write your STAR story here...&#10;&#10;Situation: ...&#10;Task: ...&#10;Action: ...&#10;Result: ..."></textarea>
+              <div style="display:flex;gap:8px;">
+                <button class="story-save-btn"   onclick="saveStory()">Save Story</button>
+                <button class="story-cancel-btn" onclick="toggleStoryForm()">Cancel</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: match to role -->
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div class="ai-card-title match" style="font-size:1rem;">⚡ Match Stories to Role</div>
+            <p style="font-size:0.78rem;color:var(--muted);margin:0;">Pick a tracked application or paste a JD — Groq finds your top matching stories and tailors talking points.</p>
+            <select class="jd-select" id="story-match-select" onchange="fillJdFromBoard('story-match-jd', this)">
+              <option value="">— Pick from My Board (optional) —</option>
+            </select>
+            <textarea class="jd-textarea" id="story-match-jd" style="min-height:100px;" placeholder="Paste the Job Description here..."></textarea>
+            <button class="ai-generate-btn" id="story-match-btn" onclick="matchStories()"
+              style="background:linear-gradient(135deg,var(--accent),#8b5cf6);color:#fff;">
+              ⚡ Match My Stories
+            </button>
+            <div id="story-match-output" class="ai-output"></div>
+          </div>
+
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -8638,7 +8760,7 @@
     const opts = applications.map(a =>
       '<option value="' + escHtml(a.title) + '">' + escHtml(a.title) + (a.source ? ' — ' + escHtml(a.source) : '') + '</option>'
     ).join('');
-    ['cover-jd-select','ats-jd-select'].forEach(id => {
+    ['cover-jd-select','ats-jd-select','story-match-select'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.innerHTML = '<option value="">— Pick from My Board (optional) —</option>' + opts;
     });
@@ -8966,6 +9088,110 @@ Use realistic Indian market data. If it's a global company with India office, us
       }
     });
   }
+
+  // ── INTERVIEW STORY BANK ─────────────────────────────────────────────────────
+  function loadStories() {
+    try { return JSON.parse(localStorage.getItem('interviewStories') || '[]'); } catch { return []; }
+  }
+  function saveStories(arr) { localStorage.setItem('interviewStories', JSON.stringify(arr)); }
+
+  function renderStoryList() {
+    const stories = loadStories();
+    const list = document.getElementById('story-list');
+    const countEl = document.getElementById('story-count');
+    if (countEl) countEl.textContent = stories.length;
+    if (!list) return;
+    if (!stories.length) {
+      list.innerHTML = '<div style="color:var(--muted);font-size:0.8rem;font-family:\'JetBrains Mono\';">No stories yet. Add your first one →</div>';
+      return;
+    }
+    list.innerHTML = stories.map((s, i) => `
+      <div class="story-item" id="story-item-${i}">
+        <div class="story-item-header" onclick="toggleStoryBody(${i})">
+          <div class="story-item-title">${escHtml(s.title)}</div>
+          <button class="story-del-btn" onclick="event.stopPropagation();deleteStory(${i})" title="Delete">✕</button>
+        </div>
+        ${s.tags?.length ? `<div class="story-item-tags">${s.tags.map(t=>`<span class="story-tag">${escHtml(t)}</span>`).join('')}</div>` : ''}
+        <div class="story-item-body" id="story-body-${i}">${escHtml(s.body)}</div>
+      </div>`).join('');
+
+    // also refresh the match select in populateBoardSelects
+    populateBoardSelects();
+  }
+
+  function toggleStoryBody(i) {
+    const el = document.getElementById('story-body-' + i);
+    if (el) el.style.display = el.style.display === 'block' ? 'none' : 'block';
+  }
+
+  function toggleStoryForm() {
+    const form = document.getElementById('story-add-form');
+    const btn  = document.getElementById('story-add-toggle');
+    const open = form.style.display === 'none';
+    form.style.display = open ? 'flex' : 'none';
+    btn.textContent = open ? '✕ Cancel' : '+ Add Story';
+    if (open) document.getElementById('story-new-title').focus();
+  }
+
+  function saveStory() {
+    const title = document.getElementById('story-new-title').value.trim();
+    const body  = document.getElementById('story-new-body').value.trim();
+    if (!title || !body) { alert('Title and story text are required.'); return; }
+    const tags = document.getElementById('story-new-tags').value
+      .split(',').map(t => t.trim()).filter(Boolean);
+    const stories = loadStories();
+    stories.push({ id: 'story_' + Date.now(), title, tags, body });
+    saveStories(stories);
+    document.getElementById('story-new-title').value = '';
+    document.getElementById('story-new-tags').value  = '';
+    document.getElementById('story-new-body').value  = '';
+    toggleStoryForm();
+    renderStoryList();
+  }
+
+  function deleteStory(i) {
+    const stories = loadStories();
+    stories.splice(i, 1);
+    saveStories(stories);
+    renderStoryList();
+  }
+
+  async function matchStories() {
+    const stories = loadStories();
+    if (!stories.length) { alert('Add at least one story first.'); return; }
+    const jd  = document.getElementById('story-match-jd').value.trim();
+    if (!jd)  { alert('Paste a job description to match against.'); return; }
+    const key = loadGroqKey();
+    if (!key) { alert('Add your Groq API key in the AI Tools tab first.'); return; }
+
+    const btn = document.getElementById('story-match-btn');
+    const out = document.getElementById('story-match-output');
+    btn.textContent = '⟳ Matching…'; btn.disabled = true;
+    out.style.display = 'none';
+
+    const storySummary = stories.map((s, i) =>
+      `Story ${i+1}: "${s.title}"\nTags: ${(s.tags||[]).join(', ')}\n${s.body}`
+    ).join('\n\n---\n\n');
+
+    try {
+      const result = await callGroq(
+        `You are an interview coach. Given a job description and a candidate's STAR story bank,
+select the 2-3 most relevant stories. For each, explain WHY it fits this role and provide
+3 tailored talking points the candidate should emphasise in the interview.
+Format your response in clean markdown with headers for each story.`,
+        `JOB DESCRIPTION:\n${jd}\n\n---\n\nCANDIDATE STORIES:\n${storySummary}`
+      );
+      out.style.display = 'block';
+      out.innerHTML = result.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    } catch(e) {
+      out.style.display = 'block';
+      out.textContent = 'Error: ' + e.message;
+    }
+    btn.textContent = '⚡ Match My Stories'; btn.disabled = false;
+  }
+
+  // Init story list on load
+  renderStoryList();
 
   // ── APPLICATION ANALYTICS ────────────────────────────────────────────────────
   function renderAnalytics() {

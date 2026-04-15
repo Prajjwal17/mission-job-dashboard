@@ -8683,20 +8683,49 @@
     renderBoard();
   }
 
+  function _withTimeout(promise, ms, label) {
+    return Promise.race([
+      promise,
+      new Promise((_, reject) => setTimeout(() => reject(new Error((label || 'Request') + ' timed out after ' + (ms/1000) + 's')), ms))
+    ]);
+  }
+
   async function insertApp(app) {
     if (!currentUser) { showLogin(); return null; }
-    const { data, error } = await _sb.from('applications')
-      .insert({ ...app, user_id: currentUser.id }).select().single();
-    if (error) {
-      console.error('insertApp:', error);
-      showToast('Save failed: ' + (error.message || 'Unknown error'), 'error', 6000, function() { insertApp(app); });
+    // Validate auth session first (5s timeout)
+    try {
+      const { data: sd } = await _withTimeout(_sb.auth.getSession(), 5000, 'Auth check');
+      if (!sd || !sd.session) {
+        showToast('Session expired — please sign in again.', 'warn', 5000);
+        currentUser = null;
+        showLogin();
+        return null;
+      }
+    } catch (e) {
+      showToast('Auth check failed — please sign in again.', 'error', 5000);
+      showLogin();
       return null;
     }
-    applications.unshift(data);
-    document.getElementById('apps-logged').textContent = applications.length;
-    renderBoard();
-    showToast('Application tracked!', 'success', 3000);
-    return data;
+    // Insert with 10s timeout
+    try {
+      const { data, error } = await _withTimeout(
+        _sb.from('applications').insert({ ...app, user_id: currentUser.id }).select().single(),
+        10000, 'Save'
+      );
+      if (error) {
+        console.error('insertApp:', error);
+        showToast('Save failed: ' + (error.message || 'Unknown error'), 'error', 6000, function() { insertApp(app); });
+        return null;
+      }
+      applications.unshift(data);
+      document.getElementById('apps-logged').textContent = applications.length;
+      renderBoard();
+      showToast('Application tracked!', 'success', 3000);
+      return data;
+    } catch (e) {
+      showToast(e.message, 'error', 6000, function() { insertApp(app); });
+      return null;
+    }
   }
 
   async function updateStatus(id, sel) {
@@ -9021,7 +9050,12 @@ Grades: A=excellent, B=good, C=moderate, D=weak, F=poor. Dims are 0-100.`,
     }
   }
 
-  function closeQuickTrackModal() { document.getElementById('quickTrackModal').classList.remove('show'); }
+  function closeQuickTrackModal() {
+    const m = document.getElementById('quickTrackModal');
+    m.classList.remove('show');
+    m.style.display = 'none';
+    setTimeout(function() { m.style.display = ''; }, 300);
+  }
 
   async function researchSalary() {
     const title = document.getElementById('qt-title').value;

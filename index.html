@@ -8621,9 +8621,12 @@
   }
 
   async function signInGitHub() {
+    const redirect = window.location.href.startsWith('https://')
+      ? window.location.href
+      : 'https://prajjwal17.github.io/mission-job-dashboard/';
     const { error } = await _sb.auth.signInWithOAuth({
       provider: 'github',
-      options: { redirectTo: window.location.href }
+      options: { redirectTo: redirect }
     });
     if (error) _authSetMsg(error.message, '#f87171');
   }

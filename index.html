@@ -1037,10 +1037,22 @@
         <h1>JOB MASTER DASHBOARD</h1>
         <p>// Prajjwal Pandey · ECE VIT · Applied AI Engineer · 2026</p>
       </div>
-      <div class="stat-chips">
-        <span class="stat-chip purple">25 Curated</span>
-        <span class="stat-chip cyan">625 Companies</span>
-        <span class="stat-chip amber">Unified</span>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <div class="stat-chips">
+          <span class="stat-chip purple">25 Curated</span>
+          <span class="stat-chip cyan">625 Companies</span>
+          <span class="stat-chip amber">Unified</span>
+        </div>
+        <div id="auth-status">
+          <button id="header-signin-btn" onclick="showLogin()"
+            style="background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;padding:8px 18px;border-radius:8px;font-weight:700;font-size:0.82rem;cursor:pointer;font-family:'DM Sans';">
+            Sign In
+          </button>
+          <span id="header-user-info" style="display:none;align-items:center;gap:10px;">
+            <span id="header-user-email" style="color:var(--muted);font-size:0.78rem;font-family:'JetBrains Mono';"></span>
+            <button onclick="signOut()" style="background:transparent;color:var(--muted);border:1px solid var(--border);padding:5px 12px;border-radius:6px;font-size:0.75rem;cursor:pointer;font-family:'DM Sans';">Sign Out</button>
+          </span>
+        </div>
       </div>
     </div>
   </header>
@@ -8699,11 +8711,19 @@
       if (session?.user) {
         currentUser = session.user;
         hideLogin();
+        // Update header
+        document.getElementById('header-signin-btn').style.display = 'none';
+        const ui = document.getElementById('header-user-info');
+        ui.style.display = 'flex';
+        document.getElementById('header-user-email').textContent =
+          currentUser.email || currentUser.user_metadata?.user_name || 'Signed in';
         // Load board on first sign-in or page reload with active session
         if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') {
           await loadBoard();
         }
       } else {
+        document.getElementById('header-signin-btn').style.display = '';
+        document.getElementById('header-user-info').style.display = 'none';
         if (_realtimeChannel) { _sb.removeChannel(_realtimeChannel); _realtimeChannel = null; }
         currentUser = null; applications = []; renderBoard(); showLogin();
       }

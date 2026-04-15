@@ -8452,6 +8452,11 @@
       style="width:100%;background:transparent;color:var(--muted);border:1px solid var(--border);padding:10px;border-radius:8px;font-weight:600;font-size:0.85rem;cursor:pointer;font-family:'DM Sans';">
       First time? Create account
     </button>
+    <div style="margin-top:10px;">
+      <button onclick="resetPassword()" style="background:none;border:none;color:var(--muted);font-size:0.78rem;cursor:pointer;font-family:'JetBrains Mono';text-decoration:underline;">
+        Forgot / reset password
+      </button>
+    </div>
     <div id="auth-msg" style="display:none;margin-top:14px;font-size:0.83rem;font-family:'JetBrains Mono';"></div>
   </div>
 </div>
@@ -8634,8 +8639,27 @@
     btn.disabled = true; btn.textContent = 'Creating…'; _authSetMsg('');
     const { error } = await _sb.auth.signUp({ email, password });
     btn.disabled = false; btn.textContent = 'First time? Create account';
+    if (error) {
+      if (error.message && error.message.toLowerCase().includes('already registered')) {
+        _authSetMsg('Account exists — use Sign In, or click "Forgot / reset password" to set a new password.', '#facc15');
+      } else {
+        _authSetMsg(error.message, '#f87171');
+      }
+    } else {
+      _authSetMsg('Account created! Signing you in…', 'var(--accent4)');
+      await signInPassword();
+    }
+  }
+
+  async function resetPassword() {
+    const email = document.getElementById('auth-email').value.trim();
+    if (!email) { _authSetMsg('Enter your email above first.', '#f87171'); return; }
+    _authSetMsg('Sending reset link…', 'var(--muted)');
+    const { error } = await _sb.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.href
+    });
     if (error) { _authSetMsg(error.message, '#f87171'); }
-    else { _authSetMsg('Account created! Signing you in…', 'var(--accent4)'); await signInPassword(); }
+    else { _authSetMsg('Reset link sent! Check your inbox — click it to set a new password.', '#4ade80'); }
   }
 
   async function signOut() {

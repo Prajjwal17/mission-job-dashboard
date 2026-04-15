@@ -8702,6 +8702,9 @@
   }
 
   async function initAuth() {
+    // Wake up Supabase in background (free tier pauses after inactivity)
+    _sb.from('applications').select('id').limit(1).then(() => {}).catch(() => {});
+
     // Show login by default — onAuthStateChange is the single source of truth.
     // INITIAL_SESSION fires on every page load (including magic link redirects)
     // before getSession() could even resolve, so this avoids the race condition.

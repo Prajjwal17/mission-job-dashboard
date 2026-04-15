@@ -1011,10 +1011,24 @@
   }
   .notes-input:focus { outline: none; border-bottom: 1px solid var(--accent2); }
   .board-empty { text-align: center; padding: 48px 0; color: var(--muted); }
+  /* ── Toast notifications ── */
+  #toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+  .toast { pointer-events: all; min-width: 260px; max-width: 380px; padding: 12px 16px; border-radius: 10px; font-size: 0.85rem; font-weight: 500; color: #fff; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.35); animation: toastIn 0.28s ease; }
+  .toast.success { background: #16a34a; }
+  .toast.error   { background: #dc2626; }
+  .toast.info    { background: #2563eb; }
+  .toast.warn    { background: #d97706; }
+  .toast-msg     { flex: 1; }
+  .toast-retry   { background: rgba(255,255,255,0.2); border: none; color: #fff; padding: 3px 10px; border-radius: 6px; cursor: pointer; font-size: 0.78rem; font-weight: 600; }
+  .toast-retry:hover { background: rgba(255,255,255,0.35); }
+  .toast-close  { cursor: pointer; opacity: 0.7; font-size: 1rem; line-height: 1; background: none; border: none; color: #fff; padding: 0; }
+  @keyframes toastIn  { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes toastOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(16px); } }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+<div id="toast-container"></div>
 <div class="container">
 
   <header>
@@ -8562,6 +8576,30 @@
   function showLogin() { document.getElementById('auth-overlay').style.display = 'flex'; }
   function hideLogin() { document.getElementById('auth-overlay').style.display = 'none'; }
 
+  function showToast(msg, type, duration, onRetry) {
+    type = type || 'info'; duration = duration || 4000;
+    const c = document.getElementById('toast-container');
+    const t = document.createElement('div');
+    t.className = 'toast ' + type;
+    t.innerHTML = '<span class="toast-msg">' + msg + '</span>';
+    if (onRetry) {
+      const rb = document.createElement('button');
+      rb.className = 'toast-retry'; rb.textContent = 'Retry';
+      rb.onclick = function() { c.removeChild(t); onRetry(); };
+      t.appendChild(rb);
+    }
+    const cb = document.createElement('button');
+    cb.className = 'toast-close'; cb.textContent = '×';
+    cb.onclick = function() { dismiss(t); };
+    t.appendChild(cb);
+    c.appendChild(t);
+    function dismiss(el) {
+      el.style.animation = 'toastOut 0.25s ease forwards';
+      setTimeout(function() { if (el.parentNode) el.parentNode.removeChild(el); }, 260);
+    }
+    setTimeout(function() { dismiss(t); }, duration);
+  }
+
   async function sendMagicLink() {
     const email = document.getElementById('auth-email').value.trim();
     if (!email) return;
@@ -8649,10 +8687,15 @@
     if (!currentUser) { showLogin(); return null; }
     const { data, error } = await _sb.from('applications')
       .insert({ ...app, user_id: currentUser.id }).select().single();
-    if (error) { console.error('insertApp:', error); return null; }
+    if (error) {
+      console.error('insertApp:', error);
+      showToast('Save failed: ' + (error.message || 'Unknown error'), 'error', 6000, function() { insertApp(app); });
+      return null;
+    }
     applications.unshift(data);
     document.getElementById('apps-logged').textContent = applications.length;
     renderBoard();
+    showToast('Application tracked!', 'success', 3000);
     return data;
   }
 
@@ -9021,9 +9064,12 @@ Use realistic Indian market data. If it's a global company with India office, us
     if (e.target === document.getElementById('quickTrackModal')) closeQuickTrackModal();
   });
 
-  document.getElementById('quickTrackForm').addEventListener('submit', function(e) {
+  document.getElementById('quickTrackForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     if (!currentUser) { showLogin(); return; }
+    const btn = this.querySelector('button[type="submit"]');
+    const origText = btn ? btn.textContent : '';
+    if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
     const appData = {
       title:  document.getElementById('qt-title').value,
       salary: '',
@@ -9033,29 +9079,10 @@ Use realistic Indian market data. If it's a global company with India office, us
       date:   document.getElementById('qt-date').value,
       notes:  document.getElementById('qt-notes').value.trim()
     };
-    // Optimistic update — show result instantly, sync in background
-    const tempId = 'opt_' + Date.now();
-    const optimistic = { ...appData, id: tempId, user_id: currentUser.id };
-    applications.unshift(optimistic);
-    document.getElementById('apps-logged').textContent = applications.length;
-    renderBoard();
     closeQuickTrackModal();
-    refreshCuratedCardStates();
-    // Persist to Supabase in background
-    _sb.from('applications')
-      .insert({ ...appData, user_id: currentUser.id })
-      .select().single()
-      .then(({ data, error }) => {
-        const idx = applications.findIndex(a => a.id === tempId);
-        if (error) {
-          console.error('Quick track save failed:', error);
-          if (idx !== -1) applications.splice(idx, 1);
-        } else if (data) {
-          if (idx !== -1) applications[idx] = data;
-        }
-        document.getElementById('apps-logged').textContent = applications.length;
-        renderBoard();
-      });
+    const saved = await insertApp(appData);
+    if (btn) { btn.disabled = false; btn.textContent = origText; }
+    if (saved) refreshCuratedCardStates();
   });
 
   function injectTrackButtons() {

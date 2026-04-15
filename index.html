@@ -8783,13 +8783,12 @@
   async function insertApp(app) {
     if (!currentUser) { showLogin(); return null; }
     try {
-      const { data, error } = await _withTimeout(
-        _sb.from('applications').insert({ ...app, user_id: currentUser.id }).select().single(),
+      const { error } = await _withTimeout(
+        _sb.from('applications').insert({ ...app, user_id: currentUser.id }),
         12000, 'Save'
       );
       if (error) {
         console.error('insertApp:', error);
-        // Only redirect to login for actual auth errors
         const isAuthError = error.status === 401 || error.status === 403
           || (error.message && (error.message.includes('JWT') || error.message.includes('not authenticated')));
         if (isAuthError) {
@@ -8801,11 +8800,9 @@
         showToast('Save failed: ' + (error.message || 'Unknown error'), 'error', 6000, function() { insertApp(app); });
         return null;
       }
-      applications.unshift(data);
-      document.getElementById('apps-logged').textContent = applications.length;
-      renderBoard();
       showToast('Application tracked!', 'success', 3000);
-      return data;
+      await loadBoard();
+      return true;
     } catch (e) {
       showToast(e.message, 'error', 6000, function() { insertApp(app); });
       return null;

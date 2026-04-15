@@ -8439,15 +8439,20 @@
     <div style="font-family:'Bebas Neue';font-size:2.4rem;letter-spacing:2px;background:linear-gradient(135deg,#fff,var(--accent2) 60%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px;">MISSION JOB</div>
     <p style="color:var(--muted);font-size:0.83rem;margin-bottom:28px;font-family:'JetBrains Mono';">Sign in to sync your board across all devices</p>
     <input id="auth-email" type="email" placeholder="your@email.com"
+      style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:12px 16px;border-radius:8px;font-size:0.9rem;font-family:'DM Sans';box-sizing:border-box;margin-bottom:10px;"
+      onkeydown="if(event.key==='Enter')document.getElementById('auth-password').focus()" />
+    <input id="auth-password" type="password" placeholder="Password"
       style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:12px 16px;border-radius:8px;font-size:0.9rem;font-family:'DM Sans';box-sizing:border-box;margin-bottom:12px;"
-      onkeydown="if(event.key==='Enter')sendMagicLink()" />
-    <button id="magic-btn" onclick="sendMagicLink()"
-      style="width:100%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;padding:12px;border-radius:8px;font-weight:700;font-size:0.9rem;cursor:pointer;font-family:'DM Sans';">
-      Send Magic Link
+      onkeydown="if(event.key==='Enter')signInPassword()" />
+    <button id="signin-btn" onclick="signInPassword()"
+      style="width:100%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;padding:12px;border-radius:8px;font-weight:700;font-size:0.9rem;cursor:pointer;font-family:'DM Sans';margin-bottom:8px;">
+      Sign In
     </button>
-    <div id="auth-sent" style="display:none;margin-top:16px;color:var(--accent4);font-size:0.85rem;">
-      Check your email and click the magic link to sign in!
-    </div>
+    <button id="signup-btn" onclick="signUpPassword()"
+      style="width:100%;background:transparent;color:var(--muted);border:1px solid var(--border);padding:10px;border-radius:8px;font-weight:600;font-size:0.85rem;cursor:pointer;font-family:'DM Sans';">
+      First time? Create account
+    </button>
+    <div id="auth-msg" style="display:none;margin-top:14px;font-size:0.83rem;font-family:'JetBrains Mono';"></div>
   </div>
 </div>
 <script>
@@ -8600,20 +8605,37 @@
     setTimeout(function() { dismiss(t); }, duration);
   }
 
-  async function sendMagicLink() {
+  function _authSetMsg(msg, color) {
+    const el = document.getElementById('auth-msg');
+    el.textContent = msg; el.style.color = color || 'var(--accent4)'; el.style.display = msg ? 'block' : 'none';
+  }
+  function _authSetLoading(loading) {
+    const si = document.getElementById('signin-btn'), su = document.getElementById('signup-btn');
+    si.disabled = loading; su.disabled = loading;
+    si.textContent = loading ? 'Signing in…' : 'Sign In';
+  }
+
+  async function signInPassword() {
     const email = document.getElementById('auth-email').value.trim();
-    if (!email) return;
-    const btn = document.getElementById('magic-btn');
-    btn.textContent = 'Sending...'; btn.disabled = true;
-    const { error } = await _sb.auth.signInWithOtp({
-      email, options: { emailRedirectTo: window.location.href }
-    });
-    if (error) {
-      alert(error.message);
-      btn.textContent = 'Send Magic Link'; btn.disabled = false;
-    } else {
-      document.getElementById('auth-sent').style.display = 'block';
-    }
+    const password = document.getElementById('auth-password').value;
+    if (!email || !password) { _authSetMsg('Enter email and password.', '#f87171'); return; }
+    _authSetLoading(true); _authSetMsg('');
+    const { error } = await _sb.auth.signInWithPassword({ email, password });
+    _authSetLoading(false);
+    if (error) { _authSetMsg(error.message, '#f87171'); }
+  }
+
+  async function signUpPassword() {
+    const email = document.getElementById('auth-email').value.trim();
+    const password = document.getElementById('auth-password').value;
+    if (!email || !password) { _authSetMsg('Enter email and password.', '#f87171'); return; }
+    if (password.length < 6) { _authSetMsg('Password must be at least 6 characters.', '#f87171'); return; }
+    const btn = document.getElementById('signup-btn');
+    btn.disabled = true; btn.textContent = 'Creating…'; _authSetMsg('');
+    const { error } = await _sb.auth.signUp({ email, password });
+    btn.disabled = false; btn.textContent = 'First time? Create account';
+    if (error) { _authSetMsg(error.message, '#f87171'); }
+    else { _authSetMsg('Account created! Signing you in…', 'var(--accent4)'); await signInPassword(); }
   }
 
   async function signOut() {

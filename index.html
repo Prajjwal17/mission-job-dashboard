@@ -9260,46 +9260,33 @@ Use realistic Indian market data. If it's a global company with India office, us
   // ── LATEX EDITOR ─────────────────────────────────────────────────────────────
   let _latexPdfUrl = null;
 
-  function _latexUrl(code) {
-    return 'https://latexonline.cc/compile?text=' + encodeURIComponent(code);
-  }
-
   function compileLatex() {
     const code = document.getElementById('latex-editor').value.trim();
     if (!code) { showToast('Paste your LaTeX code first.', 'warn', 3000); return; }
-    const btn = document.getElementById('latex-compile-btn');
-    const status = document.getElementById('latex-status');
-    btn.textContent = '⏳ Compiling…'; btn.disabled = true;
-    status.textContent = 'Compiling…';
-
-    const iframe = document.getElementById('latex-preview');
+    // Submit form to TeXlive.net in new tab — returns full PDF, supports all packages
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = 'https://texlive.net/cgi-bin/latexcgi.pl';
+    form.target = '_blank';
+    form.style.display = 'none';
+    [['filecontents[]', code], ['filename[]', 'document.tex'], ['engine', 'pdflatex'], ['return', 'pdf']].forEach(([k, v]) => {
+      const f = document.createElement('input'); f.type = 'hidden'; f.name = k; f.value = v;
+      form.appendChild(f);
+    });
+    document.body.appendChild(form);
+    form.submit();
+    setTimeout(() => document.body.removeChild(form), 1000);
+    document.getElementById('latex-status').textContent = '✓ PDF opened in new tab';
+    document.getElementById('latex-open-btn').style.display = '';
+    // Show info in preview pane
     const placeholder = document.getElementById('latex-placeholder');
-    iframe.style.display = 'block';
-    placeholder.style.display = 'none';
-
-    const onLoad = () => {
-      btn.textContent = '▶ Compile PDF'; btn.disabled = false;
-      status.textContent = '✓ Done';
-      document.getElementById('latex-open-btn').style.display = '';
-      iframe.removeEventListener('load', onLoad);
-    };
-    const onError = () => {
-      btn.textContent = '▶ Compile PDF'; btn.disabled = false;
-      status.textContent = 'Error — try ↗ Open Full PDF';
-      iframe.removeEventListener('error', onError);
-    };
-    iframe.addEventListener('load', onLoad);
-    iframe.addEventListener('error', onError);
-    setTimeout(() => { if (btn.disabled) { btn.textContent = '▶ Compile PDF'; btn.disabled = false; status.textContent = 'Check preview →'; } }, 25000);
-
-    iframe.src = _latexUrl(code);
+    placeholder.innerHTML = '<div style="font-size:2rem;margin-bottom:12px;">✅</div><p style="color:var(--text)">PDF compiling in new tab</p><p style="color:var(--muted);font-size:0.78rem;margin-top:8px;">Download it from the TeXlive.net page that just opened.</p>';
+    placeholder.style.display = 'flex';
+    placeholder.style.flexDirection = 'column';
+    placeholder.style.alignItems = 'center';
   }
 
-  function openPdfNewTab() {
-    const code = document.getElementById('latex-editor').value.trim();
-    if (!code) return;
-    window.open(_latexUrl(code), '_blank');
-  }
+  function openPdfNewTab() { compileLatex(); }
 
   function downloadTex() {
     const code = document.getElementById('latex-editor').value;

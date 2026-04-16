@@ -9260,68 +9260,45 @@ Use realistic Indian market data. If it's a global company with India office, us
   // ── LATEX EDITOR ─────────────────────────────────────────────────────────────
   let _latexPdfUrl = null;
 
+  function _latexUrl(code) {
+    return 'https://latexonline.cc/compile?text=' + encodeURIComponent(code);
+  }
+
   function compileLatex() {
     const code = document.getElementById('latex-editor').value.trim();
     if (!code) { showToast('Paste your LaTeX code first.', 'warn', 3000); return; }
     const btn = document.getElementById('latex-compile-btn');
     const status = document.getElementById('latex-status');
     btn.textContent = '⏳ Compiling…'; btn.disabled = true;
-    status.textContent = 'Sending to compiler…';
-
-    // Build a form and POST to latexonline.cc — opens PDF directly
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = 'https://latexonline.cc/compile';
-    form.target = 'latex-preview';
-    form.style.display = 'none';
-    const field = document.createElement('textarea');
-    field.name = 'text';
-    field.value = code;
-    form.appendChild(field);
-    document.body.appendChild(form);
+    status.textContent = 'Compiling…';
 
     const iframe = document.getElementById('latex-preview');
     const placeholder = document.getElementById('latex-placeholder');
     iframe.style.display = 'block';
     placeholder.style.display = 'none';
-    iframe.name = 'latex-preview';
 
-    // Listen for load event to detect completion
     const onLoad = () => {
       btn.textContent = '▶ Compile PDF'; btn.disabled = false;
       status.textContent = '✓ Done';
       document.getElementById('latex-open-btn').style.display = '';
       iframe.removeEventListener('load', onLoad);
-      document.body.removeChild(form);
+    };
+    const onError = () => {
+      btn.textContent = '▶ Compile PDF'; btn.disabled = false;
+      status.textContent = 'Error — try ↗ Open Full PDF';
+      iframe.removeEventListener('error', onError);
     };
     iframe.addEventListener('load', onLoad);
+    iframe.addEventListener('error', onError);
+    setTimeout(() => { if (btn.disabled) { btn.textContent = '▶ Compile PDF'; btn.disabled = false; status.textContent = 'Check preview →'; } }, 25000);
 
-    // Timeout fallback
-    setTimeout(() => {
-      if (btn.disabled) {
-        btn.textContent = '▶ Compile PDF'; btn.disabled = false;
-        status.textContent = 'Check the preview panel →';
-        document.body.removeChild(form);
-      }
-    }, 20000);
-
-    form.submit();
+    iframe.src = _latexUrl(code);
   }
 
   function openPdfNewTab() {
     const code = document.getElementById('latex-editor').value.trim();
     if (!code) return;
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = 'https://latexonline.cc/compile';
-    form.target = '_blank';
-    form.style.display = 'none';
-    const field = document.createElement('textarea');
-    field.name = 'text'; field.value = code;
-    form.appendChild(field);
-    document.body.appendChild(form);
-    form.submit();
-    setTimeout(() => document.body.removeChild(form), 1000);
+    window.open(_latexUrl(code), '_blank');
   }
 
   function downloadTex() {

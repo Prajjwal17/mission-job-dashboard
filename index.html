@@ -1066,6 +1066,7 @@
     <button class="nav-pill" data-section="tracker">📋 My Board</button>
     <button class="nav-pill" data-section="aitools">🤖 AI Tools</button>
     <button class="nav-pill" data-section="prep">🎓 Preparation Guide</button>
+    <button class="nav-pill" data-section="latex">📄 LaTeX Editor</button>
   </div>
 
   <!-- SECTION 1: DASHBOARD -->
@@ -8381,6 +8382,52 @@
 </div>
 
 
+<!-- LaTeX Editor Section -->
+<div id="latex" class="section">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;">
+    <h2 style="color:var(--accent2);font-family:'Bebas Neue';font-size:1.4rem;margin-bottom:6px;">📄 LATEX EDITOR — FREE PDF COMPILER</h2>
+    <p style="color:var(--muted);font-size:0.82rem;font-family:'JetBrains Mono';">Paste your LaTeX resume code → Compile → Download PDF. No Overleaf credits needed.</p>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;height:72vh;">
+    <!-- Editor pane -->
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <button onclick="compileLatex()" id="latex-compile-btn"
+          style="background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;padding:8px 20px;border-radius:8px;font-weight:700;font-size:0.85rem;cursor:pointer;font-family:'DM Sans';">
+          ▶ Compile PDF
+        </button>
+        <button onclick="downloadTex()"
+          style="background:transparent;color:var(--muted);border:1px solid var(--border);padding:8px 16px;border-radius:8px;font-size:0.82rem;cursor:pointer;font-family:'DM Sans';">
+          ↓ Download .tex
+        </button>
+        <button onclick="loadSampleResume()"
+          style="background:transparent;color:var(--muted);border:1px solid var(--border);padding:8px 16px;border-radius:8px;font-size:0.82rem;cursor:pointer;font-family:'DM Sans';">
+          📋 Load Sample Resume
+        </button>
+        <span id="latex-status" style="font-size:0.78rem;font-family:'JetBrains Mono';color:var(--muted);"></span>
+      </div>
+      <textarea id="latex-editor"
+        spellcheck="false"
+        placeholder="Paste your LaTeX code here..."
+        style="flex:1;background:#0d1117;color:#e6edf3;border:1px solid var(--border);border-radius:8px;padding:16px;font-family:'JetBrains Mono';font-size:0.82rem;line-height:1.6;resize:none;outline:none;tab-size:2;"></textarea>
+    </div>
+    <!-- Preview pane -->
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-size:0.78rem;font-family:'JetBrains Mono';color:var(--muted);">PDF Preview</span>
+        <button onclick="openPdfNewTab()" id="latex-open-btn" style="display:none;background:transparent;color:var(--accent2);border:1px solid var(--accent2);padding:5px 12px;border-radius:6px;font-size:0.78rem;cursor:pointer;font-family:'DM Sans';">↗ Open Full PDF</button>
+      </div>
+      <div id="latex-preview-wrap" style="flex:1;background:#1a1a2e;border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+        <div id="latex-placeholder" style="text-align:center;color:var(--muted);font-family:'JetBrains Mono';font-size:0.82rem;">
+          <div style="font-size:2.5rem;margin-bottom:12px;">📄</div>
+          Click <strong style="color:var(--text);">Compile PDF</strong> to see preview
+        </div>
+        <iframe id="latex-preview" style="display:none;width:100%;height:100%;border:none;border-radius:8px;"></iframe>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Quick Track Modal (for curated cards) -->
 <div id="quickTrackModal" class="modal">
   <div class="modal-content" style="max-width:420px;">
@@ -9209,6 +9256,133 @@ Use realistic Indian market data. If it's a global company with India office, us
     if (btn) { btn.disabled = false; btn.textContent = origText; }
     if (saved) refreshCuratedCardStates();
   });
+
+  // ── LATEX EDITOR ─────────────────────────────────────────────────────────────
+  let _latexPdfUrl = null;
+
+  function compileLatex() {
+    const code = document.getElementById('latex-editor').value.trim();
+    if (!code) { showToast('Paste your LaTeX code first.', 'warn', 3000); return; }
+    const btn = document.getElementById('latex-compile-btn');
+    const status = document.getElementById('latex-status');
+    btn.textContent = '⏳ Compiling…'; btn.disabled = true;
+    status.textContent = 'Sending to compiler…';
+
+    // Build a form and POST to latexonline.cc — opens PDF directly
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = 'https://latexonline.cc/compile';
+    form.target = 'latex-preview';
+    form.style.display = 'none';
+    const field = document.createElement('textarea');
+    field.name = 'text';
+    field.value = code;
+    form.appendChild(field);
+    document.body.appendChild(form);
+
+    const iframe = document.getElementById('latex-preview');
+    const placeholder = document.getElementById('latex-placeholder');
+    iframe.style.display = 'block';
+    placeholder.style.display = 'none';
+    iframe.name = 'latex-preview';
+
+    // Listen for load event to detect completion
+    const onLoad = () => {
+      btn.textContent = '▶ Compile PDF'; btn.disabled = false;
+      status.textContent = '✓ Done';
+      document.getElementById('latex-open-btn').style.display = '';
+      iframe.removeEventListener('load', onLoad);
+      document.body.removeChild(form);
+    };
+    iframe.addEventListener('load', onLoad);
+
+    // Timeout fallback
+    setTimeout(() => {
+      if (btn.disabled) {
+        btn.textContent = '▶ Compile PDF'; btn.disabled = false;
+        status.textContent = 'Check the preview panel →';
+        document.body.removeChild(form);
+      }
+    }, 20000);
+
+    form.submit();
+  }
+
+  function openPdfNewTab() {
+    const code = document.getElementById('latex-editor').value.trim();
+    if (!code) return;
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = 'https://latexonline.cc/compile';
+    form.target = '_blank';
+    form.style.display = 'none';
+    const field = document.createElement('textarea');
+    field.name = 'text'; field.value = code;
+    form.appendChild(field);
+    document.body.appendChild(form);
+    form.submit();
+    setTimeout(() => document.body.removeChild(form), 1000);
+  }
+
+  function downloadTex() {
+    const code = document.getElementById('latex-editor').value;
+    if (!code.trim()) { showToast('Nothing to download.', 'warn', 2000); return; }
+    const blob = new Blob([code], { type: 'text/plain' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'resume.tex';
+    a.click();
+  }
+
+  function loadSampleResume() {
+    document.getElementById('latex-editor').value = `\\documentclass[11pt,a4paper]{article}
+\\usepackage[margin=0.75in]{geometry}
+\\usepackage{enumitem}
+\\usepackage{hyperref}
+\\usepackage{titlesec}
+\\usepackage[T1]{fontenc}
+
+\\titleformat{\\section}{\\large\\bfseries}{}{0em}{}[\\titlerule]
+\\setlength{\\parindent}{0pt}
+
+\\begin{document}
+
+% ── Header ──────────────────────────────────────────
+{\\Huge \\textbf{Prajjwal Pandey}} \\\\[4pt]
+ECE, VIT Vellore \\quad|\\quad prajjwalp1707@gmail.com \\quad|\\quad +91 XXXXXXXXXX \\\\
+\\href{https://linkedin.com/in/prajjwal17}{linkedin.com/in/prajjwal17} \\quad|\\quad
+\\href{https://github.com/Prajjwal17}{github.com/Prajjwal17}
+
+\\section{Summary}
+Applied AI Engineer and ECE final-year student at VIT Vellore.
+Focused on AI automation, full-stack development, and building
+intelligent pipelines that reduce manual effort at scale.
+
+\\section{Experience}
+\\textbf{AI Automation Intern} \\hfill Jun 2025 -- Present \\\\
+\\textit{Startup Name, Remote}
+\\begin{itemize}[leftmargin=*,noitemsep]
+  \\item Built end-to-end LLM pipeline reducing manual review time by 60\\%
+  \\item Deployed RAG-based document QA system serving 500+ daily queries
+\\end{itemize}
+
+\\section{Projects}
+\\textbf{Mission Job Pipeline} \\hfill Python, Ollama, Gmail API \\\\
+Automated job application pipeline: scrape → tailor resume → generate PDF → send cold email.
+Zero API cost using local Mistral LLM via Ollama.
+
+\\section{Skills}
+\\textbf{Languages:} Python, JavaScript, TypeScript, SQL \\\\
+\\textbf{AI/ML:} LangChain, Ollama, Mistral, RAG, Prompt Engineering \\\\
+\\textbf{Tools:} Git, Supabase, Playwright, FastAPI, React
+
+\\section{Education}
+\\textbf{B.Tech, Electronics and Communication Engineering} \\hfill 2022 -- 2026 \\\\
+VIT Vellore \\quad CGPA: X.XX
+
+\\end{document}`;
+    showToast('Sample resume loaded.', 'info', 2000);
+  }
 
   function injectTrackButtons() {
     document.querySelectorAll('.curated-card').forEach(card => {

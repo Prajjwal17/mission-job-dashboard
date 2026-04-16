@@ -8588,7 +8588,17 @@
   // ── SUPABASE + APPLICATION BOARD ──
   const SUPA_URL = 'https://cpodscwbzvfjlsluecup.supabase.co';
   const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwb2RzY3dienZmamxzbHVlY3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MDExNTYsImV4cCI6MjA5MTM3NzE1Nn0.VpGmPQ8kWaO1HqxwjiCHtXdK5Rp6Y-Nb52yjkwVbvv0';
-  const _sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+  // Bypass Web Locks API — it causes 5s stalls in Edge/Brave tracking prevention.
+  // Safe for single-user dashboard (no concurrent tab token conflicts).
+  const _sb = window.supabase.createClient(SUPA_URL, SUPA_KEY, {
+    auth: {
+      lock: async (name, acquireTimeout, fn) => fn(),
+      storageKey: 'mj_auth',
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true
+    }
+  });
 
   let currentUser = null;
   let applications = [];

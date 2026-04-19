@@ -1025,7 +1025,7 @@
   @keyframes toastIn  { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes toastOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(16px); } }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Supabase removed — storage: localStorage + GitHub Gist -->
 </head>
 <body>
 <div id="toast-container"></div>
@@ -1047,15 +1047,12 @@
             <span id="agent-status-label">Agent</span>
           </span>
         </div>
-        <div id="auth-status">
-          <button id="header-signin-btn" onclick="showLogin()"
-            style="background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;padding:8px 18px;border-radius:8px;font-weight:700;font-size:0.82rem;cursor:pointer;font-family:'DM Sans';">
-            Sign In
-          </button>
-          <span id="header-user-info" style="display:none;align-items:center;gap:10px;">
-            <span id="header-user-email" style="color:var(--muted);font-size:0.78rem;font-family:'JetBrains Mono';"></span>
-            <button onclick="signOut()" style="background:transparent;color:var(--muted);border:1px solid var(--border);padding:5px 12px;border-radius:6px;font-size:0.75rem;cursor:pointer;font-family:'DM Sans';">Sign Out</button>
+        <div id="auth-status" style="display:flex;align-items:center;gap:10px;">
+          <span id="sync-status-chip" title="Gist sync status" style="font-size:0.72rem;font-family:'JetBrains Mono';color:var(--muted);display:flex;align-items:center;gap:5px;">
+            <span id="sync-dot" style="width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.2);display:inline-block;"></span>
+            <span id="sync-label">Local</span>
           </span>
+          <button onclick="openSyncSettings()" style="background:transparent;color:var(--muted);border:1px solid var(--border);padding:5px 12px;border-radius:6px;font-size:0.75rem;cursor:pointer;font-family:'DM Sans';">⚙ Sync</button>
         </div>
       </div>
     </div>
@@ -8525,41 +8522,32 @@
   </div>
 </div>
 
-<!-- Auth Overlay -->
-<div id="auth-overlay" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:9999;align-items:center;justify-content:center;">
-  <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:40px 36px;max-width:420px;width:90%;text-align:center;">
-    <div style="font-family:'Bebas Neue';font-size:2.4rem;letter-spacing:2px;background:linear-gradient(135deg,#fff,var(--accent2) 60%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px;">MISSION JOB</div>
-    <p style="color:var(--muted);font-size:0.83rem;margin-bottom:28px;font-family:'JetBrains Mono';">Sign in to sync your board across all devices</p>
-    <button onclick="signInGitHub()"
-      style="width:100%;background:#24292e;color:#fff;border:none;padding:13px;border-radius:8px;font-weight:700;font-size:0.92rem;cursor:pointer;font-family:'DM Sans';margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:10px;">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.09-.745.083-.729.083-.729 1.205.084 1.84 1.236 1.84 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.418-1.305.762-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12z"/></svg>
-      Continue with GitHub
-    </button>
-    <div style="display:flex;align-items:center;gap:10px;margin:4px 0 10px;">
-      <div style="flex:1;height:1px;background:var(--border);"></div>
-      <span style="color:var(--muted);font-size:0.75rem;font-family:'JetBrains Mono';">or email</span>
-      <div style="flex:1;height:1px;background:var(--border);"></div>
+<!-- Gist Sync Settings Panel -->
+<div id="sync-settings-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;align-items:center;justify-content:center;" onclick="if(event.target===this)closeSyncSettings()">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:36px;max-width:460px;width:92%;font-family:'DM Sans';">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <div style="font-family:'Bebas Neue';font-size:1.6rem;letter-spacing:2px;background:linear-gradient(135deg,#fff,var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">SYNC SETTINGS</div>
+      <button onclick="closeSyncSettings()" style="background:transparent;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer;line-height:1;">×</button>
     </div>
-    <input id="auth-email" type="email" placeholder="your@email.com"
-      style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:12px 16px;border-radius:8px;font-size:0.9rem;font-family:'DM Sans';box-sizing:border-box;margin-bottom:10px;"
-      onkeydown="if(event.key==='Enter')document.getElementById('auth-password').focus()" />
-    <input id="auth-password" type="password" placeholder="Password (min 6 chars)"
-      style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:12px 16px;border-radius:8px;font-size:0.9rem;font-family:'DM Sans';box-sizing:border-box;margin-bottom:12px;"
-      onkeydown="if(event.key==='Enter')signInPassword()" />
-    <button id="signin-btn" onclick="signInPassword()"
-      style="width:100%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;padding:12px;border-radius:8px;font-weight:700;font-size:0.9rem;cursor:pointer;font-family:'DM Sans';margin-bottom:8px;">
-      Sign In
-    </button>
-    <button id="signup-btn" onclick="signUpPassword()"
-      style="width:100%;background:transparent;color:var(--muted);border:1px solid var(--border);padding:10px;border-radius:8px;font-weight:600;font-size:0.85rem;cursor:pointer;font-family:'DM Sans';">
-      First time? Create account
-    </button>
-    <div style="margin-top:10px;">
-      <button onclick="resetPassword()" style="background:none;border:none;color:var(--muted);font-size:0.78rem;cursor:pointer;font-family:'JetBrains Mono';text-decoration:underline;">
-        Forgot / reset password
-      </button>
+    <p style="color:var(--muted);font-size:0.8rem;margin-bottom:20px;font-family:'JetBrains Mono';line-height:1.5;">
+      Board saves to <b style="color:var(--text)">localStorage</b> instantly (this device).<br>
+      Add a GitHub token to sync via a private Gist (all devices).
+    </p>
+    <label style="font-size:0.78rem;color:var(--muted);font-family:'JetBrains Mono';display:block;margin-bottom:6px;">GitHub Personal Access Token <span style="color:#4ade80">(gist scope)</span></label>
+    <input id="gh-token-input" type="password" placeholder="ghp_xxxxxxxxxxxx"
+      style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:11px 14px;border-radius:8px;font-size:0.88rem;font-family:'JetBrains Mono';box-sizing:border-box;margin-bottom:10px;" />
+    <label style="font-size:0.78rem;color:var(--muted);font-family:'JetBrains Mono';display:block;margin-bottom:6px;">Gist ID <span style="color:var(--muted)">(auto-filled after first sync)</span></label>
+    <input id="gh-gist-input" type="text" placeholder="leave blank to create new"
+      style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:11px 14px;border-radius:8px;font-size:0.88rem;font-family:'JetBrains Mono';box-sizing:border-box;margin-bottom:16px;" />
+    <div style="display:flex;gap:8px;margin-bottom:12px;">
+      <button onclick="saveSyncSettings()" style="flex:1;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;padding:11px;border-radius:8px;font-weight:700;font-size:0.88rem;cursor:pointer;">Save &amp; Sync Now</button>
+      <button onclick="exportApps()" style="background:var(--surface);color:var(--text);border:1px solid var(--border);padding:11px 14px;border-radius:8px;font-size:0.85rem;cursor:pointer;" title="Download JSON backup">⬇ Export</button>
     </div>
-    <div id="auth-msg" style="display:none;margin-top:14px;font-size:0.83rem;font-family:'JetBrains Mono';"></div>
+    <button onclick="clearAllData()" style="width:100%;background:transparent;color:#f87171;border:1px solid #f87171;padding:9px;border-radius:8px;font-size:0.82rem;cursor:pointer;">Clear All Data (irreversible)</button>
+    <div id="sync-msg" style="display:none;margin-top:12px;font-size:0.8rem;font-family:'JetBrains Mono';text-align:center;"></div>
+    <p style="color:var(--muted);font-size:0.72rem;margin-top:14px;font-family:'JetBrains Mono';text-align:center;">
+      Create token: github.com/settings/tokens → New token → check <b>gist</b>
+    </p>
   </div>
 </div>
 <script>
@@ -8666,21 +8654,65 @@
   // ── APPLICATION BOARD ──
 
   // ── SUPABASE + APPLICATION BOARD ──
-  const SUPA_URL = 'https://cpodscwbzvfjlsluecup.supabase.co';
-  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwb2RzY3dienZmamxzbHVlY3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MDExNTYsImV4cCI6MjA5MTM3NzE1Nn0.VpGmPQ8kWaO1HqxwjiCHtXdK5Rp6Y-Nb52yjkwVbvv0';
-  // Bypass Web Locks API — it causes 5s stalls in Edge/Brave tracking prevention.
-  // Safe for single-user dashboard (no concurrent tab token conflicts).
-  const _sb = window.supabase.createClient(SUPA_URL, SUPA_KEY, {
-    auth: {
-      lock: async (name, acquireTimeout, fn) => fn(),
-      storageKey: 'mj_auth',
-      autoRefreshToken: true,
-      persistSession: true,
-      detectSessionInUrl: true
-    }
-  });
+  // ── STORAGE: localStorage + GitHub Gist ─────────────────────────────────────
+  const LS_APPS  = 'mj_applications';
+  const LS_TOKEN = 'mj_gh_token';
+  const LS_GIST  = 'mj_gist_id';
 
-  let currentUser = null;
+  function lsLoad() { try { return JSON.parse(localStorage.getItem(LS_APPS) || '[]'); } catch { return []; } }
+  function lsSave(apps) { localStorage.setItem(LS_APPS, JSON.stringify(apps)); }
+  function getToken() { return localStorage.getItem(LS_TOKEN) || ''; }
+  function getGistId() { return localStorage.getItem(LS_GIST) || ''; }
+
+  function _setSyncStatus(state) {
+    const dot = document.getElementById('sync-dot');
+    const lbl = document.getElementById('sync-label');
+    if (!dot || !lbl) return;
+    const map = {
+      'local':   ['rgba(255,255,255,0.2)', 'Local'],
+      'loading': ['#facc15',               'Loading…'],
+      'syncing': ['#60a5fa',               'Syncing…'],
+      'synced':  ['#4ade80',               'Synced'],
+      'error':   ['#f87171',               'Sync error'],
+    };
+    const [color, text] = map[state] || map['local'];
+    dot.style.background = color; lbl.textContent = text;
+  }
+
+  async function gistSync(apps) {
+    const token = getToken(); if (!token) return;
+    const gistId = getGistId();
+    const payload = { files: { 'mj-applications.json': { content: JSON.stringify(apps, null, 2) } } };
+    if (!gistId) Object.assign(payload, { description: 'Mission Job — Application Board', public: false });
+    const res = await fetch(
+      gistId ? `https://api.github.com/gists/${gistId}` : 'https://api.github.com/gists',
+      { method: gistId ? 'PATCH' : 'POST',
+        headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload) }
+    );
+    if (!res.ok) throw new Error(`GitHub API ${res.status}`);
+    const data = await res.json();
+    if (!gistId) { localStorage.setItem(LS_GIST, data.id); document.getElementById('gh-gist-input').value = data.id; }
+  }
+
+  async function gistLoad() {
+    const token = getToken(); const gistId = getGistId();
+    if (!token || !gistId) return null;
+    const res = await fetch(`https://api.github.com/gists/${gistId}`, { headers: { Authorization: `token ${token}` } });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const content = data.files?.['mj-applications.json']?.content;
+    return content ? JSON.parse(content) : null;
+  }
+
+  function _bgSync() {
+    if (!getToken()) return;
+    _setSyncStatus('syncing');
+    gistSync(applications)
+      .then(() => _setSyncStatus('synced'))
+      .catch(e => { console.warn('Gist sync:', e); _setSyncStatus('error'); });
+  }
+
   let applications = [];
   let boardFilter = 'all';
 
@@ -8694,9 +8726,46 @@
     'Rejected':           'status-rejected'
   };
 
-  // ── AUTH ────────────────────────────────────────────────────────────────────
-  function showLogin() { document.getElementById('auth-overlay').style.display = 'flex'; }
-  function hideLogin() { document.getElementById('auth-overlay').style.display = 'none'; }
+  // ── SYNC SETTINGS PANEL ─────────────────────────────────────────────────────
+  function openSyncSettings() {
+    document.getElementById('gh-token-input').value = getToken();
+    document.getElementById('gh-gist-input').value = getGistId();
+    document.getElementById('sync-msg').style.display = 'none';
+    document.getElementById('sync-settings-overlay').style.display = 'flex';
+  }
+  function closeSyncSettings() { document.getElementById('sync-settings-overlay').style.display = 'none'; }
+  function _syncMsg(msg, color) {
+    const el = document.getElementById('sync-msg');
+    el.textContent = msg; el.style.color = color || '#4ade80'; el.style.display = 'block';
+  }
+  async function saveSyncSettings() {
+    const token = document.getElementById('gh-token-input').value.trim();
+    const gistId = document.getElementById('gh-gist-input').value.trim();
+    if (token) { localStorage.setItem(LS_TOKEN, token); } else { localStorage.removeItem(LS_TOKEN); }
+    if (gistId) { localStorage.setItem(LS_GIST, gistId); } else { localStorage.removeItem(LS_GIST); }
+    if (!token) { _syncMsg('Token cleared — using local storage only.', 'var(--muted)'); _setSyncStatus('local'); return; }
+    _syncMsg('Syncing…', '#60a5fa'); _setSyncStatus('syncing');
+    try {
+      await gistSync(applications);
+      _syncMsg('Synced! Gist ID saved.', '#4ade80'); _setSyncStatus('synced');
+    } catch(e) { _syncMsg('Sync failed: ' + e.message, '#f87171'); _setSyncStatus('error'); }
+  }
+  function exportApps() {
+    const blob = new Blob([JSON.stringify(applications, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = 'mj-applications-' + new Date().toISOString().slice(0,10) + '.json';
+    a.click();
+  }
+  function clearAllData() {
+    if (!confirm('Delete ALL applications? This cannot be undone.')) return;
+    applications = []; lsSave([]); renderBoard();
+    _bgSync(); closeSyncSettings();
+    showToast('All data cleared.', 'info', 3000);
+  }
+
+  // Legacy stubs (called from old HTML, safe to be no-ops now)
+  function showLogin() {}
+  function hideLogin() {}
 
   function showToast(msg, type, duration, onRetry) {
     type = type || 'info'; duration = duration || 4000;
@@ -8722,249 +8791,68 @@
     setTimeout(function() { dismiss(t); }, duration);
   }
 
-  async function signInGitHub() {
-    const redirect = window.location.href.startsWith('https://')
-      ? window.location.href
-      : 'https://prajjwal17.github.io/mission-job-dashboard/';
-    const { error } = await _sb.auth.signInWithOAuth({
-      provider: 'github',
-      options: { redirectTo: redirect }
-    });
-    if (error) _authSetMsg(error.message, '#f87171');
+  async function initStorage() {
+    await loadBoard();
   }
 
-  function _authSetMsg(msg, color) {
-    const el = document.getElementById('auth-msg');
-    el.textContent = msg; el.style.color = color || 'var(--accent4)'; el.style.display = msg ? 'block' : 'none';
-  }
-  function _authSetLoading(loading) {
-    const si = document.getElementById('signin-btn'), su = document.getElementById('signup-btn');
-    si.disabled = loading; su.disabled = loading;
-    si.textContent = loading ? 'Signing in…' : 'Sign In';
-  }
-
-  async function signInPassword() {
-    const email = document.getElementById('auth-email').value.trim();
-    const password = document.getElementById('auth-password').value;
-    if (!email || !password) { _authSetMsg('Enter email and password.', '#f87171'); return; }
-    _authSetLoading(true); _authSetMsg('');
-    const { error } = await _sb.auth.signInWithPassword({ email, password });
-    _authSetLoading(false);
-    if (error) { _authSetMsg(error.message, '#f87171'); }
-  }
-
-  async function signUpPassword() {
-    const email = document.getElementById('auth-email').value.trim();
-    const password = document.getElementById('auth-password').value;
-    if (!email || !password) { _authSetMsg('Enter email and password.', '#f87171'); return; }
-    if (password.length < 6) { _authSetMsg('Password must be at least 6 characters.', '#f87171'); return; }
-    const btn = document.getElementById('signup-btn');
-    btn.disabled = true; btn.textContent = 'Creating…'; _authSetMsg('');
-    const { error } = await _sb.auth.signUp({ email, password });
-    btn.disabled = false; btn.textContent = 'First time? Create account';
-    if (error) {
-      if (error.message && error.message.toLowerCase().includes('already registered')) {
-        _authSetMsg('Account exists — use Sign In, or click "Forgot / reset password" to set a new password.', '#facc15');
-      } else {
-        _authSetMsg(error.message, '#f87171');
-      }
-    } else {
-      _authSetMsg('Account created! Signing you in…', 'var(--accent4)');
-      await signInPassword();
-    }
-  }
-
-  async function resetPassword() {
-    const email = document.getElementById('auth-email').value.trim();
-    if (!email) { _authSetMsg('Enter your email above first.', '#f87171'); return; }
-    _authSetMsg('Sending reset link…', 'var(--muted)');
-    const { error } = await _sb.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.href
-    });
-    if (error) { _authSetMsg(error.message, '#f87171'); }
-    else { _authSetMsg('Reset link sent! Check your inbox — click it to set a new password.', '#4ade80'); }
-  }
-
-  async function signOut() {
-    await _sb.auth.signOut();
-    currentUser = null; applications = [];
-    renderBoard(); showLogin();
-  }
-
-  async function initAuth() {
-    // Wake up Supabase in background (free tier pauses after inactivity)
-    _sb.from('applications').select('id').limit(1).then(() => {}).catch(() => {});
-
-    // Show login by default — onAuthStateChange is the single source of truth.
-    // INITIAL_SESSION fires on every page load (including magic link redirects)
-    // before getSession() could even resolve, so this avoids the race condition.
-    showLogin();
-
-    _sb.auth.onAuthStateChange(async (event, session) => {
-      if (session?.user) {
-        currentUser = session.user;
-        hideLogin();
-        // Update header
-        document.getElementById('header-signin-btn').style.display = 'none';
-        const ui = document.getElementById('header-user-info');
-        ui.style.display = 'flex';
-        document.getElementById('header-user-email').textContent =
-          currentUser.email || currentUser.user_metadata?.user_name || 'Signed in';
-        // Load board on first sign-in or page reload with active session
-        if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') {
-          await loadBoard();
-        }
-      } else {
-        document.getElementById('header-signin-btn').style.display = '';
-        document.getElementById('header-user-info').style.display = 'none';
-        if (_realtimeChannel) { _sb.removeChannel(_realtimeChannel); _realtimeChannel = null; }
-        currentUser = null; applications = []; renderBoard(); showLogin();
-      }
-    });
-  }
-
-  // ── REALTIME ─────────────────────────────────────────────────────────────────
-  let _realtimeChannel = null;
-
-  function setupRealtime() {
-    if (_realtimeChannel) _sb.removeChannel(_realtimeChannel);
-    _realtimeChannel = _sb
-      .channel('board-sync')
-      .on('postgres_changes',
-        { event: '*', schema: 'public', table: 'applications', filter: `user_id=eq.${currentUser.id}` },
-        (payload) => {
-          if (payload.eventType === 'INSERT') {
-            if (!applications.find(a => a.id === payload.new.id)) {
-              applications.unshift(payload.new);
-              document.getElementById('apps-logged').textContent = applications.length;
-              renderBoard();
-            }
-          } else if (payload.eventType === 'UPDATE') {
-            const idx = applications.findIndex(a => a.id === payload.new.id);
-            if (idx !== -1) { applications[idx] = payload.new; renderBoard(); }
-          } else if (payload.eventType === 'DELETE') {
-            applications = applications.filter(a => a.id !== payload.old.id);
-            document.getElementById('apps-logged').textContent = applications.length;
-            renderBoard();
-          }
-        }
-      )
-      .subscribe();
-  }
-
-  // ── BOARD CRUD ───────────────────────────────────────────────────────────────
+  // ── BOARD CRUD (localStorage + Gist) ────────────────────────────────────────
   async function loadBoard() {
-    const { data, error } = await _sb
-      .from('applications').select('*').order('created_at', { ascending: false });
-    if (error) {
-      console.error('loadBoard:', error);
-      const isAuth = error.status === 401 || error.status === 403
-        || (error.message && (error.message.includes('JWT') || error.message.includes('not authenticated')));
-      if (isAuth) {
-        showToast('Session expired — please sign in again.', 'warn', 5000);
-        currentUser = null; showLogin();
+    _setSyncStatus('loading');
+    try {
+      const gistData = await gistLoad();
+      if (gistData) {
+        applications = gistData; lsSave(applications); _setSyncStatus('synced');
       } else {
-        showToast('Could not load your board: ' + (error.message || 'Unknown error'), 'error', 8000,
-          function() { loadBoard(); });
+        applications = lsLoad(); _setSyncStatus(getToken() ? 'error' : 'local');
       }
-      return;
+    } catch(e) {
+      applications = lsLoad(); _setSyncStatus('error');
+      console.warn('loadBoard gist:', e);
     }
-    applications = data || [];
     document.getElementById('apps-logged').textContent = applications.length;
-    setupRealtime();
     renderBoard();
   }
 
-  function _withTimeout(promise, ms, label) {
-    return Promise.race([
-      promise,
-      new Promise((_, reject) => setTimeout(() => reject(new Error((label || 'Request') + ' timed out after ' + (ms/1000) + 's')), ms))
-    ]);
-  }
-
   async function insertApp(app) {
-    if (!currentUser) { showLogin(); return null; }
-    try {
-      const { error } = await _withTimeout(
-        _sb.from('applications').insert({ ...app, user_id: currentUser.id }),
-        12000, 'Save'
-      );
-      if (error) {
-        console.error('insertApp:', error);
-        const isAuthError = error.status === 401 || error.status === 403
-          || (error.message && (error.message.includes('JWT') || error.message.includes('not authenticated')));
-        if (isAuthError) {
-          showToast('Session expired — please sign in again.', 'warn', 4000);
-          currentUser = null;
-          showLogin();
-          return null;
-        }
-        showToast('Save failed: ' + (error.message || 'Unknown error'), 'error', 6000, function() { insertApp(app); });
-        return null;
-      }
-      showToast('Application tracked!', 'success', 3000);
-      await loadBoard();
-      return true;
-    } catch (e) {
-      showToast(e.message, 'error', 6000, function() { insertApp(app); });
-      return null;
-    }
+    app.id = Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+    app.created_at = new Date().toISOString();
+    app.updated_at = new Date().toISOString();
+    applications.unshift(app);
+    lsSave(applications);
+    document.getElementById('apps-logged').textContent = applications.length;
+    renderBoard();
+    showToast('Application tracked!', 'success', 3000);
+    _bgSync();
+    return true;
   }
 
   async function updateStatus(id, sel) {
     const status = sel.value;
     sel.className = 'status-select ' + (STATUS_CLASS[status] || 'status-to-apply');
     const app = applications.find(a => a.id === id);
-    const prevStatus = app ? app.status : status;
-    if (app) app.status = status;
-    const { error } = await _sb.from('applications').update({ status, updated_at: new Date().toISOString() }).eq('id', id);
-    if (error) {
-      console.error('updateStatus:', error);
-      if (app) app.status = prevStatus;
-      sel.value = prevStatus;
-      sel.className = 'status-select ' + (STATUS_CLASS[prevStatus] || 'status-to-apply');
-      showToast('Status update failed — ' + (error.message || 'try again'), 'error', 4000);
-      return;
-    }
+    if (app) { app.status = status; app.updated_at = new Date().toISOString(); }
+    lsSave(applications); _bgSync();
     if (boardFilter !== 'all' && status !== boardFilter) renderBoard();
   }
 
   async function updateNotes(id, val) {
     const app = applications.find(a => a.id === id);
-    const prevNotes = app ? app.notes : val;
-    if (app) app.notes = val;
-    const { error } = await _sb.from('applications').update({ notes: val, updated_at: new Date().toISOString() }).eq('id', id);
-    if (error) {
-      console.error('updateNotes:', error);
-      if (app) app.notes = prevNotes;
-      showToast('Note save failed — ' + (error.message || 'try again'), 'error', 4000);
-    }
+    if (app) { app.notes = val; app.updated_at = new Date().toISOString(); }
+    lsSave(applications); _bgSync();
   }
 
   async function deleteApp(id) {
     if (!confirm('Remove this application?')) return;
-    const snapshot = applications.slice();
     applications = applications.filter(a => a.id !== id);
     document.getElementById('apps-logged').textContent = applications.length;
     renderBoard();
-    const { error } = await _sb.from('applications').delete().eq('id', id);
-    if (error) {
-      console.error('deleteApp:', error);
-      applications = snapshot;
-      document.getElementById('apps-logged').textContent = applications.length;
-      renderBoard();
-      showToast('Delete failed — ' + (error.message || 'try again'), 'error', 4000);
-    }
+    lsSave(applications); _bgSync();
   }
 
   // ── RENDER ───────────────────────────────────────────────────────────────────
   function renderBoard() {
     const tbody = document.getElementById('app-board-body');
     if (!tbody) return;
-    if (!currentUser) {
-      tbody.innerHTML = '<tr><td colspan="8" class="board-empty">Sign in to load your board.</td></tr>';
-      return;
-    }
     const filtered = boardFilter === 'all'
       ? applications
       : applications.filter(a => a.status === boardFilter);
@@ -9026,7 +8914,6 @@
 
   // Add Application modal
   function openAddModal() {
-    if (!currentUser) { showLogin(); return; }
     document.getElementById('addModal').classList.add('show');
     document.getElementById('add-date').value = new Date().toISOString().slice(0, 10);
   }
@@ -9055,7 +8942,7 @@
 
   // ── INIT ─────────────────────────────────────────────────────────────────────
   renderDriveGrid('all');
-  initAuth();
+  initStorage();
 
   // ── AI TOOLS ─────────────────────────────────────────────────────────────────
   const MASTER_RESUME = "# Prajjwal Pandey\n\n**Phone:** +91 8278674540 | **Email:** prajjwalp1707@gmail.com\n**LinkedIn:** linkedin.com/in/prajjwal-pandey | **GitHub:** github.com/Prajjwal17\n**Location:** Sitapur, Uttar Pradesh\n\n---\n\n## SUMMARY\n\nApplied AI Engineer and ECE student at VIT specializing in Agentic AI and RAG architectures. Bridges the gap between hardware and software by building autonomous multi-agent systems and real-time signal processing tools. Proven track record of transforming manual workflows into automated AI-driven pipelines with a focus on scalability and system reliability.\n\n---\n\n## SKILLS\n\n**AI & Data:** Agentic AI, LangChain, RAG, PyTorch, Data Analysis, Automation Testing\n\n**Languages & Frameworks:** Python, SQL, JavaScript, React, Three.js, C++, C\n\n**Engineering & Tools:** Signal Processing, Embedded Systems (STM32/ESP32), Docker, Firebase, Git, NetSim, Microcontroller Programming\n\n---\n\n## ACCOMPLISHMENTS\n\n- **AI Automation:** Engineered a 5-agent LangChain pipeline, reducing manual application time by 15+ hrs/week.\n- **Performance Optimization:** Achieved a 40% reduction in processing latency via automated end-to-end EDA pipelines.\n- **System Engineering:** Reduced signal processing latency by 30% by migrating system architecture from STM32 to ESP32.\n- **Operational Impact:** Increased plant operational uptime by 15% through the standardization of DCS protocols.\n\n---\n\n## EXPERIENCE\n\n### Data Analyst Intern \u2014 Trainity\n*July 2023 \u2013 Dec. 2023*\n- Architected end-to-end EDA pipelines for automated data cleaning, successfully reducing processing latency by 40% for 5+ internal stakeholders.\n- Translated 20+ complex datasets into actionable Power BI executive dashboards, enhancing decision-making speed by 25%.\n\n### Instrumentation & Control Intern \u2014 Radico Khaitan Limited\n*Oct. 2023 \u2013 Nov. 2023*\n- Standardized maintenance documentation and DCS protocols for on-site engineering teams, achieving a 15% increase in plant operational uptime.\n- Executed daily production monitoring protocols to ensure smooth industrial operations and efficient workstation organization.\n\n---\n\n## PROJECTS\n\n### AI-Powered Job Application Pipeline (Agentic AI)\n*Feb. 2026 \u2013 Present*\n- Developed an autonomous 5-agent pipeline utilizing LangChain and Playwright with RAG integration, achieving a 70% increase in resume-to-JD alignment scores across 50+ test cases.\n- Implemented full orchestration across scraper, tailor, PDF-gen, and mailer agents with local Ollama Mistral for cost-efficient operation.\n- Built strategic HR contact management system processing 1,695+ verified HR contacts with automated cold email personalization.\n\n### Teerth \u2014 3D Cultural Exploration Web App\n*Jan. 2026 \u2013 Present*\n- Solo-developed a 3D platform using Three.js and WebGL, optimizing rendering performance by 40% to maintain a stable 60FPS on mobile devices.\n- Implemented immersive cultural site exploration with real-time asset optimization and interactive UI logic.\n\n### Capstone: Portable FMCW Radar & GPS System\n*July 2025 \u2013 Nov. 2025*\n- Optimized hardware communication by migrating to ESP32 and integrated a 16-bit ADC, achieving 98.5% signal integrity for real-time target detection visualized on Mapbox.\n- Reduced signal processing latency by 30% through architecture optimization and embedded systems design.\n\n### Smart Traffic Management System\n*Aug. 2024 \u2013 Nov. 2024*\n- Developed a scalable traffic optimization system for Delhi-NCR using YOLOv5 for real-time vehicle detection and linear regression for congestion forecasting.\n- Engineered an AI-driven dynamic signal algorithm and dashboard, reducing simulated vehicle idle times and emissions.\n\n### Network Simulation & Analysis (Academic)\n*2024*\n- Simulated complex network topologies in NetSim to identify bottlenecks, improving theoretical packet delivery ratios by 20% in high-congestion scenarios.\n\n---\n\n## EDUCATION\n\n**B.Tech, Electronics and Communication Engineering**\nVellore Institute of Technology (VIT), Vellore\n*July 2021 \u2013 May 2026*\n\n---\n\n## CERTIFICATIONS\n\n- **The Data Scientist's Toolbox** \u2014 Johns Hopkins University via Coursera | Dec 2023\n- **SQL Basic Certification** \u2014 HackerRank | Aug 2023\n\n---\n\n## KEY TECHNOLOGIES\n\nPython | JavaScript | React | Three.js | PyTorch | LangChain | Docker | Firebase | Git | Power BI | YOLOv5 | SQL | C++ | STM32/ESP32 | WebGL | Playwright\n";
@@ -9207,7 +9094,6 @@ QUICK WIN:
   // Repopulate board selects whenever board renders
   // ── QUICK TRACK (curated cards) ──────────────────────────────────────────────
   function openQuickTrackModal(title, link, source) {
-    if (!currentUser) { showLogin(); return; }
     document.getElementById('qt-title').value = title;
     document.getElementById('qt-link').value = link || '';
     document.getElementById('qt-source').value = source || 'Curated Roles';
@@ -9306,7 +9192,6 @@ Use realistic Indian market data. If it's a global company with India office, us
 
   document.getElementById('quickTrackForm').addEventListener('submit', async function(e) {
     e.preventDefault();
-    if (!currentUser) { showLogin(); return; }
     const btn = this.querySelector('button[type="submit"]');
     const origText = btn ? btn.textContent : '';
     if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }

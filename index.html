@@ -1042,6 +1042,10 @@
           <span class="stat-chip purple">25 Curated</span>
           <span class="stat-chip cyan">625 Companies</span>
           <span class="stat-chip amber">Unified</span>
+          <span id="agent-status-chip" title="Local AI Agent (localhost:8000)" style="padding:6px 14px;border-radius:100px;font-size:0.75rem;font-weight:600;font-family:'JetBrains Mono';border:1px solid rgba(255,255,255,0.1);color:var(--muted);background:transparent;cursor:default;display:flex;align-items:center;gap:6px;">
+            <span id="agent-status-dot" style="width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.15);display:inline-block;transition:background 0.4s;"></span>
+            <span id="agent-status-label">Agent</span>
+          </span>
         </div>
         <div id="auth-status">
           <button id="header-signin-btn" onclick="showLogin()"
@@ -8465,6 +8469,33 @@
       <input type="hidden" id="qt-link" />
       <input type="hidden" id="qt-source" />
 
+      <!-- Magic Tailor -->
+      <button type="button" id="qt-tailor-btn" onclick="runMagicTailor()"
+        style="width:100%;margin-bottom:10px;padding:10px;border-radius:8px;border:1px solid var(--accent);background:rgba(124,58,237,0.12);color:var(--accent);font-weight:700;font-size:0.85rem;cursor:pointer;font-family:'DM Sans';display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.2s;">
+        ✨ Magic Tailor — Generate Cover Letter + STAR Stories
+      </button>
+      <div id="qt-tailor-box" style="display:none;margin-bottom:14px;">
+        <div id="qt-tailor-loading" style="display:none;color:var(--muted);font-size:0.8rem;font-family:'JetBrains Mono';padding:10px 0;text-align:center;">
+          <span style="animation:spin 1s linear infinite;display:inline-block;">⟳</span>&nbsp;Ollama is tailoring…
+        </div>
+        <div id="qt-tailor-result" style="display:none;">
+          <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+            <button type="button" onclick="qtTailorTab('letter')" id="qt-tab-letter"
+              style="padding:4px 12px;border-radius:6px;border:1px solid var(--accent);background:rgba(124,58,237,0.15);color:var(--accent);font-size:0.73rem;font-weight:600;cursor:pointer;font-family:'JetBrains Mono';">Cover Letter</button>
+            <button type="button" onclick="qtTailorTab('star')" id="qt-tab-star"
+              style="padding:4px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:0.73rem;font-weight:600;cursor:pointer;font-family:'JetBrains Mono';">STAR Stories</button>
+            <button type="button" onclick="navigator.clipboard.writeText(document.getElementById('qt-tailor-content').innerText).then(()=>showToast('Copied!','success',2000))"
+              style="margin-left:auto;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:0.73rem;cursor:pointer;font-family:'JetBrains Mono';">📋 Copy</button>
+          </div>
+          <div id="qt-tailor-subject" style="font-size:0.72rem;color:var(--accent3);font-family:'JetBrains Mono';margin-bottom:6px;"></div>
+          <div id="qt-tailor-content"
+            style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:0.75rem;line-height:1.6;color:var(--text);white-space:pre-wrap;max-height:220px;overflow-y:auto;font-family:'JetBrains Mono';"></div>
+          <button type="button" onclick="pasteToNotes()"
+            style="margin-top:8px;width:100%;padding:7px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:0.75rem;cursor:pointer;">↓ Paste to Notes</button>
+        </div>
+        <div id="qt-tailor-error" style="display:none;color:#f87171;font-size:0.75rem;font-family:'JetBrains Mono';padding:8px 0;"></div>
+      </div>
+
       <!-- Salary Intelligence -->
       <button type="button" class="salary-btn" id="qt-salary-btn" onclick="researchSalary()">💰 Research Comp & Salary Range</button>
       <div class="salary-box" id="qt-salary-box">
@@ -9964,6 +9995,157 @@ Format your response in clean markdown with headers for each story.`,
       if (sec === 'hrcontacts' && !document.getElementById('hr-table-body').hasChildNodes()) renderHR();
     });
   });
+  </script>
+
+  <script>
+  // ── Agent Bridge (FastAPI localhost:8000) ─────────────────────────────────
+  const AGENT_URL = 'http://localhost:8000';
+  let _tailorData = { cover_letter: '', star_stories: [], email_subject: '' };
+  let _tailorTab  = 'letter';
+
+  // ── Health Check ──────────────────────────────────────────────────────────
+  function checkAgentStatus() {
+    const dot   = document.getElementById('agent-status-dot');
+    const label = document.getElementById('agent-status-label');
+    const chip  = document.getElementById('agent-status-chip');
+    fetch(AGENT_URL + '/health', { signal: AbortSignal.timeout(3000) })
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        if (d.status === 'ok' && d.ollama) {
+          dot.style.background   = '#10b981';
+          label.textContent      = 'Agent Online';
+          chip.style.borderColor = 'rgba(16,185,129,0.4)';
+          chip.style.color       = '#10b981';
+          chip.title             = 'AI Agent Online — Ollama ' + d.model + ' ready';
+        } else {
+          dot.style.background   = '#f59e0b';
+          label.textContent      = 'Agent (Ollama off)';
+          chip.style.borderColor = 'rgba(245,158,11,0.4)';
+          chip.style.color       = '#f59e0b';
+          chip.title             = 'API reachable but Ollama not running — pull mistral first';
+        }
+      })
+      .catch(function() {
+        dot.style.background   = 'rgba(255,255,255,0.15)';
+        label.textContent      = 'Agent Offline';
+        chip.style.borderColor = 'rgba(255,255,255,0.08)';
+        chip.style.color       = 'var(--muted)';
+        chip.title             = 'Local agent not running — start with: docker compose up';
+      });
+  }
+
+  // Poll on load + every 30 seconds
+  checkAgentStatus();
+  setInterval(checkAgentStatus, 30000);
+
+  // ── Magic Tailor ──────────────────────────────────────────────────────────
+  async function runMagicTailor() {
+    const company = (document.getElementById('qt-title').value || '').trim();
+    if (!company) { showToast('Open a company card first.', 'warn', 3000); return; }
+
+    const btn     = document.getElementById('qt-tailor-btn');
+    const box     = document.getElementById('qt-tailor-box');
+    const loading = document.getElementById('qt-tailor-loading');
+    const result  = document.getElementById('qt-tailor-result');
+    const errDiv  = document.getElementById('qt-tailor-error');
+
+    btn.disabled        = true;
+    btn.textContent     = '⟳ Tailoring…';
+    box.style.display   = 'block';
+    loading.style.display = 'block';
+    result.style.display  = 'none';
+    errDiv.style.display  = 'none';
+
+    try {
+      const notes = document.getElementById('qt-notes').value || '';
+      const res = await fetch(AGENT_URL + '/tailor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          company_name:     company,
+          job_description:  notes,
+          generate_star:    true
+        }),
+        signal: AbortSignal.timeout(150000)
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(function() { return { detail: 'Unknown error' }; });
+        throw new Error(err.detail || 'HTTP ' + res.status);
+      }
+
+      _tailorData = await res.json();
+      loading.style.display = 'none';
+      result.style.display  = 'block';
+      qtTailorTab('letter');
+      showToast('Tailored by Ollama Mistral!', 'success', 3000);
+    } catch(e) {
+      loading.style.display = 'none';
+      errDiv.style.display  = 'block';
+      errDiv.textContent    = e.message.includes('fetch') || e.message.includes('Failed')
+        ? '⚠ Agent offline — run: docker compose up'
+        : '⚠ ' + e.message;
+    } finally {
+      btn.disabled    = false;
+      btn.innerHTML   = '✨ Magic Tailor — Generate Cover Letter + STAR Stories';
+    }
+  }
+
+  function qtTailorTab(tab) {
+    _tailorTab = tab;
+    const content = document.getElementById('qt-tailor-content');
+    const subj    = document.getElementById('qt-tailor-subject');
+    const tLetter = document.getElementById('qt-tab-letter');
+    const tStar   = document.getElementById('qt-tab-star');
+
+    const activeStyle   = 'padding:4px 12px;border-radius:6px;border:1px solid var(--accent);background:rgba(124,58,237,0.15);color:var(--accent);font-size:0.73rem;font-weight:600;cursor:pointer;font-family:JetBrains Mono,monospace;';
+    const inactiveStyle = 'padding:4px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:0.73rem;font-weight:600;cursor:pointer;font-family:JetBrains Mono,monospace;';
+
+    if (tab === 'letter') {
+      tLetter.style.cssText = activeStyle;
+      tStar.style.cssText   = inactiveStyle;
+      subj.textContent      = _tailorData.email_subject ? '📧 Subject: ' + _tailorData.email_subject : '';
+      content.textContent   = _tailorData.cover_letter || '(No cover letter generated)';
+    } else {
+      tLetter.style.cssText = inactiveStyle;
+      tStar.style.cssText   = activeStyle;
+      subj.textContent      = '';
+      const stories = _tailorData.star_stories || [];
+      if (!stories.length) {
+        content.textContent = '(No STAR stories generated)';
+      } else {
+        content.textContent = stories.map(function(s, i) {
+          return '── Story ' + (i+1) + ': ' + (s.tag || '') + ' ──\n'
+            + 'Q: ' + (s.question || '') + '\n\n'
+            + 'S: ' + (s.situation || '') + '\n'
+            + 'T: ' + (s.task || '') + '\n'
+            + 'A: ' + (s.action || '') + '\n'
+            + 'R: ' + (s.result || '');
+        }).join('\n\n');
+      }
+    }
+  }
+
+  function pasteToNotes() {
+    const notes = document.getElementById('qt-notes');
+    const val   = _tailorTab === 'letter'
+      ? (_tailorData.email_subject ? '[Subject: ' + _tailorData.email_subject + ']\n\n' : '') + (_tailorData.cover_letter || '')
+      : (document.getElementById('qt-tailor-content').textContent || '');
+    notes.value = val.substring(0, 500);
+    showToast('Pasted to Notes (500 char limit)', 'info', 2500);
+  }
+
+  // Reset tailor box when modal opens
+  const _origOpenQT = openQuickTrackModal;
+  openQuickTrackModal = function(title, link, source) {
+    _origOpenQT(title, link, source);
+    document.getElementById('qt-tailor-box').style.display   = 'none';
+    document.getElementById('qt-tailor-result').style.display = 'none';
+    document.getElementById('qt-tailor-error').style.display  = 'none';
+    document.getElementById('qt-tailor-btn').disabled  = false;
+    document.getElementById('qt-tailor-btn').innerHTML = '✨ Magic Tailor — Generate Cover Letter + STAR Stories';
+    _tailorData = { cover_letter: '', star_stories: [], email_subject: '' };
+  };
   </script>
 
 </body>

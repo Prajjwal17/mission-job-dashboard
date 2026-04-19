@@ -8754,20 +8754,28 @@
     if (gistId) { localStorage.setItem(LS_GIST, gistId); } else { localStorage.removeItem(LS_GIST); }
     localStorage.setItem(LS_MODE, mode);
     if (!token) { _syncMsg('Token cleared — local only.', 'var(--muted)'); _setSyncStatus('local'); return; }
-    _syncMsg('Pulling from Gist…', '#60a5fa'); _setSyncStatus('loading');
-    try {
-      const gistData = await gistLoad();
-      if (gistData) {
-        applications = gistData;
-        if (mode !== 'secondary') lsSave(applications);
-        renderBoard();
-        document.getElementById('apps-logged').textContent = applications.length;
-        _syncMsg('Loaded from Gist!', '#4ade80'); _setSyncStatus('synced');
-      } else {
-        _syncMsg('No Gist data yet — will create on next save.', '#facc15');
-        _setSyncStatus('local');
-      }
-    } catch(e) { _syncMsg('Failed: ' + e.message, '#f87171'); _setSyncStatus('error'); }
+    if (mode === 'secondary') {
+      // Phone: always pull from Gist
+      _syncMsg('Pulling from Gist…', '#60a5fa'); _setSyncStatus('loading');
+      try {
+        const gistData = await gistLoad();
+        if (gistData) {
+          applications = gistData;
+          renderBoard();
+          document.getElementById('apps-logged').textContent = applications.length;
+          _syncMsg('Loaded from Gist!', '#4ade80'); _setSyncStatus('synced');
+        } else {
+          _syncMsg('No Gist data found — check Gist ID.', '#f87171'); _setSyncStatus('error');
+        }
+      } catch(e) { _syncMsg('Failed: ' + e.message, '#f87171'); _setSyncStatus('error'); }
+    } else {
+      // Laptop: push local data to Gist
+      _syncMsg('Pushing to Gist…', '#60a5fa'); _setSyncStatus('syncing');
+      try {
+        await gistSync(applications);
+        _syncMsg('Synced to Gist!', '#4ade80'); _setSyncStatus('synced');
+      } catch(e) { _syncMsg('Sync failed: ' + e.message, '#f87171'); _setSyncStatus('error'); }
+    }
   }
   function exportApps() {
     const blob = new Blob([JSON.stringify(applications, null, 2)], { type: 'application/json' });

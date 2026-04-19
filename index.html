@@ -8533,6 +8533,11 @@
       Board saves to <b style="color:var(--text)">localStorage</b> instantly (this device).<br>
       Add a GitHub token to sync via a private Gist (all devices).
     </p>
+    <label style="font-size:0.78rem;color:var(--muted);font-family:'JetBrains Mono';display:block;margin-bottom:6px;">Device Mode</label>
+    <select id="device-mode-select" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:11px 14px;border-radius:8px;font-size:0.88rem;font-family:'JetBrains Mono';box-sizing:border-box;margin-bottom:14px;">
+      <option value="primary">💻 Primary (Laptop) — localStorage + Gist backup</option>
+      <option value="secondary">📱 Secondary (Phone) — Gist only, always fresh</option>
+    </select>
     <label style="font-size:0.78rem;color:var(--muted);font-family:'JetBrains Mono';display:block;margin-bottom:6px;">GitHub Personal Access Token <span style="color:#4ade80">(gist scope)</span></label>
     <input id="gh-token-input" type="password" placeholder="ghp_xxxxxxxxxxxx"
       style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:11px 14px;border-radius:8px;font-size:0.88rem;font-family:'JetBrains Mono';box-sizing:border-box;margin-bottom:10px;" />
@@ -8658,11 +8663,13 @@
   const LS_APPS  = 'mj_applications';
   const LS_TOKEN = 'mj_gh_token';
   const LS_GIST  = 'mj_gist_id';
+  const LS_MODE  = 'mj_device_mode'; // 'primary' | 'secondary'
 
   function lsLoad() { try { return JSON.parse(localStorage.getItem(LS_APPS) || '[]'); } catch { return []; } }
   function lsSave(apps) { localStorage.setItem(LS_APPS, JSON.stringify(apps)); }
   function getToken() { return localStorage.getItem(LS_TOKEN) || ''; }
   function getGistId() { return localStorage.getItem(LS_GIST) || ''; }
+  function isSecondary() { return localStorage.getItem(LS_MODE) === 'secondary'; }
 
   function _setSyncStatus(state) {
     const dot = document.getElementById('sync-dot');
@@ -8730,6 +8737,7 @@
   function openSyncSettings() {
     document.getElementById('gh-token-input').value = getToken();
     document.getElementById('gh-gist-input').value = getGistId();
+    document.getElementById('device-mode-select').value = localStorage.getItem(LS_MODE) || 'primary';
     document.getElementById('sync-msg').style.display = 'none';
     document.getElementById('sync-settings-overlay').style.display = 'flex';
   }
@@ -8741,14 +8749,25 @@
   async function saveSyncSettings() {
     const token = document.getElementById('gh-token-input').value.trim();
     const gistId = document.getElementById('gh-gist-input').value.trim();
+    const mode = document.getElementById('device-mode-select').value;
     if (token) { localStorage.setItem(LS_TOKEN, token); } else { localStorage.removeItem(LS_TOKEN); }
     if (gistId) { localStorage.setItem(LS_GIST, gistId); } else { localStorage.removeItem(LS_GIST); }
-    if (!token) { _syncMsg('Token cleared — using local storage only.', 'var(--muted)'); _setSyncStatus('local'); return; }
-    _syncMsg('Syncing…', '#60a5fa'); _setSyncStatus('syncing');
+    localStorage.setItem(LS_MODE, mode);
+    if (!token) { _syncMsg('Token cleared — local only.', 'var(--muted)'); _setSyncStatus('local'); return; }
+    _syncMsg('Pulling from Gist…', '#60a5fa'); _setSyncStatus('loading');
     try {
-      await gistSync(applications);
-      _syncMsg('Synced! Gist ID saved.', '#4ade80'); _setSyncStatus('synced');
-    } catch(e) { _syncMsg('Sync failed: ' + e.message, '#f87171'); _setSyncStatus('error'); }
+      const gistData = await gistLoad();
+      if (gistData) {
+        applications = gistData;
+        if (mode !== 'secondary') lsSave(applications);
+        renderBoard();
+        document.getElementById('apps-logged').textContent = applications.length;
+        _syncMsg('Loaded from Gist!', '#4ade80'); _setSyncStatus('synced');
+      } else {
+        _syncMsg('No Gist data yet — will create on next save.', '#facc15');
+        _setSyncStatus('local');
+      }
+    } catch(e) { _syncMsg('Failed: ' + e.message, '#f87171'); _setSyncStatus('error'); }
   }
   function exportApps() {
     const blob = new Blob([JSON.stringify(applications, null, 2)], { type: 'application/json' });
@@ -8801,16 +8820,30 @@
     try {
       const gistData = await gistLoad();
       if (gistData) {
-        applications = gistData; lsSave(applications); _setSyncStatus('synced');
+        applications = gistData;
+        if (!isSecondary()) lsSave(applications);
+        _setSyncStatus('synced');
       } else {
-        applications = lsLoad(); _setSyncStatus(getToken() ? 'error' : 'local');
+        applications = isSecondary() ? [] : lsLoad();
+        _setSyncStatus(getToken() ? 'error' : 'local');
       }
     } catch(e) {
-      applications = lsLoad(); _setSyncStatus('error');
+      applications = isSecondary() ? [] : lsLoad();
+      _setSyncStatus('error');
       console.warn('loadBoard gist:', e);
     }
     document.getElementById('apps-logged').textContent = applications.length;
     renderBoard();
+  }
+
+  async function _write(apps) {
+    if (isSecondary()) {
+      _setSyncStatus('syncing');
+      try { await gistSync(apps); _setSyncStatus('synced'); }
+      catch(e) { console.warn('Gist write:', e); _setSyncStatus('error'); }
+    } else {
+      lsSave(apps); _bgSync();
+    }
   }
 
   async function insertApp(app) {
@@ -8818,11 +8851,10 @@
     app.created_at = new Date().toISOString();
     app.updated_at = new Date().toISOString();
     applications.unshift(app);
-    lsSave(applications);
     document.getElementById('apps-logged').textContent = applications.length;
     renderBoard();
     showToast('Application tracked!', 'success', 3000);
-    _bgSync();
+    await _write(applications);
     return true;
   }
 
@@ -8831,14 +8863,14 @@
     sel.className = 'status-select ' + (STATUS_CLASS[status] || 'status-to-apply');
     const app = applications.find(a => a.id === id);
     if (app) { app.status = status; app.updated_at = new Date().toISOString(); }
-    lsSave(applications); _bgSync();
+    await _write(applications);
     if (boardFilter !== 'all' && status !== boardFilter) renderBoard();
   }
 
   async function updateNotes(id, val) {
     const app = applications.find(a => a.id === id);
     if (app) { app.notes = val; app.updated_at = new Date().toISOString(); }
-    lsSave(applications); _bgSync();
+    await _write(applications);
   }
 
   async function deleteApp(id) {
@@ -8846,7 +8878,7 @@
     applications = applications.filter(a => a.id !== id);
     document.getElementById('apps-logged').textContent = applications.length;
     renderBoard();
-    lsSave(applications); _bgSync();
+    await _write(applications);
   }
 
   // ── RENDER ───────────────────────────────────────────────────────────────────

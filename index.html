@@ -7702,6 +7702,7 @@
             <th>Job / Company</th>
             <th>Salary</th>
             <th>Source</th>
+            <th title="ATS keyword match score (pipeline-scored jobs only)">ATS</th>
             <th>Status</th>
             <th>Date Added</th>
             <th>Notes</th>
@@ -7709,7 +7710,7 @@
           </tr>
         </thead>
         <tbody id="app-board-body">
-          <tr><td colspan="8" class="board-empty">No applications yet. Add one above or click "Track" on any job card.</td></tr>
+          <tr><td colspan="9" class="board-empty">No applications yet. Add one above or click "Track" on any job card.</td></tr>
         </tbody>
       </table>
     </div>
@@ -8899,7 +8900,7 @@
       : applications.filter(a => a.status === boardFilter);
     if (filtered.length === 0) {
       const msg = boardFilter !== 'all' ? ' with status "' + boardFilter + '"' : '';
-      tbody.innerHTML = '<tr><td colspan="8" class="board-empty">No applications' + msg
+      tbody.innerHTML = '<tr><td colspan="9" class="board-empty">No applications' + msg
         + '. Click "+ Add Application" or "+ Track" on any Job Drive card.</td></tr>';
       return;
     }
@@ -8913,11 +8914,31 @@
         ? '<a href="' + escHtml(app.link) + '" target="_blank" style="color:var(--accent2);text-decoration:none;">' + escHtml(app.title) + '</a>'
         : escHtml(app.title);
       const safeId = app.id;
+      const atsScore = app.ats_score != null ? app.ats_score : null;
+      const atsColor = atsScore == null ? 'rgba(255,255,255,0.15)'
+                     : atsScore >= 70   ? '#4ade80'
+                     : atsScore >= 50   ? '#facc15'
+                     : '#f87171';
+      const atsTip   = atsScore == null ? 'No ATS score (manually added)'
+                     : 'ATS match: ' + atsScore + '/100 (' + (app.ats_grade || '') + ')'
+                       + (app.ats_missing && app.ats_missing.length
+                         ? '\nMissing: ' + app.ats_missing.slice(0,8).join(', ')
+                         : '');
+      const atsCell  = '<td style="text-align:center;">'
+                     + '<span title="' + atsTip + '" style="'
+                     + 'display:inline-block;padding:2px 7px;border-radius:10px;'
+                     + 'font-size:0.68rem;font-family:JetBrains Mono,monospace;font-weight:700;'
+                     + 'background:' + atsColor + ';'
+                     + 'color:' + (atsScore == null ? 'var(--muted)' : '#0d0d0d') + ';'
+                     + 'cursor:default;">'
+                     + (atsScore != null ? atsScore : '—')
+                     + '</span></td>';
       return '<tr>'
         + '<td style="color:var(--muted);font-family:JetBrains Mono,monospace;font-size:0.7rem;">' + (fi + 1) + '</td>'
         + '<td><strong>' + titleCell + '</strong></td>'
         + '<td style="font-family:JetBrains Mono,monospace;font-size:0.75rem;color:var(--accent4);">' + (escHtml(app.salary) || '-') + '</td>'
         + '<td style="font-size:0.75rem;color:var(--muted);">' + (escHtml(app.source) || '-') + '</td>'
+        + atsCell
         + '<td><select class="status-select ' + sc + '" onchange="updateStatus(' + JSON.stringify(safeId) + ', this)">' + opts + '</select></td>'
         + '<td style="font-size:0.75rem;color:var(--muted);font-family:JetBrains Mono,monospace;white-space:nowrap;">' + (escHtml(app.date) || '-') + '</td>'
         + '<td><input class="notes-input" value="' + escHtml(app.notes || '') + '" placeholder="Add note..." onchange="updateNotes(' + JSON.stringify(safeId) + ', this.value)"/></td>'

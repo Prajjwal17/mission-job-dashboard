@@ -1048,7 +1048,7 @@
           </span>
         </div>
         <div id="auth-status" style="display:flex;align-items:center;gap:10px;">
-          <span id="sync-status-chip" title="Gist sync status" style="font-size:0.72rem;font-family:'JetBrains Mono';color:var(--muted);display:flex;align-items:center;gap:5px;">
+          <span id="sync-status-chip" title="Click to refresh from Gist" onclick="if(getToken()&&getGistId())loadBoard();" style="font-size:0.72rem;font-family:'JetBrains Mono';color:var(--muted);display:flex;align-items:center;gap:5px;cursor:pointer;">
             <span id="sync-dot" style="width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.2);display:inline-block;"></span>
             <span id="sync-label">Local</span>
           </span>
@@ -8829,14 +8829,14 @@
       const gistData = await gistLoad();
       if (gistData) {
         applications = gistData;
-        if (!isSecondary()) lsSave(applications);
+        lsSave(applications); // cache on both primary and secondary
         _setSyncStatus('synced');
       } else {
-        applications = isSecondary() ? [] : lsLoad();
+        applications = lsLoad(); // both modes fall back to local cache
         _setSyncStatus(getToken() ? 'error' : 'local');
       }
     } catch(e) {
-      applications = isSecondary() ? [] : lsLoad();
+      applications = lsLoad(); // both modes fall back to local cache
       _setSyncStatus('error');
       console.warn('loadBoard gist:', e);
     }
@@ -8845,12 +8845,13 @@
   }
 
   async function _write(apps) {
+    lsSave(apps); // always cache locally (both modes)
     if (isSecondary()) {
       _setSyncStatus('syncing');
       try { await gistSync(apps); _setSyncStatus('synced'); }
       catch(e) { console.warn('Gist write:', e); _setSyncStatus('error'); }
     } else {
-      lsSave(apps); _bgSync();
+      _bgSync();
     }
   }
 
@@ -8983,6 +8984,13 @@
   // ── INIT ─────────────────────────────────────────────────────────────────────
   renderDriveGrid('all');
   initStorage();
+
+  // Auto-refresh from Gist when tab regains focus (essential for phone)
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && getToken() && getGistId()) {
+      loadBoard();
+    }
+  });
 
   // ── AI TOOLS ─────────────────────────────────────────────────────────────────
   const MASTER_RESUME = "# Prajjwal Pandey\n\n**Phone:** +91 8278674540 | **Email:** prajjwalp1707@gmail.com\n**LinkedIn:** linkedin.com/in/prajjwal-pandey | **GitHub:** github.com/Prajjwal17\n**Location:** Sitapur, Uttar Pradesh\n\n---\n\n## SUMMARY\n\nApplied AI Engineer and ECE student at VIT specializing in Agentic AI and RAG architectures. Bridges the gap between hardware and software by building autonomous multi-agent systems and real-time signal processing tools. Proven track record of transforming manual workflows into automated AI-driven pipelines with a focus on scalability and system reliability.\n\n---\n\n## SKILLS\n\n**AI & Data:** Agentic AI, LangChain, RAG, PyTorch, Data Analysis, Automation Testing\n\n**Languages & Frameworks:** Python, SQL, JavaScript, React, Three.js, C++, C\n\n**Engineering & Tools:** Signal Processing, Embedded Systems (STM32/ESP32), Docker, Firebase, Git, NetSim, Microcontroller Programming\n\n---\n\n## ACCOMPLISHMENTS\n\n- **AI Automation:** Engineered a 5-agent LangChain pipeline, reducing manual application time by 15+ hrs/week.\n- **Performance Optimization:** Achieved a 40% reduction in processing latency via automated end-to-end EDA pipelines.\n- **System Engineering:** Reduced signal processing latency by 30% by migrating system architecture from STM32 to ESP32.\n- **Operational Impact:** Increased plant operational uptime by 15% through the standardization of DCS protocols.\n\n---\n\n## EXPERIENCE\n\n### Data Analyst Intern \u2014 Trainity\n*July 2023 \u2013 Dec. 2023*\n- Architected end-to-end EDA pipelines for automated data cleaning, successfully reducing processing latency by 40% for 5+ internal stakeholders.\n- Translated 20+ complex datasets into actionable Power BI executive dashboards, enhancing decision-making speed by 25%.\n\n### Instrumentation & Control Intern \u2014 Radico Khaitan Limited\n*Oct. 2023 \u2013 Nov. 2023*\n- Standardized maintenance documentation and DCS protocols for on-site engineering teams, achieving a 15% increase in plant operational uptime.\n- Executed daily production monitoring protocols to ensure smooth industrial operations and efficient workstation organization.\n\n---\n\n## PROJECTS\n\n### AI-Powered Job Application Pipeline (Agentic AI)\n*Feb. 2026 \u2013 Present*\n- Developed an autonomous 5-agent pipeline utilizing LangChain and Playwright with RAG integration, achieving a 70% increase in resume-to-JD alignment scores across 50+ test cases.\n- Implemented full orchestration across scraper, tailor, PDF-gen, and mailer agents with local Ollama Mistral for cost-efficient operation.\n- Built strategic HR contact management system processing 1,695+ verified HR contacts with automated cold email personalization.\n\n### Teerth \u2014 3D Cultural Exploration Web App\n*Jan. 2026 \u2013 Present*\n- Solo-developed a 3D platform using Three.js and WebGL, optimizing rendering performance by 40% to maintain a stable 60FPS on mobile devices.\n- Implemented immersive cultural site exploration with real-time asset optimization and interactive UI logic.\n\n### Capstone: Portable FMCW Radar & GPS System\n*July 2025 \u2013 Nov. 2025*\n- Optimized hardware communication by migrating to ESP32 and integrated a 16-bit ADC, achieving 98.5% signal integrity for real-time target detection visualized on Mapbox.\n- Reduced signal processing latency by 30% through architecture optimization and embedded systems design.\n\n### Smart Traffic Management System\n*Aug. 2024 \u2013 Nov. 2024*\n- Developed a scalable traffic optimization system for Delhi-NCR using YOLOv5 for real-time vehicle detection and linear regression for congestion forecasting.\n- Engineered an AI-driven dynamic signal algorithm and dashboard, reducing simulated vehicle idle times and emissions.\n\n### Network Simulation & Analysis (Academic)\n*2024*\n- Simulated complex network topologies in NetSim to identify bottlenecks, improving theoretical packet delivery ratios by 20% in high-congestion scenarios.\n\n---\n\n## EDUCATION\n\n**B.Tech, Electronics and Communication Engineering**\nVellore Institute of Technology (VIT), Vellore\n*July 2021 \u2013 May 2026*\n\n---\n\n## CERTIFICATIONS\n\n- **The Data Scientist's Toolbox** \u2014 Johns Hopkins University via Coursera | Dec 2023\n- **SQL Basic Certification** \u2014 HackerRank | Aug 2023\n\n---\n\n## KEY TECHNOLOGIES\n\nPython | JavaScript | React | Three.js | PyTorch | LangChain | Docker | Firebase | Git | Power BI | YOLOv5 | SQL | C++ | STM32/ESP32 | WebGL | Playwright\n";

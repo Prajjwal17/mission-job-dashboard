@@ -7802,6 +7802,37 @@
         </div>
       </div>
 
+      <!-- Q&A Lookup -->
+      <div class="ai-card">
+        <div class="ai-card-title" style="color:#a78bfa;">💬 Q&A Lookup</div>
+        <p>Instant answers for job application forms — CTC, notice period, experience, intro. Fuzzy search across 28+ pre-written answers.</p>
+        <input type="text" id="qa-query-input" class="jd-textarea"
+          style="min-height:unset;height:40px;padding:8px 12px;font-size:0.85rem;"
+          placeholder="Type a question (e.g. expected ctc, notice period)..."
+          onkeydown="if(event.key==='Enter') qaLookup()" />
+        <button class="ai-generate-btn" id="qa-btn" onclick="qaLookup()"
+          style="background:linear-gradient(135deg,#7c3aed,#a78bfa);color:#fff;">Search Answers</button>
+        <div class="ai-output" id="qa-output"></div>
+      </div>
+
+      <!-- Referral DM Generator -->
+      <div class="ai-card">
+        <div class="ai-card-title" style="color:#34d399;">🤝 Referral DM Generator</div>
+        <p>Generate a casual LinkedIn connection request message via local Ollama. Under 150 words, human tone — not a cover letter.</p>
+        <input type="text" id="dm-company" class="jd-textarea"
+          style="min-height:unset;height:40px;padding:8px 12px;font-size:0.85rem;" placeholder="Company (e.g. Razorpay)" />
+        <input type="text" id="dm-name" class="jd-textarea"
+          style="min-height:unset;height:40px;padding:8px 12px;font-size:0.85rem;" placeholder="Target person name" />
+        <input type="text" id="dm-title" class="jd-textarea"
+          style="min-height:unset;height:40px;padding:8px 12px;font-size:0.85rem;" placeholder="Their title (e.g. Engineering Manager)" />
+        <input type="text" id="dm-context" class="jd-textarea"
+          style="min-height:unset;height:40px;padding:8px 12px;font-size:0.85rem;" placeholder="Extra context (optional)" />
+        <button class="ai-generate-btn" id="dm-btn" onclick="generateReferralDM()"
+          style="background:linear-gradient(135deg,#059669,#34d399);color:#fff;">Generate DM</button>
+        <div class="ai-output" id="dm-output"></div>
+        <button class="ai-copy-btn" id="dm-copy" onclick="copyOutput('dm-output','dm-copy')">Copy</button>
+      </div>
+
     </div>
   </div>
 
@@ -10087,6 +10118,76 @@ Format your response in clean markdown with headers for each story.`,
       : (document.getElementById('qt-tailor-content').textContent || '');
     notes.value = val.substring(0, 500);
     showToast('Pasted to Notes (500 char limit)', 'info', 2500);
+  }
+
+  // ── Q&A Lookup ────────────────────────────────────────────────────────────
+  async function qaLookup() {
+    const query = document.getElementById('qa-query-input').value.trim();
+    if (!query) return;
+    const btn = document.getElementById('qa-btn');
+    const out = document.getElementById('qa-output');
+    btn.disabled = true; btn.textContent = 'Searching...';
+    out.textContent = '';
+    try {
+      const res = await fetch(AGENT_URL + '/qa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, top_n: 3 }),
+        signal: AbortSignal.timeout(5000)
+      });
+      if (!res.ok) throw new Error('Agent returned ' + res.status);
+      const data = await res.json();
+      const results = data.results || [];
+      if (!results.length) {
+        out.textContent = 'No match found. Try different keywords.';
+      } else {
+        out.textContent = results.map(function(r) {
+          return 'Q: ' + r.q + '\nA: ' + r.a + '\n   [match: ' + Math.round(r.score * 100) + '%  tags: ' + (r.tags || []).join(', ') + ']';
+        }).join('\n\n');
+      }
+    } catch(e) {
+      out.textContent = e.message.includes('fetch') || e.message.includes('Failed') || e.message.includes('abort')
+        ? 'Agent offline — start FastAPI: cd job_pipeline && uvicorn api:app --port 8000'
+        : 'Error: ' + e.message;
+    } finally {
+      btn.disabled = false; btn.textContent = 'Search Answers';
+    }
+  }
+
+  // ── Referral DM Generator ─────────────────────────────────────────────────
+  async function generateReferralDM() {
+    const company = document.getElementById('dm-company').value.trim();
+    const name    = document.getElementById('dm-name').value.trim();
+    const title   = document.getElementById('dm-title').value.trim();
+    const context = document.getElementById('dm-context').value.trim();
+    if (!company || !name) { showToast('Company and name required.', 'error', 3000); return; }
+    const btn = document.getElementById('dm-btn');
+    const out = document.getElementById('dm-output');
+    const copy = document.getElementById('dm-copy');
+    btn.disabled = true; btn.textContent = 'Generating via Ollama...';
+    out.textContent = ''; copy.style.display = 'none';
+    try {
+      const res = await fetch(AGENT_URL + '/referral-dm', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ company, target_name: name, target_title: title, context }),
+        signal: AbortSignal.timeout(90000)
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: res.statusText }));
+        throw new Error(err.detail || res.statusText);
+      }
+      const data = await res.json();
+      out.textContent = data.dm;
+      copy.style.display = 'block';
+      showToast('DM generated (~' + data.word_count + ' words)', 'success', 3000);
+    } catch(e) {
+      out.textContent = e.message.includes('fetch') || e.message.includes('Failed') || e.message.includes('abort')
+        ? 'Agent offline — start FastAPI: cd job_pipeline && uvicorn api:app --port 8000'
+        : 'Error: ' + e.message;
+    } finally {
+      btn.disabled = false; btn.textContent = 'Generate DM';
+    }
   }
 
   // Reset tailor box when modal opens

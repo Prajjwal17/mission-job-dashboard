@@ -80,11 +80,132 @@
     font-family: 'Bebas Neue', sans-serif;
     font-size: clamp(2rem, 5vw, 3.2rem);
     letter-spacing: 2px;
+    line-height: 1;
+    /* gradient applied per-char via JS */
+    color: #fff;
+  }
+
+  /* ── BubbleText — per-character hover ── */
+  .bchar {
+    display: inline-block;
     background: linear-gradient(135deg, #fff 0%, var(--accent2) 60%, var(--accent) 100%);
     -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
     background-clip: text;
+    -webkit-text-fill-color: transparent;
+    transition: opacity 0.2s, letter-spacing 0.2s, transform 0.18s;
+    cursor: default;
   }
+  .bchar-space { display: inline-block; width: 0.28em; }
+  /* distance classes set by JS */
+  .bchar.bd-0 { opacity: 1; letter-spacing: 3.5px; transform: scaleY(1.06); filter: brightness(1.3); }
+  .bchar.bd-1 { opacity: 0.85; }
+  .bchar.bd-2 { opacity: 0.6; }
+  .bchar.bd-far { opacity: 0.3; }
+
+  /* ── Typing effect — subheading ── */
+  .header-sub {
+    font-size: 0.85rem;
+    margin-top: 8px;
+    font-family: 'JetBrains Mono';
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: wrap;
+  }
+  .hero-name {
+    color: #e8e8e8;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  .hero-sep { color: rgba(255,255,255,0.18); margin: 0 6px; }
+  .hero-typed { color: rgba(255,255,255,0.45); }
+  .hero-cursor {
+    display: inline-block;
+    width: 2px; height: 0.9em;
+    background: var(--accent2);
+    margin-left: 2px;
+    vertical-align: middle;
+    border-radius: 1px;
+    animation: cursorBlink 0.8s step-end infinite;
+  }
+  @keyframes cursorBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+  /* ── AnimatedUnderline on dnav buttons ── */
+  .dnav-btn { overflow: visible; }
+  .dnav-btn::after {
+    content: '';
+    position: absolute;
+    bottom: 3px;
+    left: 14px; right: 14px;
+    height: 1px;
+    background: var(--accent2);
+    transform: scaleX(0);
+    transform-origin: right center;
+    transition: transform 0.28s ease;
+    border-radius: 1px;
+  }
+  .dnav-btn:hover::after, .dnav-btn.dnav-active::after {
+    transform: scaleX(1);
+    transform-origin: left center;
+  }
+
+  /* ── BarsSpinner — 12-bar radial loader ── */
+  @keyframes barFade { 0% { opacity: 1; } 100% { opacity: 0.12; } }
+  .bars-spinner {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px; height: 18px;
+    flex-shrink: 0;
+  }
+  .bars-spinner .bbar {
+    position: absolute;
+    width: 23%; height: 8%;
+    background: currentColor;
+    border-radius: 4px;
+    top: 46%; left: -10%;
+    animation: barFade 1.2s linear infinite;
+  }
+  .bars-spinner .bbar:nth-child(1)  { transform: rotate(0deg)   translate(146%); animation-delay: -1.2s; }
+  .bars-spinner .bbar:nth-child(2)  { transform: rotate(30deg)  translate(146%); animation-delay: -1.1s; }
+  .bars-spinner .bbar:nth-child(3)  { transform: rotate(60deg)  translate(146%); animation-delay: -1.0s; }
+  .bars-spinner .bbar:nth-child(4)  { transform: rotate(90deg)  translate(146%); animation-delay: -0.9s; }
+  .bars-spinner .bbar:nth-child(5)  { transform: rotate(120deg) translate(146%); animation-delay: -0.8s; }
+  .bars-spinner .bbar:nth-child(6)  { transform: rotate(150deg) translate(146%); animation-delay: -0.7s; }
+  .bars-spinner .bbar:nth-child(7)  { transform: rotate(180deg) translate(146%); animation-delay: -0.6s; }
+  .bars-spinner .bbar:nth-child(8)  { transform: rotate(210deg) translate(146%); animation-delay: -0.5s; }
+  .bars-spinner .bbar:nth-child(9)  { transform: rotate(240deg) translate(146%); animation-delay: -0.4s; }
+  .bars-spinner .bbar:nth-child(10) { transform: rotate(270deg) translate(146%); animation-delay: -0.3s; }
+  .bars-spinner .bbar:nth-child(11) { transform: rotate(300deg) translate(146%); animation-delay: -0.2s; }
+  .bars-spinner .bbar:nth-child(12) { transform: rotate(330deg) translate(146%); animation-delay: -0.1s; }
+
+  /* ── CopyButton — check/copy icon flip ── */
+  .copy-btn-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.05);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.18s, border-color 0.18s;
+  }
+  .copy-btn-wrap:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); }
+  .copy-btn-wrap:active { transform: scale(0.94); }
+  .copy-btn-icon {
+    position: absolute;
+    transition: opacity 0.18s, transform 0.18s;
+    color: rgba(255,255,255,0.55);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .copy-btn-wrap .copy-icon  { opacity: 1; transform: scale(1); }
+  .copy-btn-wrap .check-icon { opacity: 0; transform: scale(0.6); color: #34d399; }
+  .copy-btn-wrap.copied .copy-icon  { opacity: 0; transform: scale(0.6); }
+  .copy-btn-wrap.copied .check-icon { opacity: 1; transform: scale(1); }
 
   .header-left p { color: var(--muted); font-size: 0.85rem; margin-top: 6px; font-family: 'JetBrains Mono'; }
 
@@ -934,10 +1055,9 @@
   .btn-spin-loader {
     position: absolute; inset: 0; display: none;
     align-items: center; justify-content: center;
+    color: currentColor;
   }
   .btn-spin[data-loading=true] .btn-spin-loader { display: flex; }
-  @keyframes btnSpin { to { transform: rotate(360deg); } }
-  .btn-spin-loader svg { animation: btnSpin 0.75s linear infinite; }
 
   /* ── Expanding search dock (expanding-search-dock port) ── */
   .drive-search-wrap { display: flex; align-items: center; gap: 0; margin-left: auto; }
@@ -1473,8 +1593,12 @@
   <header>
     <div class="header-inner">
       <div class="header-left">
-        <h1>JOB MASTER DASHBOARD</h1>
-        <p>// Prajjwal Pandey · ECE VIT · Applied AI Engineer · 2026</p>
+        <h1 id="bubble-h1">JOB MASTER DASHBOARD</h1>
+        <p class="header-sub">
+          <span class="hero-name">Prajjwal Pandey</span>
+          <span class="hero-sep">·</span>
+          <span class="hero-typed" id="hero-typed"></span><span class="hero-cursor"></span>
+        </p>
       </div>
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
         <div class="stat-chips">
@@ -8294,7 +8418,7 @@
         style="padding:7px 18px;border-radius:7px;border:1px solid #34d399;background:rgba(52,211,153,0.12);color:#34d399;font-weight:700;font-size:0.8rem;cursor:pointer;font-family:'JetBrains Mono';transition:all 0.2s;"
         id="pdf-dl-btn" class="btn-spin">
         <span class="btn-spin-inner">Download PDF</span>
-        <div class="btn-spin-loader"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg></div>
+        <div class="btn-spin-loader"><div class="bars-spinner"><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div></div></div>
       </button>
       <button onclick="previewTexSource()"
         style="padding:7px 18px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--muted);font-weight:700;font-size:0.8rem;cursor:pointer;font-family:'JetBrains Mono';"
@@ -8334,13 +8458,12 @@
         <textarea class="jd-textarea" id="cover-jd-input" placeholder="Paste the Job Description here..."></textarea>
         <button class="ai-generate-btn cover btn-spin" id="cover-btn" onclick="generateCoverLetter()">
           <span class="btn-spin-inner">Generate Cover Letter</span>
-          <div class="btn-spin-loader"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg></div>
+          <div class="btn-spin-loader"><div class="bars-spinner"><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div></div></div>
         </button>
         <div class="ai-output" id="cover-output"></div>
-        <button class="ai-copy-btn" id="cover-copy" onclick="animCopyById('cover-output',this)">
-          <div class="anim-copy-progress"></div>
-          <span class="anim-copy-label">Copy</span>
-          <div class="anim-copy-confirm"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Copied!</div>
+        <button class="copy-btn-wrap" id="cover-copy" onclick="copyBtnClick('cover-output',this)" title="Copy to clipboard">
+          <span class="copy-btn-icon copy-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></span>
+          <span class="copy-btn-icon check-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></span>
         </button>
       </div>
 
@@ -8354,13 +8477,12 @@
         <textarea class="jd-textarea" id="ats-jd-input" placeholder="Paste the Job Description here..."></textarea>
         <button class="ai-generate-btn ats btn-spin" id="ats-btn" onclick="generateATSAnalysis()">
           <span class="btn-spin-inner">Optimize for ATS</span>
-          <div class="btn-spin-loader"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg></div>
+          <div class="btn-spin-loader"><div class="bars-spinner"><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div></div></div>
         </button>
         <div class="ai-output" id="ats-output"></div>
-        <button class="ai-copy-btn" id="ats-copy" onclick="animCopyById('ats-output',this)">
-          <div class="anim-copy-progress"></div>
-          <span class="anim-copy-label">Copy</span>
-          <div class="anim-copy-confirm"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Copied!</div>
+        <button class="copy-btn-wrap" id="ats-copy" onclick="copyBtnClick('ats-output',this)" title="Copy to clipboard">
+          <span class="copy-btn-icon copy-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></span>
+          <span class="copy-btn-icon check-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></span>
         </button>
       </div>
 
@@ -8435,13 +8557,12 @@
         <button class="ai-generate-btn btn-spin" id="dm-btn" onclick="generateReferralDM()"
           style="background:linear-gradient(135deg,#059669,#34d399);color:#fff;">
           <span class="btn-spin-inner">Generate DM</span>
-          <div class="btn-spin-loader"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg></div>
+          <div class="btn-spin-loader"><div class="bars-spinner"><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div></div></div>
         </button>
         <div class="ai-output" id="dm-output"></div>
-        <button class="ai-copy-btn" id="dm-copy" onclick="animCopyById('dm-output',this)">
-          <div class="anim-copy-progress"></div>
-          <span class="anim-copy-label">Copy</span>
-          <div class="anim-copy-confirm"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Copied!</div>
+        <button class="copy-btn-wrap" id="dm-copy" onclick="copyBtnClick('dm-output',this)" title="Copy to clipboard">
+          <span class="copy-btn-icon copy-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></span>
+          <span class="copy-btn-icon check-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></span>
         </button>
       </div>
 
@@ -10628,6 +10749,79 @@ Format your response in clean markdown with headers for each story.`,
     renderAnalytics();
   };
   loadGroqKey();
+
+  // ── BubbleText — h1 character hover effect ───────────────────────────────
+  (function() {
+    const h1 = document.getElementById('bubble-h1');
+    if (!h1) return;
+    const text = h1.textContent;
+    h1.innerHTML = text.split('').map((ch, i) =>
+      ch === ' '
+        ? '<span class="bchar-space"></span>'
+        : `<span class="bchar" data-i="${i}">${ch}</span>`
+    ).join('');
+
+    let hoveredI = null;
+    h1.addEventListener('mouseover', e => {
+      const target = e.target.closest('.bchar');
+      if (!target) return;
+      hoveredI = parseInt(target.dataset.i);
+      h1.querySelectorAll('.bchar').forEach(s => {
+        const d = Math.abs(parseInt(s.dataset.i) - hoveredI);
+        s.className = 'bchar ' + (d === 0 ? 'bd-0' : d === 1 ? 'bd-1' : d === 2 ? 'bd-2' : 'bd-far');
+      });
+    });
+    h1.addEventListener('mouseleave', () => {
+      hoveredI = null;
+      h1.querySelectorAll('.bchar').forEach(s => s.className = 'bchar');
+    });
+  })();
+
+  // ── TypingEffect — subheading rotating typed text ────────────────────────
+  (function() {
+    const el = document.getElementById('hero-typed');
+    if (!el) return;
+    const TEXTS = [
+      'ECE VIT · Applied AI Engineer',
+      'Final Year · Graduating 2026',
+      'AI Automation · LangChain · RAG',
+      'Building Agents · From India 🇮🇳',
+      'Open to Roles · 2026 Graduate'
+    ];
+    let tIdx = 0, cIdx = 0, erasing = false;
+
+    function tick() {
+      const text = TEXTS[tIdx];
+      if (!erasing) {
+        if (cIdx < text.length) {
+          el.textContent = text.slice(0, ++cIdx);
+          setTimeout(tick, 52);
+        } else {
+          setTimeout(() => { erasing = true; tick(); }, 2400);
+        }
+      } else {
+        if (cIdx > 0) {
+          el.textContent = text.slice(0, --cIdx);
+          setTimeout(tick, 28);
+        } else {
+          erasing = false;
+          tIdx = (tIdx + 1) % TEXTS.length;
+          setTimeout(tick, 180);
+        }
+      }
+    }
+    setTimeout(tick, 600);
+  })();
+
+  // ── CopyButton — icon-flip copy handler ──────────────────────────────────
+  function copyBtnClick(outputId, btn) {
+    const src = document.getElementById(outputId);
+    if (!src) return;
+    const text = src.textContent || src.innerText || '';
+    navigator.clipboard.writeText(text).catch(() => {});
+    btn.classList.add('copied');
+    setTimeout(() => btn.classList.remove('copied'), 1600);
+  }
 
   // ── Wave Canvas Background ────────────────────────────────────────────────
   (function() {

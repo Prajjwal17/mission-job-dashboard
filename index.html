@@ -9,6 +9,7 @@
   :root {
     /* ── Blackout — Clean Terminal Dark ── */
     --bg:      #080808;
+    --bg-grad: radial-gradient(125% 125% at 50% -20%, rgba(99,102,241,0.13) 0%, transparent 55%), #080808;
     --surface: rgba(255,255,255,0.03);
     --card:    rgba(255,255,255,0.04);
     --border:  rgba(255,255,255,0.07);
@@ -27,7 +28,7 @@
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    background: var(--bg);
+    background: var(--bg-grad);
     color: var(--text);
     font-family: 'DM Sans', sans-serif;
     min-height: 100vh;
@@ -819,12 +820,84 @@
   }
   .ai-output.visible { display: block; }
   .ai-copy-btn {
-    background: none; border: 1px solid var(--border); color: var(--muted); padding: 5px 12px;
+    background: none; border: 1px solid var(--border); color: var(--muted); padding: 5px 14px;
     border-radius: 6px; font-size: 0.72rem; cursor: pointer; font-family: 'JetBrains Mono';
-    align-self: flex-end; display: none;
+    align-self: flex-end; display: none; position: relative; overflow: hidden;
+    min-width: 72px; height: 28px;
   }
-  .ai-copy-btn.visible { display: block; }
+  .ai-copy-btn.visible { display: flex; align-items: center; justify-content: center; }
   .ai-copy-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+
+  /* ── Animated copy button (copy-code-button port) ── */
+  .anim-copy-progress {
+    position: absolute; left: 0; top: 0; bottom: 0; width: 0%;
+    background: rgba(255,255,255,0.07); opacity: 0;
+    transition: opacity 0.4s; pointer-events: none; border-radius: 6px;
+  }
+  .anim-copy-label { position: relative; z-index: 2; transition: all 0.4s cubic-bezier(0.4,0,0.2,1); }
+  .anim-copy-label.hide { opacity: 0; filter: blur(6px); transform: scale(0.9); }
+  .anim-copy-confirm {
+    position: absolute; inset: 0; z-index: 2;
+    display: flex; align-items: center; justify-content: center; gap: 5px;
+    opacity: 0; filter: blur(8px); transform: scale(1.06);
+    transition: all 0.55s cubic-bezier(0.4,0,0.2,1); pointer-events: none;
+    color: #34d399; white-space: nowrap;
+  }
+  .anim-copy-confirm.show { opacity: 1; filter: blur(0); transform: scale(1); }
+
+  /* ── Button loading state (button loading port) ── */
+  .btn-spin { position: relative; }
+  .btn-spin-inner { transition: opacity 0.15s; }
+  .btn-spin[data-loading=true] .btn-spin-inner { opacity: 0; }
+  .btn-spin-loader {
+    position: absolute; inset: 0; display: none;
+    align-items: center; justify-content: center;
+  }
+  .btn-spin[data-loading=true] .btn-spin-loader { display: flex; }
+  @keyframes btnSpin { to { transform: rotate(360deg); } }
+  .btn-spin-loader svg { animation: btnSpin 0.75s linear infinite; }
+
+  /* ── Expanding search dock (expanding-search-dock port) ── */
+  .drive-search-wrap { display: flex; align-items: center; gap: 0; margin-left: auto; }
+  .drive-search-toggle {
+    width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+    border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: rgba(255,255,255,0.5); transition: all 0.18s;
+  }
+  .drive-search-toggle:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.25); color: #fff; }
+  .drive-search-form {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 100px; padding: 0 10px;
+    width: 0; overflow: hidden; opacity: 0; margin-left: 0;
+    transition: width 0.38s cubic-bezier(0.34,1.4,0.64,1), opacity 0.22s, margin 0.3s, border-color 0.2s;
+  }
+  .drive-search-form.open { width: 260px; opacity: 1; margin-left: 8px; border-color: rgba(255,255,255,0.2); }
+  .drive-search-input {
+    background: transparent; border: none; outline: none; height: 32px;
+    color: #e8e8e8; font-size: 0.82rem; font-family: 'DM Sans'; width: 100%;
+  }
+  .drive-search-input::placeholder { color: rgba(255,255,255,0.22); }
+  .drive-search-close {
+    background: none; border: none; cursor: pointer; padding: 3px; border-radius: 50%;
+    color: rgba(255,255,255,0.3); display: flex; align-items: center; transition: all 0.15s; flex-shrink: 0;
+  }
+  .drive-search-close:hover { color: #fff; background: rgba(255,255,255,0.1); }
+
+  /* ── Grid feature card pattern (grid-feature-cards port) ── */
+  .ai-card { position: relative; }
+  .ai-card::before {
+    content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; height: 100%; pointer-events: none; z-index: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 20px 20px;
+    -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, white 30%, transparent 100%);
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, white 30%, transparent 100%);
+  }
+  .ai-card > * { position: relative; z-index: 1; }
   .ai-score-badge {
     display: inline-block; padding: 4px 12px; border-radius: 100px; font-family: 'JetBrains Mono';
     font-size: 0.75rem; font-weight: 700; margin-bottom: 8px;
@@ -7961,6 +8034,18 @@
     <div class="drive-section-header">
       <h2 class="drive-section-title">Recommended Jobs</h2>
       <span class="drive-total-badge" id="drive-count-badge">202</span>
+      <div class="drive-search-wrap">
+        <button class="drive-search-toggle" onclick="toggleDriveSearch()" title="Search jobs">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        </button>
+        <div class="drive-search-form" id="drive-search-form">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color:rgba(255,255,255,0.3);flex-shrink:0;"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input type="text" class="drive-search-input" id="drive-search-input" placeholder="Search jobs..." oninput="driveSearch(this.value)" />
+          <button class="drive-search-close" onclick="closeDriveSearch()">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+      </div>
     </div>
     <div class="drive-filter-bar-wrap">
       <span class="drive-filter-label">Filter:</span>
@@ -8035,8 +8120,9 @@
       <div style="flex:1;"></div>
       <button onclick="downloadResumePDF()"
         style="padding:7px 18px;border-radius:7px;border:1px solid #34d399;background:rgba(52,211,153,0.12);color:#34d399;font-weight:700;font-size:0.8rem;cursor:pointer;font-family:'JetBrains Mono';transition:all 0.2s;"
-        id="pdf-dl-btn">
-        Download PDF
+        id="pdf-dl-btn" class="btn-spin">
+        <span class="btn-spin-inner">Download PDF</span>
+        <div class="btn-spin-loader"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg></div>
       </button>
       <button onclick="previewTexSource()"
         style="padding:7px 18px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--muted);font-weight:700;font-size:0.8rem;cursor:pointer;font-family:'JetBrains Mono';"
@@ -8074,9 +8160,16 @@
           <option value="">— Pick from My Board (optional) —</option>
         </select>
         <textarea class="jd-textarea" id="cover-jd-input" placeholder="Paste the Job Description here..."></textarea>
-        <button class="ai-generate-btn cover" id="cover-btn" onclick="generateCoverLetter()">Generate Cover Letter</button>
+        <button class="ai-generate-btn cover btn-spin" id="cover-btn" onclick="generateCoverLetter()">
+          <span class="btn-spin-inner">Generate Cover Letter</span>
+          <div class="btn-spin-loader"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg></div>
+        </button>
         <div class="ai-output" id="cover-output"></div>
-        <button class="ai-copy-btn" id="cover-copy" onclick="copyOutput('cover-output', 'cover-copy')">Copy</button>
+        <button class="ai-copy-btn" id="cover-copy" onclick="animCopyById('cover-output',this)">
+          <div class="anim-copy-progress"></div>
+          <span class="anim-copy-label">Copy</span>
+          <div class="anim-copy-confirm"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Copied!</div>
+        </button>
       </div>
 
       <!-- ATS Resume Optimizer -->
@@ -8087,9 +8180,16 @@
           <option value="">— Pick from My Board (optional) —</option>
         </select>
         <textarea class="jd-textarea" id="ats-jd-input" placeholder="Paste the Job Description here..."></textarea>
-        <button class="ai-generate-btn ats" id="ats-btn" onclick="generateATSAnalysis()">Optimize for ATS</button>
+        <button class="ai-generate-btn ats btn-spin" id="ats-btn" onclick="generateATSAnalysis()">
+          <span class="btn-spin-inner">Optimize for ATS</span>
+          <div class="btn-spin-loader"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg></div>
+        </button>
         <div class="ai-output" id="ats-output"></div>
-        <button class="ai-copy-btn" id="ats-copy" onclick="copyOutput('ats-output', 'ats-copy')">Copy</button>
+        <button class="ai-copy-btn" id="ats-copy" onclick="animCopyById('ats-output',this)">
+          <div class="anim-copy-progress"></div>
+          <span class="anim-copy-label">Copy</span>
+          <div class="anim-copy-confirm"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Copied!</div>
+        </button>
       </div>
 
       <!-- Interview Story Bank -->
@@ -8160,10 +8260,17 @@
           style="min-height:unset;height:40px;padding:8px 12px;font-size:0.85rem;" placeholder="Their title (e.g. Engineering Manager)" />
         <input type="text" id="dm-context" class="jd-textarea"
           style="min-height:unset;height:40px;padding:8px 12px;font-size:0.85rem;" placeholder="Extra context (optional)" />
-        <button class="ai-generate-btn" id="dm-btn" onclick="generateReferralDM()"
-          style="background:linear-gradient(135deg,#059669,#34d399);color:#fff;">Generate DM</button>
+        <button class="ai-generate-btn btn-spin" id="dm-btn" onclick="generateReferralDM()"
+          style="background:linear-gradient(135deg,#059669,#34d399);color:#fff;">
+          <span class="btn-spin-inner">Generate DM</span>
+          <div class="btn-spin-loader"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg></div>
+        </button>
         <div class="ai-output" id="dm-output"></div>
-        <button class="ai-copy-btn" id="dm-copy" onclick="copyOutput('dm-output','dm-copy')">Copy</button>
+        <button class="ai-copy-btn" id="dm-copy" onclick="animCopyById('dm-output',this)">
+          <div class="anim-copy-progress"></div>
+          <span class="anim-copy-label">Copy</span>
+          <div class="anim-copy-confirm"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Copied!</div>
+        </button>
       </div>
 
     </div>
@@ -8983,6 +9090,73 @@
     'all': () => true
   };
 
+  // ── Loading button state (button loading port) ──────────────────────────────
+  function setLoading(btnId, loading) {
+    const btn = document.getElementById(btnId);
+    if (!btn) return;
+    btn.dataset.loading = String(loading);
+    btn.disabled = loading;
+  }
+
+  // ── Animated copy button (copy-code-button port) ─────────────────────────────
+  function animCopyById(outputId, wrapEl) {
+    const text = document.getElementById(outputId)?.textContent?.trim() || '';
+    if (!text) return;
+    // copy to clipboard
+    navigator.clipboard.writeText(text).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.style.cssText = 'position:fixed;left:-9999px;top:-9999px';
+      document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); document.body.removeChild(ta);
+    });
+    const label    = wrapEl.querySelector('.anim-copy-label');
+    const confirm  = wrapEl.querySelector('.anim-copy-confirm');
+    const progress = wrapEl.querySelector('.anim-copy-progress');
+    if (!label || !confirm || !progress) return;
+    label.classList.add('hide');
+    progress.style.opacity = '1';
+    const duration = 2200;
+    const t0 = Date.now();
+    setTimeout(() => confirm.classList.add('show'), 380);
+    const iv = setInterval(() => {
+      const pct = Math.min(((Date.now() - t0) / duration) * 100, 100);
+      progress.style.width = pct + '%';
+      if (pct >= 100) {
+        clearInterval(iv);
+        confirm.classList.remove('show');
+        setTimeout(() => {
+          label.classList.remove('hide');
+          progress.style.opacity = '0';
+          progress.style.width = '0';
+        }, 420);
+      }
+    }, 16);
+  }
+
+  // ── Expanding search dock (expanding-search-dock port) ───────────────────────
+  function toggleDriveSearch() {
+    const form  = document.getElementById('drive-search-form');
+    const input = document.getElementById('drive-search-input');
+    form.classList.add('open');
+    setTimeout(() => input?.focus(), 60);
+  }
+  function closeDriveSearch() {
+    const form  = document.getElementById('drive-search-form');
+    const input = document.getElementById('drive-search-input');
+    form.classList.remove('open');
+    if (input) input.value = '';
+    driveSearch('');
+  }
+  function driveSearch(query) {
+    const q = query.toLowerCase().trim();
+    document.querySelectorAll('#drive-grid .lj-card').forEach(card => {
+      const title  = (card.querySelector('.lj-title')?.textContent  || '').toLowerCase();
+      const source = (card.querySelector('.lj-source')?.textContent || '').toLowerCase();
+      const tags   = (card.querySelector('.lj-tags')?.textContent   || '').toLowerCase();
+      card.style.display = (!q || title.includes(q) || source.includes(q) || tags.includes(q)) ? '' : 'none';
+    });
+  }
+
   // ── BookmarkIconButton — 21st.dev port (vanilla JS) ────────────────────────
   function bmToggle(el) {
     const wasSaved = el.classList.contains('bm-saved');
@@ -9545,7 +9719,7 @@
     const btn = document.getElementById('cover-btn');
     const out = document.getElementById('cover-output');
     const copyBtn = document.getElementById('cover-copy');
-    btn.disabled = true; btn.textContent = 'Generating...';
+    setLoading('cover-btn', true);
     out.className = 'ai-output visible';
     out.textContent = 'Writing your cover letter...';
     copyBtn.className = 'ai-copy-btn';
@@ -9562,7 +9736,7 @@ start with a strong hook sentence instead.`;
     } catch(e) {
       out.textContent = 'Error: ' + e.message;
     }
-    btn.disabled = false; btn.textContent = 'Generate Cover Letter';
+    setLoading('cover-btn', false);
   }
 
   async function generateATSAnalysis() {
@@ -9571,7 +9745,7 @@ start with a strong hook sentence instead.`;
     const btn = document.getElementById('ats-btn');
     const out = document.getElementById('ats-output');
     const copyBtn = document.getElementById('ats-copy');
-    btn.disabled = true; btn.textContent = 'Analyzing...';
+    setLoading('ats-btn', true);
     out.className = 'ai-output visible';
     out.textContent = 'Scanning resume against JD...';
     copyBtn.className = 'ai-copy-btn';
@@ -9610,7 +9784,7 @@ QUICK WIN:
     } catch(e) {
       out.textContent = 'Error: ' + e.message;
     }
-    btn.disabled = false; btn.textContent = 'Optimize for ATS';
+    setLoading('ats-btn', false);
   }
 
   function copyOutput(outputId, btnId) {
@@ -10554,7 +10728,7 @@ Format your response in clean markdown with headers for each story.`,
   // ── PDF Resume (LaTeX compile) ────────────────────────────────────────────
   async function downloadResumePDF() {
     const btn = document.getElementById('pdf-dl-btn');
-    btn.disabled = true; btn.textContent = 'Compiling...';
+    setLoading('pdf-dl-btn', true);
     try {
       const res = await fetch(AGENT_URL + '/pdf', { signal: AbortSignal.timeout(120000) });
       if (!res.ok) {
@@ -10576,7 +10750,7 @@ Format your response in clean markdown with headers for each story.`,
         'error', 5000
       );
     } finally {
-      btn.disabled = false; btn.textContent = 'Download PDF';
+      setLoading('pdf-dl-btn', false);
     }
   }
 
@@ -10645,7 +10819,7 @@ Format your response in clean markdown with headers for each story.`,
     const btn = document.getElementById('dm-btn');
     const out = document.getElementById('dm-output');
     const copy = document.getElementById('dm-copy');
-    btn.disabled = true; btn.textContent = 'Generating via Ollama...';
+    setLoading('dm-btn', true);
     out.textContent = ''; copy.style.display = 'none';
     try {
       const res = await fetch(AGENT_URL + '/referral-dm', {
@@ -10667,7 +10841,7 @@ Format your response in clean markdown with headers for each story.`,
         ? 'Agent offline — start FastAPI: cd job_pipeline && uvicorn api:app --port 8000'
         : 'Error: ' + e.message;
     } finally {
-      btn.disabled = false; btn.textContent = 'Generate DM';
+      setLoading('dm-btn', false);
     }
   }
 

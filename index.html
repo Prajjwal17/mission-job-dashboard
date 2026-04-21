@@ -899,8 +899,39 @@
     background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
     display: flex; align-items: center; justify-content: center;
     cursor: pointer; color: var(--muted); font-size: 0.85rem; transition: all 0.18s;
+    position: relative; overflow: visible;
   }
   .lj-bm:hover { background: rgba(255,255,255,0.14); color: var(--text); }
+  .lj-bm:active { transform: scale(0.85) rotate(-10deg); }
+
+  /* ── BookmarkIconButton port (21st.dev) ── */
+  .bm-outline { display:flex; align-items:center; justify-content:center; transition: opacity 0.2s; }
+  .bm-filled  { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; opacity:0; color:#3b82f6; transition: opacity 0.25s; }
+  .lj-bm.bm-saved .bm-outline { opacity: 0; }
+  .lj-bm.bm-saved .bm-filled  { opacity: 1; }
+  .lj-bm.bm-saved { background: rgba(59,130,246,0.12) !important; border-color: rgba(59,130,246,0.35) !important; }
+
+  @keyframes bmBurst {
+    0%   { transform: scale(0); opacity: 0; }
+    40%  { transform: scale(1.5); opacity: 0.45; }
+    100% { transform: scale(2.2); opacity: 0; }
+  }
+  .bm-burst-el {
+    position: absolute; inset: -2px; border-radius: 50%; pointer-events: none;
+    background: radial-gradient(circle, rgba(59,130,246,0.5) 0%, transparent 75%);
+    animation: bmBurst 0.65s ease-out forwards;
+  }
+  @keyframes bmParticle {
+    0%   { opacity: 0.3; transform: translate(0,0) scale(0); }
+    50%  { opacity: 0.85; }
+    100% { opacity: 0; transform: var(--bm-tx, translate(18px,-10px)) scale(0); }
+  }
+  .bm-particle-el {
+    position: absolute; top: 50%; left: 50%; border-radius: 50%;
+    background: #3b82f6; filter: blur(0.5px); pointer-events: none;
+    margin: -2px 0 0 -2px;
+    animation: bmParticle var(--bm-dur, 0.6s) var(--bm-delay, 0s) ease-out forwards;
+  }
   .lj-card-meta { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
   .lj-meta-left { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; }
   .lj-source {
@@ -1202,8 +1233,9 @@
     transform: translateY(-3px);
   }
   .lj-date-badge { background: rgba(255,255,255,0.06) !important; border-color: rgba(255,255,255,0.08) !important; color: rgba(255,255,255,0.38) !important; }
-  .lj-bm { background: rgba(255,255,255,0.06) !important; border-color: rgba(255,255,255,0.08) !important; color: rgba(255,255,255,0.38) !important; }
+  .lj-bm { background: rgba(255,255,255,0.06) !important; border-color: rgba(255,255,255,0.08) !important; color: rgba(255,255,255,0.38) !important; overflow: visible !important; }
   .lj-bm:hover { background: rgba(255,255,255,0.1) !important; color: #fff !important; }
+  .lj-bm.bm-saved { background: rgba(59,130,246,0.12) !important; border-color: rgba(59,130,246,0.35) !important; }
   .lj-title  { color: #e8e8e8 !important; }
   .lj-source { color: rgba(255,255,255,0.35) !important; }
   .lj-tag { background: rgba(255,255,255,0.05) !important; border-color: rgba(255,255,255,0.08) !important; color: rgba(255,255,255,0.4) !important; }
@@ -8951,6 +8983,41 @@
     'all': () => true
   };
 
+  // ── BookmarkIconButton — 21st.dev port (vanilla JS) ────────────────────────
+  function bmToggle(el) {
+    const wasSaved = el.classList.contains('bm-saved');
+    el.classList.toggle('bm-saved');
+
+    if (!wasSaved) {
+      // Spring scale effect via class
+      el.style.transform = 'scale(1.15)';
+      setTimeout(() => { el.style.transform = ''; }, 200);
+
+      // Burst ring
+      const burst = document.createElement('div');
+      burst.className = 'bm-burst-el';
+      el.appendChild(burst);
+      burst.addEventListener('animationend', () => burst.remove(), { once: true });
+
+      // 5 particles at evenly-spaced angles
+      for (let i = 0; i < 5; i++) {
+        const angle  = (i / 5) * Math.PI * 2;
+        const radius = 18 + Math.random() * 8;
+        const tx = (Math.cos(angle) * radius).toFixed(1);
+        const ty = (Math.sin(angle) * radius * 0.75).toFixed(1);
+        const sz = (4 + Math.random() * 2).toFixed(1);
+        const dur   = (0.6 + Math.random() * 0.1).toFixed(2);
+        const delay = (i * 0.04).toFixed(2);
+        const p = document.createElement('div');
+        p.className = 'bm-particle-el';
+        p.style.cssText =
+          `--bm-tx:translate(${tx}px,${ty}px);--bm-dur:${dur}s;--bm-delay:${delay}s;width:${sz}px;height:${sz}px;`;
+        el.appendChild(p);
+        p.addEventListener('animationend', () => p.remove(), { once: true });
+      }
+    }
+  }
+
   function escHtml(s) {
     return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
@@ -8998,7 +9065,10 @@
         // Header row: date badge + bookmark
         + '<div class="lj-card-header">'
         + '<span class="lj-date-badge">Apr 2025</span>'
-        + '<div class="lj-bm">&#x2610;</div>'
+        + '<div class="lj-bm" onclick="bmToggle(this)" title="Bookmark">'
+        + '<span class="bm-outline"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></span>'
+        + '<span class="bm-filled"><svg width="14" height="14" viewBox="0 0 24 24" fill="#3b82f6" stroke="#3b82f6" stroke-width="2.5"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></span>'
+        + '</div>'
         + '</div>'
 
         // Meta: source + title + logo

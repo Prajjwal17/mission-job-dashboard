@@ -1165,6 +1165,7 @@
   .status-interview { color: #a78bfa; border-color: rgba(167,139,250,0.4); }
   .status-selected  { color: #10b981; border-color: rgba(16,185,129,0.4); }
   .status-rejected  { color: #f43f5e; border-color: rgba(244,63,94,0.4); }
+  .status-no-vacancy { color: #fb923c; border-color: rgba(251,146,60,0.4); }
   .del-btn {
     background: none; border: none; color: var(--muted); cursor: pointer;
     font-size: 1rem; padding: 2px 6px; border-radius: 4px; transition: color 0.2s;
@@ -8037,6 +8038,7 @@
       <div class="bstat" style="--bstat-color:#a78bfa;"><div class="bstat-num" id="bs-interview">0</div><div class="bstat-label">Interview</div></div>
       <div class="bstat" style="--bstat-color:#10b981;"><div class="bstat-num" id="bs-selected">0</div><div class="bstat-label">Selected</div></div>
       <div class="bstat" style="--bstat-color:#f43f5e;"><div class="bstat-num" id="bs-rejected">0</div><div class="bstat-label">Rejected</div></div>
+      <div class="bstat" style="--bstat-color:#fb923c;"><div class="bstat-num" id="bs-novacancy">0</div><div class="bstat-label">No Vacancy</div></div>
     </div>
     <div class="board-filter-bar">
       <span class="board-filter-label">Status:</span>
@@ -8047,6 +8049,7 @@
       <button class="board-filter" data-status="Interview lined up">Interview</button>
       <button class="board-filter" data-status="Selected">Selected</button>
       <button class="board-filter" data-status="Rejected">Rejected</button>
+      <button class="board-filter" data-status="No Vacancy">No Vacancy</button>
     </div>
     <div class="app-table-wrap">
       <table class="app-table">
@@ -8802,6 +8805,7 @@
           <option>Interview lined up</option>
           <option>Selected</option>
           <option>Rejected</option>
+          <option>No Vacancy</option>
         </select>
       </div>
       <div class="form-group">
@@ -8886,6 +8890,7 @@
           <option value="Interview lined up">Interview lined up</option>
           <option value="Selected">Selected</option>
           <option value="Rejected">Rejected</option>
+          <option value="No Vacancy">No Vacancy</option>
         </select>
       </div>
       <div class="form-group">
@@ -9308,14 +9313,15 @@
   let applications = [];
   let boardFilter = 'all';
 
-  const STATUSES = ['To Apply', 'Applied', 'Shortlisted', 'Interview lined up', 'Selected', 'Rejected'];
+  const STATUSES = ['To Apply', 'Applied', 'Shortlisted', 'Interview lined up', 'Selected', 'Rejected', 'No Vacancy'];
   const STATUS_CLASS = {
     'To Apply':           'status-to-apply',
     'Applied':            'status-applied',
     'Shortlisted':        'status-shortlisted',
     'Interview lined up': 'status-interview',
     'Selected':           'status-selected',
-    'Rejected':           'status-rejected'
+    'Rejected':           'status-rejected',
+    'No Vacancy':         'status-no-vacancy'
   };
 
   // ── SYNC SETTINGS PANEL ─────────────────────────────────────────────────────
@@ -9486,6 +9492,7 @@
     set('bs-interview', cnt('Interview lined up'));
     set('bs-selected',  cnt('Selected'));
     set('bs-rejected',  cnt('Rejected'));
+    set('bs-novacancy', cnt('No Vacancy'));
   }
 
   function renderBoard() {
@@ -10318,7 +10325,7 @@ Format your response in clean markdown with headers for each story.`,
     const now       = new Date();
     const weekAgo   = new Date(now - 7 * 864e5);
     const thisWeek  = applications.filter(a => a.date && new Date(a.date) >= weekAgo).length;
-    const responded = applications.filter(a => ['Shortlisted','Interview lined up','Selected'].includes(a.status)).length;
+    const responded = applications.filter(a => ['Shortlisted','Interview lined up','Selected','No Vacancy','Rejected'].includes(a.status)).length;
     const respRate  = total ? Math.round(responded / total * 100) : 0;
     const srcCounts = {};
     applications.forEach(a => { const s = a.source || 'Unknown'; srcCounts[s] = (srcCounts[s]||0)+1; });
@@ -10352,7 +10359,8 @@ Format your response in clean markdown with headers for each story.`,
     // ── Status funnel ──
     const STATUS_COLORS = {
       'Applied':'#06b6d4','To Apply':'#94a3b8','Shortlisted':'#f59e0b',
-      'Interview lined up':'#a78bfa','Selected':'#10b981','Rejected':'#f43f5e'
+      'Interview lined up':'#a78bfa','Selected':'#10b981','Rejected':'#f43f5e',
+      'No Vacancy':'#fb923c'
     };
     const statusEntries = Object.entries(
       applications.reduce((acc, a) => { acc[a.status||'Unknown']=(acc[a.status||'Unknown']||0)+1; return acc; }, {})

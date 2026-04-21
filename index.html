@@ -686,6 +686,7 @@
     padding: 5px 14px; border-radius: 100px;
     border: 1px solid rgba(255,255,255,0.08);
     background: transparent; color: rgba(255,255,255,0.38);
+    display: inline-flex; align-items: center; gap: 5px;
     font-size: 0.78rem; font-family: 'DM Sans';
     cursor: pointer; transition: all 0.18s; white-space: nowrap;
   }
@@ -766,7 +767,8 @@
     border-bottom: 1px solid rgba(255,255,255,0.05);
   }
 
-  .domain-icon { font-size: 1.1rem; }
+  .domain-icon { font-size: 1.1rem; display: inline-flex; align-items: center; }
+  .domain-icon svg { width: 20px; height: 20px; }
   .domain-title {
     font-family: 'Bebas Neue';
     font-size: 1.15rem;
@@ -819,7 +821,7 @@
 
   .card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
   .company-name { font-weight: 700; color: #e8e8e8; font-size: 1rem; }
-  .priority-badge { font-size: 0.72rem; font-weight: 600; padding: 3px 10px; border-radius: 100px; white-space: nowrap; }
+  .priority-badge { font-size: 0.72rem; font-weight: 600; padding: 3px 10px; border-radius: 100px; white-space: nowrap; display: inline-flex; align-items: center; gap: 5px; }
   .p-fire { background: rgba(124,58,237,0.18); color: #a78bfa; border: 1px solid rgba(124,58,237,0.25); }
   .p-high { background: rgba(245,158,11,0.12); color: #fbbf24; border: 1px solid rgba(245,158,11,0.25); }
   .p-solid { background: rgba(16,185,129,0.12); color: #34d399; border: 1px solid rgba(16,185,129,0.25); }
@@ -2064,7 +2066,7 @@
       <!-- PRODUCT MANAGEMENT -->
       <div style="margin-bottom: 40px;">
         <div class="domain-header">
-          <span class="domain-icon">🧠</span>
+          <span class="domain-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg></span>
           <span class="domain-title">Product Management</span>
           <span class="domain-count">9 roles</span>
           <div class="domain-line"></div>
@@ -2073,7 +2075,7 @@
           <div class="curated-card pm-card">
             <div class="card-top">
               <span class="company-name">Google</span>
-              <span class="priority-badge p-fire">🔥 TOP TARGET</span>
+              <span class="priority-badge p-fire"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> TOP TARGET</span>
             </div>
             <div class="role-title">Associate Product Manager (APM) — 2026 Graduate</div>
             <div class="role-note">Rotational APM program. Bengaluru onboarding Apr–Aug 2026. Build products for billions. Your hardware-software bridge + AI background stands out.</div>
@@ -2084,7 +2086,7 @@
           <div class="curated-card pm-card">
             <div class="card-top">
               <span class="company-name">Microsoft</span>
-              <span class="priority-badge p-fire">🔥 TOP TARGET</span>
+              <span class="priority-badge p-fire"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> TOP TARGET</span>
             </div>
             <div class="role-title">PM or TPM — Azure AI / Copilot</div>
             <div class="role-note">Lead product for enterprise AI. Your RAG + agentic AI expertise aligns with Copilot expansion. Remote/Bangalore hybrid available.</div>
@@ -2095,7 +2097,7 @@
           <div class="curated-card pm-card">
             <div class="card-top">
               <span class="company-name">Sarvam AI</span>
-              <span class="priority-badge p-fire">🔥 TOP TARGET</span>
+              <span class="priority-badge p-fire"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> TOP TARGET</span>
             </div>
             <div class="role-title">AI/ML Engineer or TPM — Founding Team</div>
             <div class="role-note">Indian AI startup. Your RAG stack and LangChain expertise make you founding engineer material. Direct founder access.</div>
@@ -2106,7 +2108,7 @@
           <div class="curated-card pm-card">
             <div class="card-top">
               <span class="company-name">Razorpay</span>
-              <span class="priority-badge p-high">⚡ HIGH FIT</span>
+              <span class="priority-badge p-high"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> HIGH FIT</span>
             </div>
             <div class="role-title">Associate Product Manager — Fintech</div>
             <div class="role-note">High-growth fintech. Your data + automation background fits. Strong team, ₹40k/month+ intern stipends common.</div>
@@ -2117,7 +2119,7 @@
           <div class="curated-card pm-card">
             <div class="card-top">
               <span class="company-name">Flipkart</span>
-              <span class="priority-badge p-high">⚡ HIGH FIT</span>
+              <span class="priority-badge p-high"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> HIGH FIT</span>
             </div>
             <div class="role-title">Product Manager — GMO / Analytics</div>
             <div class="role-note">India's e-commerce leader. Your BI/analytics + Power BI skills directly applicable. Large PM intake annually.</div>
@@ -2128,7 +2130,7 @@
           <div class="curated-card pm-card">
             <div class="card-top">
               <span class="company-name">Meesho</span>
-              <span class="priority-badge p-high">⚡ HIGH FIT</span>
+              <span class="priority-badge p-high"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> HIGH FIT</span>
             </div>
             <div class="role-title">Associate Product Manager — Tech/Data</div>
             <div class="role-note">Social commerce unicorn. Younger team appreciates builder mindset + AI automation. Fast-moving environment.</div>
@@ -2174,7 +2176,7 @@
       <!-- SOLUTIONS ARCHITECT -->
       <div style="margin-bottom: 40px;">
         <div class="domain-header">
-          <span class="domain-icon">🏗️</span>
+          <span class="domain-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></span>
           <span class="domain-title">Solutions Architect & Infrastructure</span>
           <span class="domain-count">6 roles</span>
           <div class="domain-line"></div>
@@ -2183,7 +2185,7 @@
           <div class="curated-card sa-card">
             <div class="card-top">
               <span class="company-name">AWS</span>
-              <span class="priority-badge p-fire">🔥 TOP TARGET</span>
+              <span class="priority-badge p-fire"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> TOP TARGET</span>
             </div>
             <div class="role-title">Solutions Architect Associate / TAM — Graduate</div>
             <div class="role-note">Global SA program. Your hardware-to-cloud migration expertise (ESP32 → cloud) + signal processing background unique fit.</div>
@@ -2194,7 +2196,7 @@
           <div class="curated-card sa-card">
             <div class="card-top">
               <span class="company-name">Microsoft Azure</span>
-              <span class="priority-badge p-fire">🔥 TOP TARGET</span>
+              <span class="priority-badge p-fire"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> TOP TARGET</span>
             </div>
             <div class="role-title">Cloud Solutions Architect — AI/ML Focus</div>
             <div class="role-note">Azure ecosystem. Your RAG + agentic AI stack + embedded systems bridge fits their customer technical depth.</div>
@@ -2205,7 +2207,7 @@
           <div class="curated-card sa-card">
             <div class="card-top">
               <span class="company-name">Google Cloud</span>
-              <span class="priority-badge p-high">⚡ HIGH FIT</span>
+              <span class="priority-badge p-high"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> HIGH FIT</span>
             </div>
             <div class="role-title">Cloud Solutions Architect / TPM</div>
             <div class="role-note">GCP expansion in India. Your ML/AI + signal processing knowledge unique. Strong rotation program.</div>
@@ -2216,7 +2218,7 @@
           <div class="curated-card sa-card">
             <div class="card-top">
               <span class="company-name">Salesforce</span>
-              <span class="priority-badge p-high">⚡ HIGH FIT</span>
+              <span class="priority-badge p-high"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> HIGH FIT</span>
             </div>
             <div class="role-title">Solutions Architect — Enterprise Data/AI</div>
             <div class="role-note">Enterprise CRM leader. Your data pipeline + Power BI background fits customer delivery track.</div>
@@ -2227,7 +2229,7 @@
           <div class="curated-card sa-card">
             <div class="card-top">
               <span class="company-name">Databricks</span>
-              <span class="priority-badge p-high">⚡ HIGH FIT</span>
+              <span class="priority-badge p-high"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> HIGH FIT</span>
             </div>
             <div class="role-title">Sales Engineer / Solutions Architect — Data+AI</div>
             <div class="role-note">Data + AI platform. Your EDA pipelines + 40% latency reduction + ML background directly relevant.</div>
@@ -2251,7 +2253,7 @@
       <!-- DIGITAL MARKETING -->
       <div style="margin-bottom: 40px;">
         <div class="domain-header">
-          <span class="domain-icon">📈</span>
+          <span class="domain-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span>
           <span class="domain-title">Digital Marketing & Growth</span>
           <span class="domain-count">5 roles</span>
           <div class="domain-line"></div>
@@ -2260,7 +2262,7 @@
           <div class="curated-card mkt-card">
             <div class="card-top">
               <span class="company-name">Google gTech</span>
-              <span class="priority-badge p-fire">🔥 TOP TARGET</span>
+              <span class="priority-badge p-fire"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> TOP TARGET</span>
             </div>
             <div class="role-title">Marketing Technologist / Growth PM</div>
             <div class="role-note">Google's growth tech team. Your automation pipelines + data analysis directly applicable to marketing tech stack.</div>
@@ -2271,7 +2273,7 @@
           <div class="curated-card mkt-card">
             <div class="card-top">
               <span class="company-name">Meta</span>
-              <span class="priority-badge p-high">⚡ HIGH FIT</span>
+              <span class="priority-badge p-high"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> HIGH FIT</span>
             </div>
             <div class="role-title">Product Marketer / Growth Analyst</div>
             <div class="role-note">Social platform. Your data analytics + Power BI skills fit product marketing analytics track. Strong India team.</div>
@@ -2282,7 +2284,7 @@
           <div class="curated-card mkt-card">
             <div class="card-top">
               <span class="company-name">Zomato / Blinkit</span>
-              <span class="priority-badge p-high">⚡ HIGH FIT</span>
+              <span class="priority-badge p-high"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> HIGH FIT</span>
             </div>
             <div class="role-title">Growth PM / Marketing Analyst</div>
             <div class="role-note">India's delivery giant. Your data + automation background valuable for growth experimentation. Bangalore HQ.</div>
@@ -2317,7 +2319,7 @@
       <!-- BI & ANALYTICS -->
       <div style="margin-bottom: 40px;">
         <div class="domain-header">
-          <span class="domain-icon">📊</span>
+          <span class="domain-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
           <span class="domain-title">BI & Analytics</span>
           <span class="domain-count">6 roles</span>
           <div class="domain-line"></div>
@@ -2326,7 +2328,7 @@
           <div class="curated-card bi-card">
             <div class="card-top">
               <span class="company-name">Walmart</span>
-              <span class="priority-badge p-fire">🔥 TOP TARGET</span>
+              <span class="priority-badge p-fire"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> TOP TARGET</span>
             </div>
             <div class="role-title">Data Analyst / BI Analyst — Global Commerce</div>
             <div class="role-note">Retail analytics. Your EDA pipelines + 40% latency reduction + Power BI expertise directly applicable to commerce analytics.</div>
@@ -2337,7 +2339,7 @@
           <div class="curated-card bi-card">
             <div class="card-top">
               <span class="company-name">JPMorgan Chase</span>
-              <span class="priority-badge p-fire">🔥 TOP TARGET</span>
+              <span class="priority-badge p-fire"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> TOP TARGET</span>
             </div>
             <div class="role-title">Data Analyst / Quant Analyst — Risk/Trading</div>
             <div class="role-note">Financial services. Your signal processing + data pipeline expertise valuable for trading analytics. Strong India presence.</div>
@@ -2348,7 +2350,7 @@
           <div class="curated-card bi-card">
             <div class="card-top">
               <span class="company-name">Deloitte</span>
-              <span class="priority-badge p-high">⚡ HIGH FIT</span>
+              <span class="priority-badge p-high"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> HIGH FIT</span>
             </div>
             <div class="role-title">Analytics Consultant / BI Specialist</div>
             <div class="role-note">Consulting firm. Your data pipeline + Power BI + signal processing fit analytics practice. India office large.</div>
@@ -2359,7 +2361,7 @@
           <div class="curated-card bi-card">
             <div class="card-top">
               <span class="company-name">Fractal</span>
-              <span class="priority-badge p-high">⚡ HIGH FIT</span>
+              <span class="priority-badge p-high"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> HIGH FIT</span>
             </div>
             <div class="role-title">Data Scientist / Analytics Engineer</div>
             <div class="role-note">Analytics AI startup. Your 20+ datasets + Power BI + ML background perfect fit. Bangalore-based, growing fast.</div>
@@ -2394,7 +2396,7 @@
       <!-- AI & GENAI -->
       <div style="margin-bottom: 40px;">
         <div class="domain-header">
-          <span class="domain-icon">🤖</span>
+          <span class="domain-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg></span>
           <span class="domain-title">AI & GenAI</span>
           <span class="domain-count">7 roles</span>
           <div class="domain-line"></div>
@@ -2403,7 +2405,7 @@
           <div class="curated-card ai-card">
             <div class="card-top">
               <span class="company-name">Sarvam AI</span>
-              <span class="priority-badge p-fire">🔥 TOP TARGET</span>
+              <span class="priority-badge p-fire"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> TOP TARGET</span>
             </div>
             <div class="role-title">AI/ML Engineer — Founding Member</div>
             <div class="role-note">Indian LLM/GenAI startup. Your RAG + LangChain + automation expertise makes you a founding engineer candidate.</div>
@@ -2414,7 +2416,7 @@
           <div class="curated-card ai-card">
             <div class="card-top">
               <span class="company-name">Google DeepMind</span>
-              <span class="priority-badge p-fire">🔥 TOP TARGET</span>
+              <span class="priority-badge p-fire"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> TOP TARGET</span>
             </div>
             <div class="role-title">Research Engineer / ML Engineer</div>
             <div class="role-note">AI research leader. Your signal processing + ML + embedded systems background valuable for robotics/agents research.</div>
@@ -2425,7 +2427,7 @@
           <div class="curated-card ai-card">
             <div class="card-top">
               <span class="company-name">Krutrim</span>
-              <span class="priority-badge p-fire">🔥 TOP TARGET</span>
+              <span class="priority-badge p-fire"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> TOP TARGET</span>
             </div>
             <div class="role-title">ML Engineer / Research Engineer — Indian LLM</div>
             <div class="role-note">Indian AI startup backed by Zynga founder. Your RAG + agentic AI expertise + founding energy fit perfectly.</div>
@@ -2436,7 +2438,7 @@
           <div class="curated-card ai-card">
             <div class="card-top">
               <span class="company-name">Haptik</span>
-              <span class="priority-badge p-high">⚡ HIGH FIT</span>
+              <span class="priority-badge p-high"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> HIGH FIT</span>
             </div>
             <div class="role-title">ML/AI Engineer — Conversational AI</div>
             <div class="role-note">Conversational AI platform. Your LangChain + RAG background valuable for chatbot/NLU pipeline.</div>
@@ -2447,7 +2449,7 @@
           <div class="curated-card ai-card">
             <div class="card-top">
               <span class="company-name">Yellow.ai</span>
-              <span class="priority-badge p-high">⚡ HIGH FIT</span>
+              <span class="priority-badge p-high"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> HIGH FIT</span>
             </div>
             <div class="role-title">ML Engineer / NLP Specialist</div>
             <div class="role-note">Enterprise conversational AI. Your RAG + agentic systems expertise valuable for customer automation.</div>
@@ -2458,7 +2460,7 @@
           <div class="curated-card ai-card">
             <div class="card-top">
               <span class="company-name">Observe.AI</span>
-              <span class="priority-badge p-high">⚡ HIGH FIT</span>
+              <span class="priority-badge p-high"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> HIGH FIT</span>
             </div>
             <div class="role-title">ML Engineer — Voice AI / Signal Processing</div>
             <div class="role-note">Voice intelligence platform. Your signal processing + AI background directly applicable to speech analytics.</div>
@@ -2482,7 +2484,7 @@
       <!-- CUSTOMER SUCCESS -->
       <div style="margin-bottom: 40px;">
         <div class="domain-header">
-          <span class="domain-icon">👥</span>
+          <span class="domain-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></span>
           <span class="domain-title">Customer Success & Technical Sales</span>
           <span class="domain-count">5 roles</span>
           <div class="domain-line"></div>
@@ -2491,7 +2493,7 @@
           <div class="curated-card cs-card">
             <div class="card-top">
               <span class="company-name">AWS TAM</span>
-              <span class="priority-badge p-fire">🔥 TOP TARGET</span>
+              <span class="priority-badge p-fire"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> TOP TARGET</span>
             </div>
             <div class="role-title">Technical Account Manager (TAM) — Enterprise</div>
             <div class="role-note">AWS support track. Your cloud + signal processing expertise valuable for enterprise customer success. High visibility role.</div>
@@ -2502,7 +2504,7 @@
           <div class="curated-card cs-card">
             <div class="card-top">
               <span class="company-name">HubSpot</span>
-              <span class="priority-badge p-high">⚡ HIGH FIT</span>
+              <span class="priority-badge p-high"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> HIGH FIT</span>
             </div>
             <div class="role-title">Customer Success Manager / Solutions Engineer</div>
             <div class="role-note">CRM/marketing platform. Your automation + data background valuable for customer technical depth. India team growing.</div>
@@ -2513,7 +2515,7 @@
           <div class="curated-card cs-card">
             <div class="card-top">
               <span class="company-name">Freshworks</span>
-              <span class="priority-badge p-high">⚡ HIGH FIT</span>
+              <span class="priority-badge p-high"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> HIGH FIT</span>
             </div>
             <div class="role-title">Solutions Engineer / Customer Success Manager</div>
             <div class="role-note">Customer engagement platform. Your technical depth + automation background fits CS engineering track. Bangalore HQ.</div>
@@ -2548,7 +2550,7 @@
       <!-- PROGRAM MANAGEMENT -->
       <div style="margin-bottom: 40px;">
         <div class="domain-header">
-          <span class="domain-icon">🗂️</span>
+          <span class="domain-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg></span>
           <span class="domain-title">Program & Technical Program Management</span>
           <span class="domain-count">5 roles</span>
           <div class="domain-line"></div>
@@ -2557,7 +2559,7 @@
           <div class="curated-card pgm-card">
             <div class="card-top">
               <span class="company-name">Microsoft</span>
-              <span class="priority-badge p-fire">🔥 TOP TARGET</span>
+              <span class="priority-badge p-fire"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> TOP TARGET</span>
             </div>
             <div class="role-title">Technical Program Manager (TPM) — Azure / Office</div>
             <div class="role-note">TPM rotation program. Your systems thinking + signal processing + embedded background valuable for cross-functional programs.</div>
@@ -2568,7 +2570,7 @@
           <div class="curated-card pgm-card">
             <div class="card-top">
               <span class="company-name">Google</span>
-              <span class="priority-badge p-fire">🔥 TOP TARGET</span>
+              <span class="priority-badge p-fire"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> TOP TARGET</span>
             </div>
             <div class="role-title">Program Manager / TPM (rotational) — Early Career</div>
             <div class="role-note">Google PM rotation. Your technical depth + systems thinking + automation expertise valuable for large-scale program execution.</div>
@@ -2579,7 +2581,7 @@
           <div class="curated-card pgm-card">
             <div class="card-top">
               <span class="company-name">Amazon</span>
-              <span class="priority-badge p-high">⚡ HIGH FIT</span>
+              <span class="priority-badge p-high"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> HIGH FIT</span>
             </div>
             <div class="role-title">Technical Program Manager (TPM) / Program Manager</div>
             <div class="role-note">TPM program. Your signal processing + embedded systems + automation background valuable for ops/infra programs.</div>
@@ -2590,7 +2592,7 @@
           <div class="curated-card pgm-card">
             <div class="card-top">
               <span class="company-name">Infosys / TCS / Wipro</span>
-              <span class="priority-badge p-high">⚡ HIGH FIT</span>
+              <span class="priority-badge p-high"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> HIGH FIT</span>
             </div>
             <div class="role-title">Program Manager / PMO — IT Services</div>
             <div class="role-note">Consulting/IT services. Your automation + data background valuable for program delivery. Large India presence. ₹30-40k/month intern common.</div>
@@ -2650,23 +2652,23 @@
     <div class="filter-bar">
       <span>FILTER://</span>
       <button class="filter-btn active" data-filter="all">All Domains</button>
-      <button class="filter-btn" data-filter="pm">🧠 PM (4)</button>
-      <button class="filter-btn" data-filter="sa">🏗️ Solutions Architect (360)</button>
-      <button class="filter-btn" data-filter="mkt">📈 Marketing (7)</button>
-      <button class="filter-btn" data-filter="bi">📊 BI & Analytics (24)</button>
-      <button class="filter-btn" data-filter="ai">🤖 AI/GenAI (8)</button>
-      <button class="filter-btn" data-filter="pgm">🗂️ Program Mgmt (1)</button>
-      <button class="filter-btn" data-filter="ai-llm">🤖 Agentic AI & LLM (36)</button>
-      <button class="filter-btn" data-filter="cv">👁️ Computer Vision (21)</button>
-      <button class="filter-btn" data-filter="ds">📊 Data Science (36)</button>
-      <button class="filter-btn" data-filter="fsd">💻 Full-Stack Dev (36)</button>
-      <button class="filter-btn" data-filter="regional">🏙️ Regional (92)</button>
+      <button class="filter-btn" data-filter="pm"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg> PM (4)</button>
+      <button class="filter-btn" data-filter="sa"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg> Solutions Architect (360)</button>
+      <button class="filter-btn" data-filter="mkt"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> Marketing (7)</button>
+      <button class="filter-btn" data-filter="bi"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> BI & Analytics (24)</button>
+      <button class="filter-btn" data-filter="ai"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg> AI/GenAI (8)</button>
+      <button class="filter-btn" data-filter="pgm"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg> Program Mgmt (1)</button>
+      <button class="filter-btn" data-filter="ai-llm"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 01-9 9"/></svg> Agentic AI &amp; LLM (36)</button>
+      <button class="filter-btn" data-filter="cv"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Computer Vision (21)</button>
+      <button class="filter-btn" data-filter="ds"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 118 2.83"/><path d="M22 12A10 10 0 0012 2v10z"/></svg> Data Science (36)</button>
+      <button class="filter-btn" data-filter="fsd"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg> Full-Stack Dev (36)</button>
+      <button class="filter-btn" data-filter="regional"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg> Regional (92)</button>
     </div>
 
     <div id="companies-container">
     <div class="domain-section domain-pm" data-domain="pm">
       <div class="domain-header">
-        <span class="domain-icon">🧠</span>
+        <span class="domain-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg></span>
         <span class="domain-title">Product Management</span>
         <span class="domain-count">4 companies</span>
         <div class="domain-line"></div>
@@ -2717,7 +2719,7 @@
 
     <div class="domain-section domain-sa" data-domain="sa">
       <div class="domain-header">
-        <span class="domain-icon">🏗️</span>
+        <span class="domain-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></span>
         <span class="domain-title">Solutions Architect & Pre-Sales</span>
         <span class="domain-count">360 companies</span>
         <div class="domain-line"></div>
@@ -6328,7 +6330,7 @@
 
     <div class="domain-section domain-mkt" data-domain="mkt">
       <div class="domain-header">
-        <span class="domain-icon">📈</span>
+        <span class="domain-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span>
         <span class="domain-title">Digital Marketing & Growth</span>
         <span class="domain-count">7 companies</span>
         <div class="domain-line"></div>
@@ -6409,7 +6411,7 @@
 
     <div class="domain-section domain-bi" data-domain="bi">
       <div class="domain-header">
-        <span class="domain-icon">📊</span>
+        <span class="domain-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
         <span class="domain-title">Business Intelligence & Analytics</span>
         <span class="domain-count">24 companies</span>
         <div class="domain-line"></div>
@@ -6660,7 +6662,7 @@
 
     <div class="domain-section domain-ai" data-domain="ai">
       <div class="domain-header">
-        <span class="domain-icon">🤖</span>
+        <span class="domain-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg></span>
         <span class="domain-title">AI / GenAI Roles</span>
         <span class="domain-count">8 companies</span>
         <div class="domain-line"></div>
@@ -6762,7 +6764,7 @@
 
     <div class="domain-section domain-pgm" data-domain="pgm">
       <div class="domain-header">
-        <span class="domain-icon">🗂️</span>
+        <span class="domain-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg></span>
         <span class="domain-title">Program Management & Operations</span>
         <span class="domain-count">1 companies</span>
         <div class="domain-line"></div>
@@ -6783,7 +6785,7 @@
 
     <div class="domain-section domain-ai-llm" data-domain="ai-llm">
       <div class="domain-header">
-        <span class="domain-icon">🤖</span>
+        <span class="domain-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg></span>
         <span class="domain-title">Agentic AI & LLM</span>
         <span class="domain-count">36 companies</span>
         <div class="domain-line"></div>
@@ -7259,7 +7261,7 @@
     </div>
     <div class="domain-section domain-ds" data-domain="ds">
       <div class="domain-header">
-        <span class="domain-icon">📊</span>
+        <span class="domain-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
         <span class="domain-title">Data Science</span>
         <span class="domain-count">36 companies</span>
         <div class="domain-line"></div>
@@ -7557,7 +7559,7 @@
     </div>
     <div class="domain-section domain-fsd" data-domain="fsd">
       <div class="domain-header">
-        <span class="domain-icon">💻</span>
+        <span class="domain-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></span>
         <span class="domain-title">Full-Stack Development</span>
         <span class="domain-count">36 companies</span>
         <div class="domain-line"></div>
@@ -8778,7 +8780,10 @@
 
       <!-- ATS Resume Optimizer -->
       <div class="ai-card">
-        <div class="ai-card-title ats">🎯 ATS Resume Optimizer</div>
+        <div class="ai-card-title ats" style="display:flex;align-items:center;gap:9px;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;opacity:0.85;"><circle cx="12" cy="12" r="10"/><line x1="22" y1="12" x2="18" y2="12"/><line x1="6" y1="12" x2="2" y2="12"/><line x1="12" y1="6" x2="12" y2="2"/><line x1="12" y1="22" x2="12" y2="18"/></svg>
+          ATS Resume Optimizer
+        </div>
         <p>Analyzes your resume against the JD — gives an ATS score, missing keywords, specific bullet rewrites, and red flags to fix before applying.</p>
         <select class="jd-select" id="ats-jd-select" onchange="fillJdFromBoard('ats-jd-input', this)">
           <option value="">— Pick from My Board (optional) —</option>
@@ -8797,7 +8802,10 @@
 
       <!-- Interview Story Bank -->
       <div class="ai-card story-bank-card">
-        <div class="ai-card-title story">🎤 Interview Story Bank</div>
+        <div class="ai-card-title story" style="display:flex;align-items:center;gap:9px;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;opacity:0.85;"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+          Interview Story Bank
+        </div>
         <p>Store your STAR stories once. Pick a job below and Groq matches your best 2–3 stories to that role with tailored talking points.</p>
         <div class="story-bank-body">
 
@@ -8840,7 +8848,10 @@
 
       <!-- Q&A Lookup -->
       <div class="ai-card">
-        <div class="ai-card-title" style="color:#a78bfa;">💬 Q&A Lookup</div>
+        <div class="ai-card-title" style="color:#a78bfa;display:flex;align-items:center;gap:9px;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;opacity:0.85;"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          Q&amp;A Lookup
+        </div>
         <p>Instant answers for job application forms — CTC, notice period, experience, intro. Fuzzy search across 28+ pre-written answers.</p>
         <input type="text" id="qa-query-input" class="jd-textarea"
           style="min-height:unset;height:40px;padding:8px 12px;font-size:0.85rem;"
@@ -8890,7 +8901,10 @@
   <!-- SECTION 5: PREPARATION GUIDE -->
   <div id="prep" class="section">
     <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 32px;">
-      <h2 style="color: var(--accent2); margin-bottom: 12px; font-family: 'Bebas Neue'; font-size: 1.4rem;">🎓 INTERVIEW PREPARATION GUIDE</h2>
+      <h2 style="color: var(--accent2); margin-bottom: 12px; font-family: 'Bebas Neue'; font-size: 1.4rem; display:flex; align-items:center; gap:10px;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;opacity:0.85;"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+        INTERVIEW PREPARATION GUIDE
+      </h2>
       <p style="color: var(--muted); margin-bottom: 16px; font-size: 0.9rem;">Select a curated role below to access company-specific interview preparation material, recommended topics, and application tips.</p>
       <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-bottom: 24px;">
         <button onclick="showPrepGuide('google-apm')" style="padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: rgba(6,182,212,0.1); color: var(--accent2); font-weight: 600; cursor: pointer; transition: all 0.2s;">Google APM</button>
@@ -9554,7 +9568,8 @@
       <!-- Magic Tailor -->
       <button type="button" id="qt-tailor-btn" onclick="runMagicTailor()"
         style="width:100%;margin-bottom:10px;padding:10px;border-radius:8px;border:1px solid var(--accent);background:rgba(124,58,237,0.12);color:var(--accent);font-weight:700;font-size:0.85rem;cursor:pointer;font-family:'DM Sans';display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.2s;">
-        ✨ Magic Tailor — Generate Cover Letter + STAR Stories
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="flex-shrink:0;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        Magic Tailor — Generate Cover Letter + STAR Stories
       </button>
       <div id="qt-tailor-box" style="display:none;margin-bottom:14px;">
         <div id="qt-tailor-loading" style="display:none;color:var(--muted);font-size:0.8rem;font-family:'JetBrains Mono';padding:10px 0;text-align:center;">
@@ -9579,7 +9594,7 @@
       </div>
 
       <!-- Salary Intelligence -->
-      <button type="button" class="salary-btn" id="qt-salary-btn" onclick="researchSalary()">💰 Research Comp & Salary Range</button>
+      <button type="button" class="salary-btn" id="qt-salary-btn" onclick="researchSalary()">$ Research Comp &amp; Salary Range</button>
       <div class="salary-box" id="qt-salary-box">
         <div class="salary-range" id="qt-salary-range"></div>
         <div class="salary-breakdown" id="qt-salary-breakdown"></div>
@@ -10427,7 +10442,7 @@ QUICK WIN:
     // Reset salary box
     document.getElementById('qt-salary-box').style.display = 'none';
     document.getElementById('qt-salary-btn').disabled = false;
-    document.getElementById('qt-salary-btn').textContent = '💰 Research Comp & Salary Range';
+    document.getElementById('qt-salary-btn').textContent = '$ Research Comp & Salary Range';
     scoreJobFit(title);
   }
 
@@ -10505,7 +10520,7 @@ Use realistic Indian market data. If it's a global company with India office, us
       btn.style.display = 'none';
     } catch(e) {
       btn.disabled = false;
-      btn.textContent = '💰 Research Comp & Salary Range';
+      btn.textContent = '$ Research Comp & Salary Range';
     }
   }
 

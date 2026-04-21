@@ -8469,7 +8469,16 @@
   <!-- SECTION 5: APPLICATION BOARD -->
   <div id="tracker" class="section">
     <div class="board-topbar">
-      <span class="board-title">📋 My Application Board</span>
+      <span class="board-title" style="display:flex;align-items:center;gap:10px;">
+        <!-- Curriculum icon (Freepik / Flaticon) — clipboard with lines -->
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.8;flex-shrink:0;">
+          <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+          <rect x="9" y="3" width="6" height="4" rx="1"/>
+          <line x1="9" y1="12" x2="15" y2="12"/>
+          <line x1="9" y1="16" x2="12" y2="16"/>
+        </svg>
+        My Application Board
+      </span>
       <button class="add-app-btn" onclick="openAddModal()">+ Add Application</button>
     </div>
     <!-- Kanban stat cards -->

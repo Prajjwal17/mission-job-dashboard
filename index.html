@@ -28,10 +28,30 @@
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    background: var(--bg-grad);
+    background: #080808;
     color: var(--text);
     font-family: 'DM Sans', sans-serif;
     min-height: 100vh;
+  }
+
+  /* ── Wave canvas background ── */
+  #wave-bg {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.72;
+  }
+
+  /* dim overlay so text stays readable */
+  #wave-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(8,8,8,0.55);
+    z-index: 0;
+    pointer-events: none;
   }
 
   body::before {
@@ -39,14 +59,14 @@
     position: fixed;
     inset: 0;
     background-image:
-      linear-gradient(rgba(124,58,237,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(124,58,237,0.03) 1px, transparent 1px);
+      linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
     background-size: 40px 40px;
     pointer-events: none;
-    z-index: 0;
+    z-index: 1;
   }
 
-  .container { max-width: 1600px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+  .container { max-width: 1600px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 2; }
 
   header {
     padding: 40px 0 32px;
@@ -81,32 +101,140 @@
   .stat-chip.cyan { border-color: var(--accent2); color: var(--accent2); background: rgba(6,182,212,0.1); }
   .stat-chip.amber { border-color: var(--accent3); color: var(--accent3); background: rgba(245,158,11,0.1); }
 
-  .nav-pills {
+  /* ── old pill nav — hidden, kept for JS compat ── */
+  .nav-pills { display: none; }
+  .nav-pill  { display: none; }
+
+  /* ── Dropdown Navigation ─────────────────────────────────── */
+  .dnav {
     display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 24px;
-    padding: 16px;
-    background: var(--surface);
-    border: 1px solid var(--border);
+    align-items: center;
+    gap: 2px;
+    margin-bottom: 28px;
+    padding: 6px 8px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
     border-radius: 12px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    position: relative;
+    z-index: 100;
+    flex-wrap: wrap;
   }
 
-  .nav-pill {
-    padding: 8px 18px;
-    border-radius: 100px;
-    border: 1px solid var(--border);
+  .dnav-item {
+    position: relative;
+  }
+
+  .dnav-btn {
+    display: flex; align-items: center; gap: 5px;
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: none;
     background: transparent;
-    color: var(--muted);
-    font-size: 0.85rem;
-    font-weight: 600;
+    color: rgba(255,255,255,0.38);
+    font-size: 0.82rem;
+    font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: color 0.18s, background 0.18s;
+    font-family: 'DM Sans';
+    white-space: nowrap;
+    position: relative;
+  }
+  .dnav-btn:hover,
+  .dnav-btn.dnav-active  { color: #fff; background: rgba(255,255,255,0.08); }
+  .dnav-btn.dnav-open    { color: #fff; background: rgba(255,255,255,0.08); }
+
+  .dnav-chevron {
+    width: 13px; height: 13px;
+    flex-shrink: 0;
+    transition: transform 0.22s ease;
+    opacity: 0.5;
+  }
+  .dnav-item.open .dnav-chevron { transform: rotate(180deg); opacity: 1; }
+
+  /* ── Dropdown panel ── */
+  .dnav-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    background: #111111;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 14px;
+    padding: 18px;
+    min-width: 220px;
+    z-index: 200;
+    display: flex;
+    gap: 24px;
+    opacity: 0;
+    transform: translateY(-6px);
+    pointer-events: none;
+    transition: opacity 0.18s ease, transform 0.18s ease;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+  }
+  .dnav-item.open .dnav-dropdown {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .dnav-col-title {
+    font-family: 'JetBrains Mono';
+    font-size: 0.64rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.25);
+    margin-bottom: 10px;
+  }
+
+  .dnav-submenu-list { list-style: none; display: flex; flex-direction: column; gap: 2px; }
+
+  .dnav-submenu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s;
+    border: none;
+    background: transparent;
+    width: 100%;
+    text-align: left;
     font-family: 'DM Sans';
   }
+  .dnav-submenu-item:hover { background: rgba(255,255,255,0.06); }
+  .dnav-submenu-item.active { background: rgba(255,255,255,0.09); }
 
-  .nav-pill:hover { border-color: var(--accent); color: var(--text); }
-  .nav-pill.active { border-color: var(--accent2); background: rgba(6,182,212,0.15); color: var(--accent2); }
+  .dnav-submenu-icon {
+    width: 30px; height: 30px;
+    border-radius: 7px;
+    border: 1px solid rgba(255,255,255,0.1);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 0.85rem;
+    background: rgba(255,255,255,0.04);
+    transition: background 0.15s;
+  }
+  .dnav-submenu-item:hover .dnav-submenu-icon { background: rgba(255,255,255,0.09); }
+
+  .dnav-submenu-text-label {
+    font-size: 0.83rem;
+    font-weight: 600;
+    color: #e8e8e8;
+    display: block;
+    white-space: nowrap;
+  }
+  .dnav-submenu-text-desc {
+    font-size: 0.71rem;
+    color: rgba(255,255,255,0.32);
+    display: block;
+    margin-top: 1px;
+    white-space: nowrap;
+  }
+
+  .dnav-divider { width: 1px; background: rgba(255,255,255,0.06); align-self: stretch; }
 
   .section { display: none; }
   .section.active { display: block; animation: fadeIn 0.3s ease-in; }
@@ -1216,18 +1344,7 @@
   #auth-status button { color: rgba(255,255,255,0.28); border-color: rgba(255,255,255,0.08); background: transparent; }
 
   /* ── Nav ─────────────────────────────────────────────────── */
-  .nav-pills {
-    background: #0a0a0a;
-    border: none;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-    border-radius: 0;
-    padding: 0 0 18px;
-    margin-bottom: 32px;
-    gap: 4px;
-  }
-  .nav-pill { color: rgba(255,255,255,0.35); border-color: rgba(255,255,255,0.07); font-size: 0.8rem; padding: 6px 16px; border-radius: 6px; }
-  .nav-pill:hover { color: rgba(255,255,255,0.8); border-color: rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); }
-  .nav-pill.active { color: #fff; border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); }
+  /* nav override — already dark, no change needed */
 
   /* ── Sections ────────────────────────────────────────────── */
   .section { background: transparent; }
@@ -1346,6 +1463,10 @@
 <!-- Supabase removed — storage: localStorage + GitHub Gist -->
 </head>
 <body>
+<!-- Wave canvas background -->
+<canvas id="wave-bg"></canvas>
+<div id="wave-overlay"></div>
+
 <div id="toast-container"></div>
 <div class="container">
 
@@ -1376,18 +1497,105 @@
     </div>
   </header>
 
-  <!-- NAVIGATION PILLS -->
-  <div class="nav-pills">
-    <button class="nav-pill active" data-section="dashboard">📊 Dashboard</button>
-    <button class="nav-pill" data-section="curated">🎯 Curated Roles (25)</button>
-    <button class="nav-pill" data-section="companies">🌐 All Companies (625)</button>
-    <button class="nav-pill" data-section="drives">🔥 Job Drives (202)</button>
-    <button class="nav-pill" data-section="tracker">📋 My Board</button>
-    <button class="nav-pill" data-section="aitools">🤖 AI Tools</button>
-    <button class="nav-pill" data-section="prep">🎓 Preparation Guide</button>
-    <button class="nav-pill" data-section="latex">📄 LaTeX Editor</button>
-    <button class="nav-pill" data-section="beyondfaang">🌍 Beyond FAANG (1329)</button>
-    <button class="nav-pill" data-section="hrcontacts">📧 HR Contacts (1842)</button>
+  <!-- DROPDOWN NAVIGATION -->
+  <nav class="dnav" id="dnav">
+
+    <!-- Dashboard (direct) -->
+    <div class="dnav-item" id="dni-dashboard">
+      <button class="dnav-btn dnav-active" data-section="dashboard" onclick="dnavGo('dashboard')">
+        📊 Dashboard
+      </button>
+    </div>
+
+    <!-- Discover -->
+    <div class="dnav-item" id="dni-discover">
+      <button class="dnav-btn" onclick="dnavToggle('discover')">
+        🔍 Discover
+        <svg class="dnav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="dnav-dropdown" id="dnd-discover">
+        <div>
+          <div class="dnav-col-title">Job Search</div>
+          <ul class="dnav-submenu-list">
+            <li><button class="dnav-submenu-item" data-section="curated" onclick="dnavGo('curated')">
+              <span class="dnav-submenu-icon">🎯</span>
+              <span><span class="dnav-submenu-text-label">Curated Roles</span><span class="dnav-submenu-text-desc">25 hand-picked top targets</span></span>
+            </button></li>
+            <li><button class="dnav-submenu-item" data-section="companies" onclick="dnavGo('companies')">
+              <span class="dnav-submenu-icon">🌐</span>
+              <span><span class="dnav-submenu-text-label">All Companies</span><span class="dnav-submenu-text-desc">625 companies by domain</span></span>
+            </button></li>
+            <li><button class="dnav-submenu-item" data-section="beyondfaang" onclick="dnavGo('beyondfaang')">
+              <span class="dnav-submenu-icon">🌍</span>
+              <span><span class="dnav-submenu-text-label">Beyond FAANG</span><span class="dnav-submenu-text-desc">1,329 global tech companies</span></span>
+            </button></li>
+          </ul>
+        </div>
+        <div class="dnav-divider"></div>
+        <div>
+          <div class="dnav-col-title">Opportunities</div>
+          <ul class="dnav-submenu-list">
+            <li><button class="dnav-submenu-item" data-section="drives" onclick="dnavGo('drives')">
+              <span class="dnav-submenu-icon">🔥</span>
+              <span><span class="dnav-submenu-text-label">Job Drives</span><span class="dnav-submenu-text-desc">202 active drives</span></span>
+            </button></li>
+            <li><button class="dnav-submenu-item" data-section="hrcontacts" onclick="dnavGo('hrcontacts')">
+              <span class="dnav-submenu-icon">📧</span>
+              <span><span class="dnav-submenu-text-label">HR Contacts</span><span class="dnav-submenu-text-desc">1,842 verified contacts</span></span>
+            </button></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- My Board (direct) -->
+    <div class="dnav-item" id="dni-tracker">
+      <button class="dnav-btn" data-section="tracker" onclick="dnavGo('tracker')">
+        📋 My Board
+      </button>
+    </div>
+
+    <!-- Tools -->
+    <div class="dnav-item" id="dni-tools">
+      <button class="dnav-btn" onclick="dnavToggle('tools')">
+        🛠 Tools
+        <svg class="dnav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="dnav-dropdown" id="dnd-tools">
+        <div>
+          <div class="dnav-col-title">Resources</div>
+          <ul class="dnav-submenu-list">
+            <li><button class="dnav-submenu-item" data-section="aitools" onclick="dnavGo('aitools')">
+              <span class="dnav-submenu-icon">🤖</span>
+              <span><span class="dnav-submenu-text-label">AI Tools</span><span class="dnav-submenu-text-desc">Cover letters, ATS scorer, STAR stories</span></span>
+            </button></li>
+            <li><button class="dnav-submenu-item" data-section="prep" onclick="dnavGo('prep')">
+              <span class="dnav-submenu-icon">🎓</span>
+              <span><span class="dnav-submenu-text-label">Preparation Guide</span><span class="dnav-submenu-text-desc">Interview prep by domain</span></span>
+            </button></li>
+            <li><button class="dnav-submenu-item" data-section="latex" onclick="dnavGo('latex')">
+              <span class="dnav-submenu-icon">📄</span>
+              <span><span class="dnav-submenu-text-label">LaTeX Editor</span><span class="dnav-submenu-text-desc">Resume PDF generator</span></span>
+            </button></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </nav>
+
+  <!-- hidden pills kept for JS section-switching compat -->
+  <div class="nav-pills" style="display:none;">
+    <button class="nav-pill active" data-section="dashboard">Dashboard</button>
+    <button class="nav-pill" data-section="curated">Curated</button>
+    <button class="nav-pill" data-section="companies">Companies</button>
+    <button class="nav-pill" data-section="drives">Drives</button>
+    <button class="nav-pill" data-section="tracker">Tracker</button>
+    <button class="nav-pill" data-section="aitools">AI Tools</button>
+    <button class="nav-pill" data-section="prep">Prep</button>
+    <button class="nav-pill" data-section="latex">LaTeX</button>
+    <button class="nav-pill" data-section="beyondfaang">Beyond FAANG</button>
+    <button class="nav-pill" data-section="hrcontacts">HR Contacts</button>
   </div>
 
   <!-- SECTION 1: DASHBOARD -->
@@ -10420,6 +10628,121 @@ Format your response in clean markdown with headers for each story.`,
     renderAnalytics();
   };
   loadGroqKey();
+
+  // ── Wave Canvas Background ────────────────────────────────────────────────
+  (function() {
+    const canvas = document.getElementById('wave-bg');
+    const ctx    = canvas.getContext('2d');
+    const SCALE  = 3; // lower = sharper but slower; 3 is sweet-spot for perf
+    let width, height, imageData, data, animId;
+
+    const SIN_TABLE = new Float32Array(1024);
+    const COS_TABLE = new Float32Array(1024);
+    for (let i = 0; i < 1024; i++) {
+      const a = (i / 1024) * Math.PI * 2;
+      SIN_TABLE[i] = Math.sin(a);
+      COS_TABLE[i] = Math.cos(a);
+    }
+    const fSin = x => SIN_TABLE[((x % (Math.PI*2)) / (Math.PI*2) * 1024 | 0) & 1023];
+    const fCos = x => COS_TABLE[((x % (Math.PI*2)) / (Math.PI*2) * 1024 | 0) & 1023];
+
+    function resize() {
+      canvas.width  = window.innerWidth;
+      canvas.height = window.innerHeight;
+      width  = Math.floor(canvas.width  / SCALE);
+      height = Math.floor(canvas.height / SCALE);
+      imageData = ctx.createImageData(width, height);
+      data = imageData.data;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    const t0 = Date.now();
+    function render() {
+      const t = (Date.now() - t0) * 0.001;
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const ux = (2*x - width)  / height;
+          const uy = (2*y - height) / height;
+          let a = 0, d = 0;
+          for (let i = 0; i < 4; i++) {
+            a += fCos(i - d + t*0.5 - a*ux);
+            d += fSin(i*uy + a);
+          }
+          const wave     = (fSin(a) + fCos(d)) * 0.5;
+          const intensity = 0.3 + 0.4 * wave;
+          const base      = 0.1 + 0.15 * fCos(ux + uy + t*0.3);
+          const blueAcc   = 0.2  * fSin(a*1.5 + t*0.2);
+          const purpAcc   = 0.15 * fCos(d*2   + t*0.1);
+          const r = Math.max(0, Math.min(1, base + purpAcc*0.8)) * intensity;
+          const g = Math.max(0, Math.min(1, base + blueAcc*0.6)) * intensity;
+          const b = Math.max(0, Math.min(1, base + blueAcc*1.2 + purpAcc*0.4)) * intensity;
+          const idx = (y*width + x) * 4;
+          data[idx]   = r * 255;
+          data[idx+1] = g * 255;
+          data[idx+2] = b * 255;
+          data[idx+3] = 255;
+        }
+      }
+      ctx.putImageData(imageData, 0, 0);
+      // upscale pixel-art style (no blurring)
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(canvas, 0, 0, width, height, 0, 0, canvas.width, canvas.height);
+      animId = requestAnimationFrame(render);
+    }
+    render();
+  })();
+
+  // ── Dropdown Navigation ───────────────────────────────────────────────────
+  const DNAV_DROPS = ['discover', 'tools'];
+  let _dnavOpen = null;
+
+  function dnavToggle(key) {
+    if (_dnavOpen === key) { dnavClose(); return; }
+    dnavClose();
+    _dnavOpen = key;
+    document.querySelector(`#dnd-${key}`)?.parentElement.classList.add('open');
+  }
+
+  function dnavClose() {
+    DNAV_DROPS.forEach(k => {
+      document.querySelector(`#dnd-${k}`)?.parentElement.classList.remove('open');
+    });
+    _dnavOpen = null;
+  }
+
+  function dnavGo(section) {
+    dnavClose();
+    // switch section
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    const target = document.getElementById(section);
+    if (target) target.classList.add('active');
+    // update hidden pills (keeps existing JS working)
+    document.querySelectorAll('.nav-pill').forEach(p => {
+      p.classList.toggle('active', p.dataset.section === section);
+    });
+    // highlight active dnav button
+    document.querySelectorAll('.dnav-btn').forEach(b => {
+      b.classList.toggle('dnav-active', b.dataset.section === section);
+    });
+    // submenu items
+    document.querySelectorAll('.dnav-submenu-item').forEach(b => {
+      b.classList.toggle('active', b.dataset.section === section);
+    });
+    // trigger any section-specific init (board stats etc.)
+    if (section === 'tracker') renderBoard && renderBoard();
+    if (section === 'dashboard') renderAnalytics && renderAnalytics();
+  }
+
+  // close dropdown when clicking outside
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.dnav-item')) dnavClose();
+  });
+
+  // keep hidden nav-pill JS compat: clicking hidden pills still works
+  document.querySelectorAll('.nav-pill').forEach(btn => {
+    btn.addEventListener('click', () => dnavGo(btn.dataset.section));
+  });
 
 </script>
 

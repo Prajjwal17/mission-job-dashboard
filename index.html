@@ -323,30 +323,25 @@
   }
 
   .filter-bar {
-    display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px;
-    padding: 16px 20px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
+    display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px;
+    padding: 12px 16px;
+    background: #111111;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
   }
 
-  .filter-bar span { font-size: 0.75rem; color: var(--muted); align-self: center; font-family: 'JetBrains Mono'; }
+  .filter-bar span { font-size: 0.72rem; color: rgba(255,255,255,0.3); align-self: center; font-family: 'JetBrains Mono'; }
 
   .filter-btn {
-    padding: 6px 16px;
-    border-radius: 100px;
-    border: 1px solid var(--border);
-    background: transparent;
-    color: var(--muted);
-    font-size: 0.8rem;
-    font-family: 'DM Sans';
-    cursor: pointer;
-    transition: all 0.2s;
-    white-space: nowrap;
+    padding: 5px 14px; border-radius: 100px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: transparent; color: rgba(255,255,255,0.38);
+    font-size: 0.78rem; font-family: 'DM Sans';
+    cursor: pointer; transition: all 0.18s; white-space: nowrap;
   }
 
-  .filter-btn:hover { border-color: var(--accent); color: var(--text); }
-  .filter-btn.active { border-color: var(--accent); background: rgba(124,58,237,0.18); color: #fff; font-weight: 600; }
+  .filter-btn:hover { border-color: rgba(255,255,255,0.2); color: #fff; background: rgba(255,255,255,0.06); }
+  .filter-btn.active { background: #fff; color: #080808; border-color: transparent; font-weight: 700; }
 
   .search-box {
     display: flex;
@@ -415,28 +410,28 @@
 
   .domain-header {
     display: flex; align-items: center; gap: 12px;
-    margin-bottom: 16px;
+    margin-bottom: 16px; padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
   }
 
-  .domain-icon { font-size: 1.3rem; }
+  .domain-icon { font-size: 1.1rem; }
   .domain-title {
     font-family: 'Bebas Neue';
-    font-size: 1.25rem;
+    font-size: 1.15rem;
     letter-spacing: 1.5px;
-    color: var(--text);
+    color: #e8e8e8;
   }
 
   .domain-count {
     font-family: 'JetBrains Mono';
-    font-size: 0.72rem;
-    padding: 2px 8px;
-    border-radius: 100px;
-    background: rgba(124,58,237,0.15);
-    color: var(--accent);
-    border: 1px solid rgba(124,58,237,0.25);
+    font-size: 0.68rem;
+    padding: 2px 8px; border-radius: 100px;
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.38);
+    border: 1px solid rgba(255,255,255,0.09);
   }
 
-  .domain-line { flex: 1; height: 1px; background: var(--border); }
+  .domain-line { flex: 1; height: 1px; background: rgba(255,255,255,0.05); }
 
   .curated-grid, .company-list-grid {
     display: grid;
@@ -444,155 +439,114 @@
     gap: 16px;
   }
 
+  /* ── Curated Cards — LJ dark style ── */
   .curated-card {
-    background: var(--card);
-    border: 1px solid var(--border);
+    background: #111111;
+    border: 1px solid rgba(255,255,255,0.07);
     border-radius: 12px;
     padding: 16px;
-    transition: all 0.2s;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    position: relative;
-    overflow: hidden;
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.18s;
+    display: flex; flex-direction: column; gap: 10px;
+    position: relative; overflow: hidden;
   }
-
   .curated-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    opacity: 0.8;
+    content: ''; position: absolute; top: 0; left: 0; right: 0;
+    height: 2px; opacity: 1;
   }
-
-  .pm-card::before { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
-  .sa-card::before { background: linear-gradient(90deg, var(--accent2), #0ea5e9); }
+  .pm-card::before  { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+  .sa-card::before  { background: linear-gradient(90deg, var(--accent2), #0ea5e9); }
   .mkt-card::before { background: linear-gradient(90deg, var(--accent3), #f97316); }
-  .bi-card::before { background: linear-gradient(90deg, var(--accent4), #14b8a6); }
-  .ai-card::before { background: linear-gradient(90deg, var(--accent), #8b5cf6); }
-  .cs-card::before { background: linear-gradient(90deg, var(--accent5), #fb7185); }
+  .bi-card::before  { background: linear-gradient(90deg, var(--accent4), #14b8a6); }
   .pgm-card::before { background: linear-gradient(90deg, #6366f1, var(--accent)); }
 
-  .curated-card:hover { border-color: rgba(124,58,237,0.35); transform: translateY(-3px); box-shadow: 0 8px 16px rgba(0,0,0,0.3); }
+  .curated-card:hover {
+    border-color: rgba(255,255,255,0.16);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.55);
+  }
 
   .card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
-  .company-name { font-weight: 700; color: var(--accent2); font-size: 1rem; }
-  .priority-badge { font-size: 0.75rem; font-weight: 600; padding: 3px 10px; border-radius: 100px; white-space: nowrap; }
-  .p-fire { background: rgba(124,58,237,0.2); color: var(--accent); }
-  .p-high { background: rgba(245,158,11,0.15); color: var(--accent3); }
-  .p-solid { background: rgba(16,185,129,0.15); color: var(--accent4); }
+  .company-name { font-weight: 700; color: #e8e8e8; font-size: 1rem; }
+  .priority-badge { font-size: 0.72rem; font-weight: 600; padding: 3px 10px; border-radius: 100px; white-space: nowrap; }
+  .p-fire { background: rgba(124,58,237,0.18); color: #a78bfa; border: 1px solid rgba(124,58,237,0.25); }
+  .p-high { background: rgba(245,158,11,0.12); color: #fbbf24; border: 1px solid rgba(245,158,11,0.25); }
+  .p-solid { background: rgba(16,185,129,0.12); color: #34d399; border: 1px solid rgba(16,185,129,0.25); }
 
-  .role-title { font-weight: 600; color: var(--text); font-size: 0.95rem; margin: 4px 0; }
-  .role-note { font-size: 0.8rem; color: var(--muted); line-height: 1.5; margin: 6px 0; flex-grow: 1; }
-  .card-tags { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0; }
-  .tag { background: rgba(6,182,212,0.12); color: var(--accent2); padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; }
+  .role-title { font-weight: 600; color: rgba(255,255,255,0.78); font-size: 0.92rem; margin: 2px 0; }
+  .role-note { font-size: 0.78rem; color: rgba(255,255,255,0.35); line-height: 1.55; margin: 4px 0; flex-grow: 1; }
+  .card-tags { display: flex; gap: 5px; flex-wrap: wrap; margin: 6px 0; }
+  .tag {
+    background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.45);
+    border: 1px solid rgba(255,255,255,0.09);
+    padding: 2px 8px; border-radius: 4px; font-size: 0.68rem; font-weight: 600;
+  }
 
   .apply-btn {
     display: inline-block;
-    background: linear-gradient(135deg, rgba(6,182,212,0.2), rgba(6,182,212,0.05));
-    color: var(--accent2);
-    padding: 8px 14px;
-    border-radius: 6px;
-    text-decoration: none;
-    font-size: 0.8rem;
-    font-weight: 600;
-    border: 1px solid rgba(6,182,212,0.25);
-    transition: all 0.2s;
-    text-align: center;
-    margin-top: 4px;
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.6);
+    padding: 8px 14px; border-radius: 6px; text-decoration: none;
+    font-size: 0.78rem; font-weight: 600;
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: all 0.2s; text-align: center; margin-top: 4px;
   }
-
-  .apply-btn:hover { background: linear-gradient(135deg, rgba(6,182,212,0.3), rgba(6,182,212,0.1)); border-color: var(--accent2); }
+  .apply-btn:hover { background: rgba(255,255,255,0.11); color: #fff; border-color: rgba(255,255,255,0.2); }
 
   .card-track-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-    background: rgba(124,58,237,0.1);
-    color: var(--accent);
-    border: 1px solid rgba(124,58,237,0.28);
-    padding: 7px 12px;
-    border-radius: 6px;
-    font-size: 0.78rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-family: 'DM Sans', sans-serif;
-    width: 100%;
-    letter-spacing: 0.3px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+    background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.55);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 7px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif;
+    width: 100%; letter-spacing: 0.3px;
   }
-  .card-track-btn:hover:not(.tracked) { background: rgba(124,58,237,0.22); border-color: var(--accent); }
-  .card-track-btn.tracked { background: rgba(16,185,129,0.13); color: #10b981; border-color: rgba(16,185,129,0.35); cursor: default; pointer-events: none; }
+  .card-track-btn:hover:not(.tracked) { background: rgba(255,255,255,0.11); color: #fff; border-color: rgba(255,255,255,0.22); }
+  .card-track-btn.tracked { background: rgba(16,185,129,0.12); color: #34d399; border-color: rgba(16,185,129,0.3); cursor: default; pointer-events: none; }
 
-  .company-list-grid {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  }
+  /* ── Company list grid ── */
+  .company-list-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
 
   .company-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 14px;
-    transition: all 0.2s;
+    background: #111111;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px; padding: 14px;
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.18s;
     display: flex; flex-direction: column; gap: 8px;
-    position: relative;
-    overflow: hidden;
+    position: relative; overflow: hidden;
   }
-
   .company-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    opacity: 0;
-    transition: opacity 0.2s;
+    content: ''; position: absolute; top: 0; left: 0; right: 0;
+    height: 2px; opacity: 0; transition: opacity 0.2s;
   }
-
-  .company-card:hover { border-color: rgba(124,58,237,0.35); transform: translateY(-2px); }
+  .company-card:hover { border-color: rgba(255,255,255,0.16); transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
   .company-card:hover::before { opacity: 1; }
 
-  .domain-pm .company-card::before { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
-  .domain-sa .company-card::before { background: linear-gradient(90deg, var(--accent2), #0ea5e9); }
+  .domain-pm  .company-card::before { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+  .domain-sa  .company-card::before { background: linear-gradient(90deg, var(--accent2), #0ea5e9); }
   .domain-mkt .company-card::before { background: linear-gradient(90deg, var(--accent3), #f97316); }
-  .domain-bi .company-card::before { background: linear-gradient(90deg, var(--accent4), #14b8a6); }
-  .domain-ai .company-card::before { background: linear-gradient(90deg, var(--accent), #8b5cf6); }
-  .domain-cs .company-card::before { background: linear-gradient(90deg, var(--accent5), #fb7185); }
+  .domain-bi  .company-card::before { background: linear-gradient(90deg, var(--accent4), #14b8a6); }
+  .domain-ai  .company-card::before { background: linear-gradient(90deg, var(--accent), #8b5cf6); }
+  .domain-cs  .company-card::before { background: linear-gradient(90deg, var(--accent5), #fb7185); }
   .domain-pgm .company-card::before { background: linear-gradient(90deg, #6366f1, var(--accent)); }
 
   .company-card-header { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-  .company-card-name { font-weight: 600; font-size: 0.9rem; color: #fff; word-break: break-word; flex: 1; }
+  .company-card-name { font-weight: 600; font-size: 0.88rem; color: #e8e8e8; word-break: break-word; flex: 1; }
 
   .log-btn {
-    background: rgba(6,182,212,0.1);
-    border: 1px solid rgba(6,182,212,0.25);
-    color: var(--accent2);
-    padding: 4px 8px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.8rem;
-    transition: all 0.2s;
-    white-space: nowrap;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.45); padding: 4px 9px; border-radius: 6px;
+    cursor: pointer; font-size: 0.78rem; transition: all 0.2s; white-space: nowrap;
   }
-
-  .log-btn:hover:not(.tracked) { background: rgba(6,182,212,0.2); }
-  .log-btn.tracked { background: rgba(16,185,129,0.15); color: #10b981; border-color: rgba(16,185,129,0.4); cursor: default; pointer-events: none; font-size: 0.7rem; }
+  .log-btn:hover:not(.tracked) { background: rgba(255,255,255,0.11); color: #fff; }
+  .log-btn.tracked { background: rgba(16,185,129,0.12); color: #34d399; border-color: rgba(16,185,129,0.3); cursor: default; pointer-events: none; font-size: 0.7rem; }
 
   .apply-btn-small {
-    display: inline-block;
-    text-decoration: none;
-    font-size: 0.7rem;
-    font-weight: 600;
-    color: var(--accent2);
-    border: 1px solid rgba(6,182,212,0.25);
-    background: rgba(6,182,212,0.06);
-    padding: 4px 10px;
-    border-radius: 6px;
-    transition: all 0.2s;
-    text-align: center;
+    display: inline-block; text-decoration: none; font-size: 0.7rem; font-weight: 600;
+    color: rgba(255,255,255,0.45); border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 6px;
+    transition: all 0.2s; text-align: center;
   }
-
-  .apply-btn-small:hover { background: rgba(6,182,212,0.15); }
+  .apply-btn-small:hover { background: rgba(255,255,255,0.1); color: #fff; border-color: rgba(255,255,255,0.2); }
 
   .hidden { display: none !important; }
 
@@ -1488,8 +1442,11 @@
 
   <!-- SECTION 2: CURATED ROLES -->
   <div id="curated" class="section">
-    <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 32px;">
-      <h2 style="color: var(--accent2); margin-bottom: 20px; font-family: 'Bebas Neue'; font-size: 1.4rem;">🔥 25 CURATED ROLES — YOUR PERFECT MATCHES</h2>
+    <div style="margin-bottom: 32px;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
+        <h2 style="font-family:'Bebas Neue';font-size:1.8rem;letter-spacing:1px;color:#e8e8e8;margin:0;">Curated Roles</h2>
+        <span style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.09);border-radius:100px;padding:3px 12px;font-size:0.72rem;font-family:'JetBrains Mono';color:rgba(255,255,255,0.4);">25 roles</span>
+      </div>
 
       <!-- PRODUCT MANAGEMENT -->
       <div style="margin-bottom: 40px;">
@@ -2055,8 +2012,12 @@
     </div>
   </div>
   <div id="companies" class="section">
-    <div class="search-box">
-      <input type="text" id="company-search" placeholder="🔍 Search companies by name (e.g., Google, Razorpay, Fractal)..." />
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+      <h2 style="font-family:'Bebas Neue';font-size:1.8rem;letter-spacing:1px;color:#e8e8e8;margin:0;">All Companies</h2>
+      <span style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.09);border-radius:100px;padding:3px 12px;font-size:0.72rem;font-family:'JetBrains Mono';color:rgba(255,255,255,0.4);">625 companies</span>
+      <div style="flex:1;min-width:200px;">
+        <input type="text" id="company-search" placeholder="Search companies..." style="width:100%;background:#111111;border:1px solid rgba(255,255,255,0.1);border-radius:100px;padding:7px 16px;color:#e8e8e8;font-size:0.82rem;font-family:'DM Sans';outline:none;" />
+      </div>
     </div>
 
     <!-- Smart Fit Analysis Bar -->

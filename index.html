@@ -1224,38 +1224,27 @@
   .analytics-stat { background: rgba(255,255,255,0.04); border-color: rgba(139,92,246,0.12); }
   .bar-track { background: rgba(255,255,255,0.06); }
 
-  /* ── LuckyJob Cards — dark glass with color accent bar ───── */
+  /* ── LuckyJob Cards — pastel colors pop on dark background ── */
   .lj-card {
-    background: rgba(10,10,28,0.72) !important;
-    border: 1px solid rgba(255,255,255,0.07) !important;
-    border-left: 3px solid var(--lj-accent) !important;
-    backdrop-filter: blur(16px) !important;
-    -webkit-backdrop-filter: blur(16px) !important;
-    transition: border-color 0.25s, box-shadow 0.25s, transform 0.2s !important;
+    /* Use inline --lj-bg / --lj-border / --lj-accent pastel vars */
+    transition: box-shadow 0.25s, transform 0.2s !important;
   }
   .lj-card:hover {
-    border-color: rgba(255,255,255,0.12) !important;
-    border-left-color: var(--lj-accent) !important;
-    box-shadow: 0 0 28px rgba(124,58,237,0.18), 0 12px 40px rgba(0,0,0,0.45) !important;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.55), 0 0 0 1px var(--lj-border) !important;
     transform: translateY(-3px);
   }
-  .lj-date-badge { background: rgba(255,255,255,0.07) !important; border-color: rgba(255,255,255,0.1) !important; color: rgba(255,255,255,0.45) !important; }
-  .lj-bm { background: rgba(255,255,255,0.07) !important; border-color: rgba(255,255,255,0.1) !important; color: rgba(255,255,255,0.45) !important; }
-  .lj-bm:hover { background: rgba(255,255,255,0.13) !important; color: #fff !important; }
-  .lj-title  { color: #e2e8f0 !important; }
-  .lj-source { color: rgba(255,255,255,0.38) !important; }
-  .lj-tag { background: rgba(255,255,255,0.06) !important; border-color: rgba(255,255,255,0.1) !important; color: rgba(255,255,255,0.5) !important; }
-  .lj-card-footer { border-top-color: rgba(255,255,255,0.06) !important; }
-  .lj-salary { color: rgba(255,255,255,0.45) !important; }
-  .lj-apply-btn { background: rgba(255,255,255,0.06) !important; border-color: rgba(255,255,255,0.1) !important; color: rgba(255,255,255,0.65) !important; }
-  .lj-apply-btn:hover { background: rgba(255,255,255,0.12) !important; color: #fff !important; }
-  .lj-apply-btn.disabled { opacity: 0.3 !important; }
-  .lj-track-btn:not(.tracked) {
-    background: linear-gradient(135deg, #7c3aed, #06b6d4) !important;
-    color: #fff !important;
-    border-color: transparent !important;
-    box-shadow: 0 0 12px rgba(124,58,237,0.3) !important;
-  }
+  .lj-date-badge { background: rgba(0,0,0,0.06) !important; border-color: rgba(0,0,0,0.1) !important; color: #6b7280 !important; }
+  .lj-bm { background: rgba(0,0,0,0.06) !important; border-color: rgba(0,0,0,0.1) !important; color: #6b7280 !important; }
+  .lj-bm:hover { background: rgba(0,0,0,0.12) !important; color: #111827 !important; }
+  .lj-title  { color: #111827 !important; }
+  .lj-source { color: #6b7280 !important; }
+  .lj-tag { background: rgba(0,0,0,0.05) !important; border-color: rgba(0,0,0,0.1) !important; color: #6b7280 !important; }
+  .lj-card-footer { border-top-color: rgba(0,0,0,0.08) !important; }
+  .lj-salary { color: #6b7280 !important; }
+  .lj-apply-btn { background: rgba(0,0,0,0.06) !important; border-color: rgba(0,0,0,0.1) !important; color: #111827 !important; }
+  .lj-apply-btn:hover { background: rgba(0,0,0,0.12) !important; }
+  .lj-apply-btn.disabled { opacity: 0.35 !important; }
+  .lj-track-btn:not(.tracked) { background: #111827 !important; color: #fff !important; border-color: transparent !important; }
 
   /* ── Drive section ───────────────────────────────────────── */
   .drive-section-title { color: #e2e8f0; }

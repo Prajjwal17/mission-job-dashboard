@@ -415,6 +415,57 @@
     to { opacity: 1; }
   }
 
+  /* ── ATS Score Hero ── */
+  .ats-hero-card {
+    display: flex; align-items: center; gap: 28px;
+    background: linear-gradient(135deg, rgba(6,182,212,0.06) 0%, rgba(124,58,237,0.06) 100%);
+    border: 1px solid rgba(6,182,212,0.22);
+    border-radius: 16px; padding: 22px 28px;
+    margin-bottom: 20px; position: relative; overflow: hidden;
+  }
+  .ats-hero-card::before {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse 55% 90% at 8% 50%, rgba(6,182,212,0.1) 0%, transparent 70%);
+  }
+  .ats-ring-wrap { position: relative; flex-shrink: 0; width: 108px; height: 108px; }
+  .ats-ring-svg  { width: 108px; height: 108px; transform: rotate(-90deg); }
+  .ats-ring-bg   { fill: none; stroke: rgba(255,255,255,0.07); stroke-width: 8; }
+  .ats-ring-fill {
+    fill: none; stroke: url(#atsGrad); stroke-width: 8; stroke-linecap: round;
+    stroke-dasharray: 314; stroke-dashoffset: 314;
+    transition: stroke-dashoffset 1.6s cubic-bezier(0.25,0.46,0.45,0.94) 0.3s;
+  }
+  .ats-ring-fill.go { stroke-dashoffset: 6.3; } /* 98% filled = 314 × 0.02 */
+  .ats-ring-label {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .ats-ring-score {
+    font-family: 'Bebas Neue'; font-size: 2.6rem; line-height: 1;
+    background: linear-gradient(135deg, #06b6d4 30%, #7c3aed 100%);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .ats-ring-denom { font-family: 'JetBrains Mono'; font-size: 0.65rem; color: var(--muted); margin-top: -2px; }
+  .ats-hero-info  { flex: 1; position: relative; z-index: 1; }
+  .ats-hero-title {
+    font-family: 'Bebas Neue'; font-size: 1.55rem; letter-spacing: 1px;
+    background: linear-gradient(90deg, #06b6d4, #7c3aed);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: 3px;
+  }
+  .ats-hero-sub { font-family: 'JetBrains Mono'; font-size: 0.68rem; color: var(--muted); margin-bottom: 12px; }
+  .ats-hero-tags { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 10px; }
+  .ats-tag {
+    font-family: 'JetBrains Mono'; font-size: 0.63rem;
+    padding: 3px 10px; border-radius: 100px;
+    background: rgba(6,182,212,0.09); border: 1px solid rgba(6,182,212,0.24); color: var(--accent2);
+  }
+  .ats-tag.purple { background: rgba(124,58,237,0.09); border-color: rgba(124,58,237,0.24); color: #a78bfa; }
+  .ats-hero-hint { font-size: 0.73rem; color: var(--muted); }
+  @media (max-width: 600px) {
+    .ats-hero-card { flex-direction: column; align-items: flex-start; gap: 16px; }
+  }
+
   .dashboard-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -1858,9 +1909,7 @@
          class="flip-link" data-flip-text="GITHUB" style="--flip-hover:#e8e8e8;" title="GitHub"></a>
       <a href="https://www.linkedin.com/in/prajjwal-pandey17/" target="_blank" rel="noopener"
          class="flip-link" data-flip-text="LINKEDIN" style="--flip-hover:#38bdf8;" title="LinkedIn"></a>
-      <a href="https://x.com/prajjwal17" target="_blank" rel="noopener"
-         class="flip-link" data-flip-text="X" style="--flip-hover:#e8e8e8;" title="X / Twitter"></a>
-      <a href="mailto:prajjwalp1707@gmail.com"
+<a href="mailto:prajjwalp1707@gmail.com"
          class="flip-link" data-flip-text="MAIL" style="--flip-hover:#f59e0b;" title="Email"></a>
     </div>
 
@@ -1898,6 +1947,38 @@
       <div class="stat-box">
         <div class="stat-number" id="apps-logged">0</div>
         <div class="stat-label">Applications Logged</div>
+      </div>
+    </div>
+
+    <!-- ATS Score Hero Badge -->
+    <div class="ats-hero-card">
+      <div class="ats-ring-wrap">
+        <svg class="ats-ring-svg" viewBox="0 0 120 120">
+          <defs>
+            <linearGradient id="atsGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#06b6d4"/>
+              <stop offset="100%" stop-color="#7c3aed"/>
+            </linearGradient>
+          </defs>
+          <circle class="ats-ring-bg"   cx="60" cy="60" r="50"/>
+          <circle class="ats-ring-fill" cx="60" cy="60" r="50" id="ats-ring-fill"/>
+        </svg>
+        <div class="ats-ring-label">
+          <div class="ats-ring-score">98</div>
+          <div class="ats-ring-denom">/100</div>
+        </div>
+      </div>
+      <div class="ats-hero-info">
+        <div class="ats-hero-title">Resume ATS Score</div>
+        <div class="ats-hero-sub">Verified by JobsWagon &middot; March 2026 &middot; AI Automation focus</div>
+        <div class="ats-hero-tags">
+          <span class="ats-tag">AI Automation</span>
+          <span class="ats-tag">LangChain &amp; RAG</span>
+          <span class="ats-tag">5 Projects Documented</span>
+          <span class="ats-tag purple">ECE · VIT · 2026</span>
+          <span class="ats-tag purple">Quantified Impact</span>
+        </div>
+        <div class="ats-hero-hint">Score benchmarked across 200+ JDs in AI, SDE &amp; Data Engineering domains</div>
       </div>
     </div>
 
@@ -11109,6 +11190,11 @@ Format your response in clean markdown with headers for each story.`,
     }
     render();
   })();
+
+  // ── ATS ring animation ───────────────────────────────────────────────────
+  setTimeout(() => {
+    document.getElementById('ats-ring-fill')?.classList.add('go');
+  }, 500);
 
   // ── Flip links — hydrate nav GitHub / LinkedIn ──────────────────────────
   (function() {

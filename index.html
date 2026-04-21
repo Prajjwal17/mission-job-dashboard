@@ -42,14 +42,14 @@
     height: 100%;
     z-index: 0;
     pointer-events: none;
-    opacity: 0.72;
+    opacity: 0.92;
   }
 
   /* dim overlay so text stays readable */
   #wave-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(8,8,8,0.55);
+    background: rgba(8,8,8,0.22);
     z-index: 0;
     pointer-events: none;
   }
@@ -1071,7 +1071,27 @@
     padding: 14px; font-size: 0.82rem; line-height: 1.65; color: var(--text);
     min-height: 80px; white-space: pre-wrap; font-family: 'DM Sans'; display: none;
   }
-  .ai-output.visible { display: block; }
+  .ai-output.visible {
+    display: block;
+    animation: aiOutputAppear 0.38s ease-out;
+    border-color: rgba(255,255,255,0.14);
+  }
+  @keyframes aiOutputAppear {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .ai-out-meta {
+    display: none; align-items: center; justify-content: space-between;
+    font-family: 'JetBrains Mono'; font-size: 0.63rem; color: var(--muted);
+    margin-top: 6px; padding: 4px 2px;
+    text-transform: uppercase; letter-spacing: 0.4px;
+  }
+  .ai-out-meta.show { display: flex; }
+  .ai-out-badge {
+    padding: 2px 9px; border-radius: 100px;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+    font-size: 0.63rem; color: rgba(255,255,255,0.55);
+  }
   .ai-copy-btn {
     background: none; border: 1px solid var(--border); color: var(--muted); padding: 5px 14px;
     border-radius: 6px; font-size: 0.72rem; cursor: pointer; font-family: 'JetBrains Mono';
@@ -1832,12 +1852,16 @@
       </div>
     </div>
 
-    <!-- Flip links — GitHub & LinkedIn -->
+    <!-- Flip links — GitHub, LinkedIn, X, Mail -->
     <div class="dnav-flip-links">
       <a href="https://github.com/Prajjwal17" target="_blank" rel="noopener"
          class="flip-link" data-flip-text="GITHUB" style="--flip-hover:#e8e8e8;" title="GitHub"></a>
       <a href="https://www.linkedin.com/in/prajjwal-pandey17/" target="_blank" rel="noopener"
          class="flip-link" data-flip-text="LINKEDIN" style="--flip-hover:#38bdf8;" title="LinkedIn"></a>
+      <a href="https://x.com/prajjwal17" target="_blank" rel="noopener"
+         class="flip-link" data-flip-text="X" style="--flip-hover:#e8e8e8;" title="X / Twitter"></a>
+      <a href="mailto:prajjwalp1707@gmail.com"
+         class="flip-link" data-flip-text="MAIL" style="--flip-hover:#f59e0b;" title="Email"></a>
     </div>
 
   </nav>
@@ -8627,7 +8651,13 @@
 
       <!-- Cover Letter Generator -->
       <div class="ai-card">
-        <div class="ai-card-title cover">✉ Cover Letter Generator</div>
+        <div class="ai-card-title cover" style="display:flex;align-items:center;gap:9px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;opacity:0.85;">
+            <rect x="2" y="4" width="20" height="16" rx="2"/>
+            <path d="M2 8l10 7 10-7"/>
+          </svg>
+          Cover Letter Generator
+        </div>
         <p>Paste a job description or pick from your tracked applications. Gets a personalized cover letter highlighting your most relevant achievements.</p>
         <select class="jd-select" id="cover-jd-select" onchange="fillJdFromBoard('cover-jd-input', this)">
           <option value="">— Pick from My Board (optional) —</option>
@@ -8638,6 +8668,10 @@
           <div class="btn-spin-loader"><div class="bars-spinner"><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div></div></div>
         </button>
         <div class="ai-output" id="cover-output"></div>
+        <div class="ai-out-meta" id="cover-meta">
+          <span>AI Output · Groq</span>
+          <span class="ai-out-badge" id="cover-wc">— words</span>
+        </div>
         <button class="copy-btn-wrap" id="cover-copy" onclick="copyBtnClick('cover-output',this)" title="Copy to clipboard">
           <span class="copy-btn-icon copy-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></span>
           <span class="copy-btn-icon check-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></span>
@@ -8721,7 +8755,12 @@
 
       <!-- Referral DM Generator -->
       <div class="ai-card">
-        <div class="ai-card-title" style="color:#34d399;">🤝 Referral DM Generator</div>
+        <div class="ai-card-title" style="color:#34d399;display:flex;align-items:center;gap:9px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;opacity:0.85;">
+            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+          </svg>
+          Referral DM Generator
+        </div>
         <p>Generate a casual LinkedIn connection request message via local Ollama. Under 150 words, human tone — not a cover letter.</p>
         <input type="text" id="dm-company" class="jd-textarea"
           style="min-height:unset;height:40px;padding:8px 12px;font-size:0.85rem;" placeholder="Company (e.g. Razorpay)" />
@@ -8737,6 +8776,10 @@
           <div class="btn-spin-loader"><div class="bars-spinner"><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div><div class="bbar"></div></div></div>
         </button>
         <div class="ai-output" id="dm-output"></div>
+        <div class="ai-out-meta" id="dm-meta">
+          <span>AI Output · Ollama Mistral</span>
+          <span class="ai-out-badge" id="dm-wc">— words</span>
+        </div>
         <button class="copy-btn-wrap" id="dm-copy" onclick="copyBtnClick('dm-output',this)" title="Copy to clipboard">
           <span class="copy-btn-icon copy-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></span>
           <span class="copy-btn-icon check-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></span>
@@ -10207,6 +10250,9 @@ start with a strong hook sentence instead.`;
       const result = await callGroq(system, user);
       out.textContent = result;
       copyBtn.className = 'ai-copy-btn visible';
+      const wc = result.trim().split(/\s+/).length;
+      document.getElementById('cover-meta').className = 'ai-out-meta show';
+      document.getElementById('cover-wc').textContent = wc + ' words';
     } catch(e) {
       out.textContent = 'Error: ' + e.message;
     }
@@ -11041,10 +11087,10 @@ Format your response in clean markdown with headers for each story.`,
             d += fSin(i*uy + a);
           }
           const wave     = (fSin(a) + fCos(d)) * 0.5;
-          const intensity = 0.3 + 0.4 * wave;
-          const base      = 0.1 + 0.15 * fCos(ux + uy + t*0.3);
-          const blueAcc   = 0.2  * fSin(a*1.5 + t*0.2);
-          const purpAcc   = 0.15 * fCos(d*2   + t*0.1);
+          const intensity = 0.42 + 0.58 * wave;
+          const base      = 0.14 + 0.24 * fCos(ux + uy + t*0.3);
+          const blueAcc   = 0.42 * fSin(a*1.5 + t*0.2);
+          const purpAcc   = 0.32 * fCos(d*2   + t*0.1);
           const r = Math.max(0, Math.min(1, base + purpAcc*0.8)) * intensity;
           const g = Math.max(0, Math.min(1, base + blueAcc*0.6)) * intensity;
           const b = Math.max(0, Math.min(1, base + blueAcc*1.2 + purpAcc*0.4)) * intensity;
@@ -11509,7 +11555,10 @@ Format your response in clean markdown with headers for each story.`,
       const data = await res.json();
       out.textContent = data.dm;
       copy.style.display = 'block';
-      showToast('DM generated (~' + data.word_count + ' words)', 'success', 3000);
+      const dmWc = data.word_count ?? data.dm.trim().split(/\s+/).length;
+      document.getElementById('dm-meta').className = 'ai-out-meta show';
+      document.getElementById('dm-wc').textContent = dmWc + ' words';
+      showToast('DM generated (' + dmWc + ' words)', 'success', 3000);
     } catch(e) {
       out.textContent = e.message.includes('fetch') || e.message.includes('Failed') || e.message.includes('abort')
         ? 'Agent offline — start FastAPI: cd job_pipeline && uvicorn api:app --port 8000'

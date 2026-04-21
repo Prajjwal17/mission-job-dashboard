@@ -368,6 +368,45 @@
 
   .dnav-divider { width: 1px; background: rgba(255,255,255,0.06); align-self: stretch; }
 
+  /* ── Flip links (GitHub / LinkedIn) — right side of nav ── */
+  .dnav-flip-links {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 0 4px;
+  }
+  .flip-link {
+    position: relative;
+    display: inline-flex;
+    flex-direction: column;
+    overflow: hidden;
+    white-space: nowrap;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.92rem;
+    letter-spacing: 0.1em;
+    text-decoration: none;
+    line-height: 1;
+    color: rgba(255,255,255,0.32);
+    height: 0.95em;
+    transition: color 0.2s;
+  }
+  .flip-link:hover { color: var(--flip-hover, var(--accent2)); }
+  .flip-link-top,
+  .flip-link-bot { display: flex; }
+  .flip-link-bot { position: absolute; inset: 0; }
+  .flip-link-top span {
+    display: inline-block;
+    transition: transform 0.32s cubic-bezier(0.76,0,0.24,1);
+  }
+  .flip-link:hover .flip-link-top span { transform: translateY(-110%); }
+  .flip-link-bot span {
+    display: inline-block;
+    transform: translateY(110%);
+    transition: transform 0.32s cubic-bezier(0.76,0,0.24,1);
+  }
+  .flip-link:hover .flip-link-bot span { transform: translateY(0); }
+
   .section { display: none; }
   .section.active { display: block; animation: fadeIn 0.3s ease-in; }
 
@@ -1791,6 +1830,14 @@
           </ul>
         </div>
       </div>
+    </div>
+
+    <!-- Flip links — GitHub & LinkedIn -->
+    <div class="dnav-flip-links">
+      <a href="https://github.com/Prajjwal17" target="_blank" rel="noopener"
+         class="flip-link" data-flip-text="GITHUB" style="--flip-hover:#e8e8e8;" title="GitHub"></a>
+      <a href="https://www.linkedin.com/in/prajjwal-pandey17/" target="_blank" rel="noopener"
+         class="flip-link" data-flip-text="LINKEDIN" style="--flip-hover:#38bdf8;" title="LinkedIn"></a>
     </div>
 
   </nav>
@@ -11015,6 +11062,17 @@ Format your response in clean markdown with headers for each story.`,
       animId = requestAnimationFrame(render);
     }
     render();
+  })();
+
+  // ── Flip links — hydrate nav GitHub / LinkedIn ──────────────────────────
+  (function() {
+    document.querySelectorAll('.flip-link[data-flip-text]').forEach(link => {
+      const text = link.dataset.flipText;
+      const row = () => text.split('').map((ch, i) =>
+        `<span style="transition-delay:${i * 28}ms">${ch}</span>`
+      ).join('');
+      link.innerHTML = `<div class="flip-link-top">${row()}</div><div class="flip-link-bot">${row()}</div>`;
+    });
   })();
 
   // ── Dropdown Navigation ───────────────────────────────────────────────────

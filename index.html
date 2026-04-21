@@ -7,17 +7,23 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
 <style>
   :root {
-    --bg: #0a0a0f;
-    --surface: #12121a;
-    --card: #16161f;
-    --border: rgba(255,255,255,0.06);
-    --accent: #7c3aed;
+    /* ── LuckyJob Light Theme ── */
+    --bg:      #f0f2f5;
+    --surface: #ffffff;
+    --card:    #ffffff;
+    --border:  rgba(0,0,0,0.08);
+    --accent:  #7c3aed;
     --accent2: #06b6d4;
     --accent3: #f59e0b;
-    --accent4: #10b981;
+    --accent4: #059669;
     --accent5: #f43f5e;
-    --text: #e8e8f0;
-    --muted: #6b6b80;
+    --text:    #111827;
+    --muted:   #6b7280;
+    /* dark zone for header/nav */
+    --dark-bg:      #0d0d0d;
+    --dark-border:  rgba(255,255,255,0.08);
+    --dark-text:    #e8e8f0;
+    --dark-muted:   rgba(255,255,255,0.45);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1126,6 +1132,174 @@
   .toast-close  { cursor: pointer; opacity: 0.7; font-size: 1rem; line-height: 1; background: none; border: none; color: #fff; padding: 0; }
   @keyframes toastIn  { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes toastOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(16px); } }
+
+  /* ══════════════════════════════════════════════════════════════
+     LUCKYJOB LIGHT THEME — global overrides
+     Header/nav stay dark; all content sections go light.
+     ══════════════════════════════════════════════════════════════ */
+
+  /* Background grid pattern → invisible on light */
+  body::before { display: none; }
+
+  /* ── Dark zone: header + nav ─────────────────────────────── */
+  header {
+    background: var(--dark-bg);
+    border-bottom: 1px solid var(--dark-border);
+    border-radius: 0 0 16px 16px;
+    padding: 28px 0 24px;
+    margin-bottom: 0;
+  }
+  .header-left p { color: var(--dark-muted); }
+  .stat-chip { border-width: 1px; }
+  .stat-chip.purple { background: rgba(124,58,237,0.25); }
+  .stat-chip.cyan   { background: rgba(6,182,212,0.25); }
+  .stat-chip.amber  { background: rgba(245,158,11,0.25); }
+  #agent-status-chip,
+  #sync-status-chip,
+  #sync-label { color: rgba(255,255,255,0.4); }
+  #auth-status button {
+    color: rgba(255,255,255,0.4);
+    border-color: rgba(255,255,255,0.1);
+    background: transparent;
+  }
+
+  .nav-pills {
+    background: var(--dark-bg);
+    border: none;
+    border-radius: 0;
+    padding: 0 0 20px;
+    margin-bottom: 28px;
+    gap: 6px;
+  }
+  .nav-pill {
+    color: rgba(255,255,255,0.5);
+    border-color: rgba(255,255,255,0.1);
+    font-size: 0.8rem;
+    padding: 7px 16px;
+  }
+  .nav-pill:hover { color: #fff; border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.07); }
+  .nav-pill.active { color: #06b6d4; border-color: #06b6d4; background: rgba(6,182,212,0.18); }
+
+  /* ── Sections: light background ─────────────────────────── */
+  .section { background: transparent; }
+
+  /* ── Dashboard stat boxes ────────────────────────────────── */
+  .stat-box {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.07);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  }
+  .stat-number { color: var(--accent); }
+  .stat-label  { color: var(--muted); }
+
+  /* Analytics cards */
+  .analytics-card {
+    background: #fff;
+    border-color: rgba(0,0,0,0.07);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+  .analytics-card-title { color: #9ca3af; }
+
+  /* ── LuckyJob Cards — light opaque pastels ───────────────── */
+  .lj-date-badge {
+    background: rgba(0,0,0,0.05) !important;
+    border-color: rgba(0,0,0,0.09) !important;
+    color: var(--muted) !important;
+  }
+  .lj-bm {
+    background: rgba(0,0,0,0.05) !important;
+    border-color: rgba(0,0,0,0.09) !important;
+    color: var(--muted) !important;
+  }
+  .lj-bm:hover { background: rgba(0,0,0,0.1) !important; color: var(--text) !important; }
+  .lj-title  { color: #111827 !important; }
+  .lj-source { color: var(--muted) !important; }
+  .lj-tag {
+    background: rgba(0,0,0,0.05) !important;
+    border-color: rgba(0,0,0,0.1) !important;
+    color: #6b7280 !important;
+  }
+  .lj-card-footer { border-top-color: rgba(0,0,0,0.07) !important; }
+  .lj-apply-btn {
+    background: rgba(0,0,0,0.06) !important;
+    border-color: rgba(0,0,0,0.1) !important;
+    color: #111827 !important;
+  }
+  .lj-apply-btn:hover { background: rgba(0,0,0,0.11) !important; }
+  .lj-apply-btn.disabled { opacity: 0.35 !important; }
+  .lj-track-btn:not(.tracked) { background: #111827 !important; color: #fff !important; border-color: transparent !important; }
+
+  /* ── Drive filter bar ────────────────────────────────────── */
+  .drive-section-title { color: #111827; }
+  .drive-total-badge   { background: #fff; border-color: rgba(0,0,0,0.1); color: #111827; }
+  .drive-filter-bar-wrap { background: #fff; border-color: rgba(0,0,0,0.08); }
+  .drive-filter-btn:not(.active) { color: #6b7280; border-color: rgba(0,0,0,0.13); background: transparent; }
+  .drive-filter-btn.active { background: #111827; color: #fff; border-color: #111827; }
+  .drive-filter-btn:not(.active):hover { color: var(--accent); border-color: var(--accent); background: rgba(124,58,237,0.07); }
+
+  /* ── Board section ───────────────────────────────────────── */
+  .board-title { color: #111827; }
+  .add-app-btn { background: #111827; color: #fff; }
+  .add-app-btn:hover { opacity: 0.85; }
+  .bstat { background: #fff; border-color: rgba(0,0,0,0.08); box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+  .board-filter-label { color: #9ca3af; }
+  .board-filter:not(.active) { color: #6b7280; border-color: rgba(0,0,0,0.13); background: transparent; }
+  .board-filter.active { background: #111827; color: #fff; border-color: #111827; }
+  .app-table-wrap { background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 14px; overflow: hidden; }
+  .app-table th  { background: #f9fafb; color: #9ca3af; border-bottom: 1px solid rgba(0,0,0,0.07); }
+  .app-table td  { border-bottom: 1px solid rgba(0,0,0,0.05); color: #111827; }
+  .app-table tr:hover td { background: rgba(0,0,0,0.018); }
+  .status-select { background: #f9fafb; border-color: rgba(0,0,0,0.12); color: #111827; }
+  .notes-input   { color: #111827; }
+  .board-empty   { color: #9ca3af; }
+  .del-btn       { color: #9ca3af; }
+
+  /* ── AI Tools ────────────────────────────────────────────── */
+  .ai-card { background: #fff; border-color: rgba(0,0,0,0.08); }
+  .ai-card p { color: #6b7280; }
+  .ai-settings-bar { background: #fff; border-color: rgba(0,0,0,0.08); }
+  .ai-settings-bar label { color: #9ca3af; }
+  .ai-key-input, .jd-textarea, .jd-select {
+    background: #f9fafb;
+    border-color: rgba(0,0,0,0.1);
+    color: #111827;
+  }
+  .ai-output { background: #f9fafb; border-color: rgba(0,0,0,0.08); color: #374151; }
+
+  /* ── Modals ──────────────────────────────────────────────── */
+  .modal-box {
+    background: #fff;
+    border-color: rgba(0,0,0,0.1);
+    color: #111827;
+  }
+  .modal-box h3, .modal-box h2 { color: #111827; }
+  .modal-box label { color: #374151; }
+  .modal-box input, .modal-box select, .modal-box textarea {
+    background: #f9fafb;
+    border-color: rgba(0,0,0,0.12);
+    color: #111827;
+  }
+
+  /* ── Prep Guide, Beyond FAANG, HR Contacts ───────────────── */
+  #prep > div, #beyondfaang > div, #hrcontacts > div,
+  #latex > div {
+    background: #fff;
+    border-color: rgba(0,0,0,0.08);
+    color: #111827;
+  }
+
+  /* ── Curated + Companies cards/tables ────────────────────── */
+  .company-card, .role-card, .company-row {
+    background: #fff;
+    border-color: rgba(0,0,0,0.08);
+  }
+  .company-card:hover, .role-card:hover { border-color: rgba(124,58,237,0.3); }
+
+  /* scrollbars light */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: #f0f2f5; }
+  ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
 </style>
 <!-- Supabase removed — storage: localStorage + GitHub Gist -->
 </head>
@@ -8799,14 +8973,14 @@
     return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  // LuckyJob pastel card palette — rotates by index
+  // LuckyJob pastel card palette — full opaque for light theme
   const LJ_COLORS = [
-    { bg: 'rgba(251,146,60,0.13)',  border: 'rgba(251,146,60,0.28)',  accent: '#fb923c' },
-    { bg: 'rgba(52,211,153,0.12)',  border: 'rgba(52,211,153,0.28)',  accent: '#34d399' },
-    { bg: 'rgba(167,139,250,0.12)', border: 'rgba(167,139,250,0.28)', accent: '#a78bfa' },
-    { bg: 'rgba(56,189,248,0.12)',  border: 'rgba(56,189,248,0.28)',  accent: '#38bdf8' },
-    { bg: 'rgba(244,114,182,0.12)', border: 'rgba(244,114,182,0.28)', accent: '#f472b4' },
-    { bg: 'rgba(250,204,21,0.10)',  border: 'rgba(250,204,21,0.26)',  accent: '#facc15' },
+    { bg: '#fff7ed', border: '#fed7aa', accent: '#ea580c' },  // peach
+    { bg: '#f0fdf4', border: '#bbf7d0', accent: '#16a34a' },  // mint
+    { bg: '#faf5ff', border: '#e9d5ff', accent: '#9333ea' },  // lavender
+    { bg: '#eff6ff', border: '#bfdbfe', accent: '#2563eb' },  // sky blue
+    { bg: '#fdf2f8', border: '#fbcfe8', accent: '#db2777' },  // pink
+    { bg: '#fefce8', border: '#fef08a', accent: '#ca8a04' },  // amber
   ];
 
   function renderDriveGrid(filter) {
@@ -8851,7 +9025,7 @@
         + '<span class="lj-source">' + escHtml(j.source || '') + '</span>'
         + '<div class="lj-title">' + escHtml(j.title) + '</div>'
         + '</div>'
-        + '<div class="lj-logo" style="background:' + col.accent + ';">' + logo + '</div>'
+        + '<div class="lj-logo" style="background:' + col.accent + ';color:#fff;">' + logo + '</div>'
         + '</div>'
 
         // Tags

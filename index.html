@@ -42,14 +42,14 @@
     height: 100%;
     z-index: 0;
     pointer-events: none;
-    opacity: 0.92;
+    opacity: 0.72;
   }
 
   /* dim overlay so text stays readable */
   #wave-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(8,8,8,0.22);
+    background: rgba(8,8,8,0.55);
     z-index: 0;
     pointer-events: none;
   }
@@ -11168,10 +11168,10 @@ Format your response in clean markdown with headers for each story.`,
             d += fSin(i*uy + a);
           }
           const wave     = (fSin(a) + fCos(d)) * 0.5;
-          const intensity = 0.42 + 0.58 * wave;
-          const base      = 0.14 + 0.24 * fCos(ux + uy + t*0.3);
-          const blueAcc   = 0.42 * fSin(a*1.5 + t*0.2);
-          const purpAcc   = 0.32 * fCos(d*2   + t*0.1);
+          const intensity = 0.3 + 0.4 * wave;
+          const base      = 0.1 + 0.15 * fCos(ux + uy + t*0.3);
+          const blueAcc   = 0.2  * fSin(a*1.5 + t*0.2);
+          const purpAcc   = 0.15 * fCos(d*2   + t*0.1);
           const r = Math.max(0, Math.min(1, base + purpAcc*0.8)) * intensity;
           const g = Math.max(0, Math.min(1, base + blueAcc*0.6)) * intensity;
           const b = Math.max(0, Math.min(1, base + blueAcc*1.2 + purpAcc*0.4)) * intensity;

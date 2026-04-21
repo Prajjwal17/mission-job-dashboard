@@ -833,51 +833,129 @@
   }
 
   /* ── Job Drives Section ── */
-  .drive-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
-  .drive-filter-btn {
-    padding: 6px 14px; border-radius: 100px; font-size: 0.75rem; font-weight: 600;
-    font-family: 'JetBrains Mono'; border: 1px solid var(--border);
-    background: transparent; color: var(--muted); cursor: pointer; transition: all 0.2s;
+  /* ── Drive Section — LuckyJob Style ───────────────────────────────────── */
+  .drive-section-header {
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 20px;
   }
-  .drive-filter-btn.active, .drive-filter-btn:hover {
-    border-color: var(--accent2); color: var(--accent2); background: rgba(6,182,212,0.1);
+  .drive-section-title {
+    font-family: 'Bebas Neue'; font-size: 1.8rem; color: var(--text); letter-spacing: 1px; margin: 0;
+  }
+  .drive-total-badge {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 100px; padding: 4px 14px;
+    font-family: 'JetBrains Mono'; font-size: 0.78rem; color: var(--text); font-weight: 700;
+  }
+  .drive-filter-bar-wrap {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 12px 16px;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+  .drive-filter-label {
+    font-family: 'JetBrains Mono'; font-size: 0.62rem; text-transform: uppercase;
+    letter-spacing: 1px; color: var(--muted); white-space: nowrap; margin-right: 4px;
+  }
+  .drive-filters { display: flex; gap: 7px; flex-wrap: wrap; }
+  .drive-filter-btn {
+    padding: 6px 15px; border-radius: 100px; font-size: 0.72rem; font-weight: 600;
+    font-family: 'JetBrains Mono'; border: 1px solid var(--border);
+    background: transparent; color: var(--muted); cursor: pointer; transition: all 0.18s;
+    white-space: nowrap;
+  }
+  .drive-filter-btn.active {
+    border-color: var(--text); color: var(--bg); background: var(--text);
+  }
+  .drive-filter-btn:not(.active):hover {
+    border-color: var(--accent2); color: var(--accent2); background: rgba(6,182,212,0.08);
   }
   .drive-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px;
   }
-  .drive-card {
-    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
-    padding: 14px 16px; display: flex; flex-direction: column; gap: 8px;
-    transition: border-color 0.2s, transform 0.2s;
+
+  /* ── LuckyJob Cards ── */
+  .lj-card {
+    border-radius: 18px; padding: 20px 22px;
+    display: flex; flex-direction: column; gap: 14px;
+    border: 1px solid var(--lj-border, rgba(255,255,255,0.1));
+    background: var(--lj-bg, var(--card));
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
   }
-  .drive-card:hover { border-color: rgba(124,58,237,0.4); transform: translateY(-2px); }
-  .drive-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
-  .drive-card-title { font-weight: 600; font-size: 0.9rem; color: var(--text); flex: 1; }
-  .drive-tag {
-    font-size: 0.65rem; font-family: 'JetBrains Mono'; font-weight: 700;
-    padding: 3px 8px; border-radius: 100px; white-space: nowrap;
+  .lj-card:hover { transform: translateY(-4px); box-shadow: 0 16px 48px rgba(0,0,0,0.28); }
+  .lj-card-header { display: flex; justify-content: space-between; align-items: center; }
+  .lj-date-badge {
+    font-family: 'JetBrains Mono'; font-size: 0.67rem;
+    color: var(--lj-accent, var(--muted));
+    background: rgba(255,255,255,0.09); padding: 4px 11px;
+    border-radius: 100px; border: 1px solid rgba(255,255,255,0.12);
   }
-  .tag-fresher { background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
-  .tag-urgent  { background: rgba(244,63,94,0.15);  color: #f43f5e; border: 1px solid rgba(244,63,94,0.3); }
-  .tag-nontech { background: rgba(245,158,11,0.15); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3); }
-  .tag-tech    { background: rgba(6,182,212,0.15);  color: #06b6d4; border: 1px solid rgba(6,182,212,0.3); }
-  .tag-remote  { background: rgba(124,58,237,0.15); color: #a78bfa; border: 1px solid rgba(124,58,237,0.3); }
-  .drive-salary { font-size: 0.78rem; color: var(--accent4); font-family: 'JetBrains Mono'; font-weight: 600; }
-  .drive-source { font-size: 0.7rem; color: var(--muted); }
-  .drive-actions { display: flex; gap: 8px; margin-top: 4px; }
-  .drive-apply-btn {
-    flex: 1; padding: 6px 10px; background: rgba(6,182,212,0.1); border: 1px solid rgba(6,182,212,0.3);
-    color: var(--accent2); border-radius: 6px; font-size: 0.75rem; font-weight: 600;
-    cursor: pointer; text-decoration: none; text-align: center; transition: all 0.2s;
+  .lj-bm {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--muted); font-size: 0.85rem; transition: all 0.18s;
   }
-  .drive-apply-btn:hover { background: rgba(6,182,212,0.2); }
-  .drive-track-btn {
-    padding: 6px 10px; background: rgba(124,58,237,0.1); border: 1px solid rgba(124,58,237,0.3);
-    color: var(--accent); border-radius: 6px; font-size: 0.75rem; font-weight: 600;
-    cursor: pointer; transition: all 0.2s;
+  .lj-bm:hover { background: rgba(255,255,255,0.14); color: var(--text); }
+  .lj-card-meta { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  .lj-meta-left { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; }
+  .lj-source {
+    font-size: 0.67rem; font-family: 'JetBrains Mono';
+    color: var(--lj-accent, var(--muted)); text-transform: uppercase; letter-spacing: 0.6px;
   }
-  .drive-track-btn:hover:not(.tracked) { background: rgba(124,58,237,0.2); }
-  .drive-track-btn.tracked { background: rgba(16,185,129,0.13); color: #10b981; border-color: rgba(16,185,129,0.35); cursor: default; pointer-events: none; }
+  .lj-title {
+    font-size: 1.05rem; font-weight: 700; color: var(--text);
+    line-height: 1.28; word-break: break-word;
+  }
+  .lj-logo {
+    width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0;
+    background: var(--lj-accent, var(--accent));
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 1.05rem; color: #0d0d0d;
+  }
+  .lj-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .lj-tag {
+    font-size: 0.63rem; font-family: 'JetBrains Mono';
+    padding: 4px 11px; border-radius: 100px;
+    border: 1px solid rgba(255,255,255,0.13);
+    color: var(--muted); background: rgba(255,255,255,0.05);
+    white-space: nowrap;
+  }
+  .lj-card-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 8px; margin-top: auto; padding-top: 4px;
+    border-top: 1px solid rgba(255,255,255,0.07);
+  }
+  .lj-salary {
+    font-family: 'JetBrains Mono'; font-weight: 700; font-size: 0.88rem;
+    color: var(--lj-accent, var(--accent4));
+  }
+  .lj-actions { display: flex; gap: 6px; }
+  .lj-apply-btn {
+    padding: 7px 14px; border-radius: 100px; font-size: 0.7rem; font-weight: 700;
+    font-family: 'JetBrains Mono'; background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15); color: var(--text);
+    cursor: pointer; text-decoration: none; display: inline-flex; align-items: center;
+    transition: all 0.18s;
+  }
+  .lj-apply-btn:hover { background: rgba(255,255,255,0.16); }
+  .lj-apply-btn.disabled { opacity: 0.35; pointer-events: none; }
+  .lj-track-btn {
+    padding: 7px 16px; border-radius: 100px; font-size: 0.7rem; font-weight: 700;
+    font-family: 'JetBrains Mono'; background: var(--text);
+    border: 1px solid transparent; color: var(--bg); cursor: pointer; transition: all 0.18s;
+  }
+  .lj-track-btn:hover:not(.tracked) { opacity: 0.82; }
+  .lj-track-btn.tracked {
+    background: rgba(16,185,129,0.14); color: #10b981;
+    border-color: rgba(16,185,129,0.3); pointer-events: none;
+  }
+  /* keep old tag classes (used elsewhere) */
+  .drive-tag { font-size:0.65rem;font-family:'JetBrains Mono';font-weight:700;padding:3px 8px;border-radius:100px;white-space:nowrap; }
+  .tag-fresher{background:rgba(16,185,129,0.15);color:#10b981;border:1px solid rgba(16,185,129,0.3);}
+  .tag-urgent {background:rgba(244,63,94,0.15);color:#f43f5e;border:1px solid rgba(244,63,94,0.3);}
+  .tag-nontech{background:rgba(245,158,11,0.15);color:#f59e0b;border:1px solid rgba(245,158,11,0.3);}
+  .tag-tech   {background:rgba(6,182,212,0.15);color:#06b6d4;border:1px solid rgba(6,182,212,0.3);}
+  .tag-remote {background:rgba(124,58,237,0.15);color:#a78bfa;border:1px solid rgba(124,58,237,0.3);}
 
   /* ── Job Fit Score ── */
   .fit-score-box {
@@ -960,19 +1038,43 @@
     display: flex; justify-content: space-between; align-items: center;
     margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
   }
-  .board-title { font-family: 'Bebas Neue'; font-size: 1.6rem; color: var(--text); letter-spacing: 1px; }
+  .board-title { font-family: 'Bebas Neue'; font-size: 1.8rem; color: var(--text); letter-spacing: 1px; }
   .add-app-btn {
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    color: #fff; border: none; padding: 9px 20px; border-radius: 8px;
-    font-weight: 700; cursor: pointer; font-family: 'DM Sans'; font-size: 0.85rem;
+    background: var(--text); color: var(--bg); border: none; padding: 9px 22px; border-radius: 100px;
+    font-weight: 700; cursor: pointer; font-family: 'JetBrains Mono'; font-size: 0.78rem;
+    letter-spacing: 0.3px; transition: opacity 0.18s;
   }
-  .board-filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .add-app-btn:hover { opacity: 0.82; }
+  /* Kanban stat row */
+  .board-stats {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px;
+    margin-bottom: 20px;
+  }
+  .bstat {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 12px 14px;
+    display: flex; flex-direction: column; gap: 4px; transition: border-color 0.18s;
+  }
+  .bstat:hover { border-color: var(--bstat-color, var(--border)); }
+  .bstat-num {
+    font-family: 'Bebas Neue'; font-size: 1.8rem; line-height: 1;
+    color: var(--bstat-color, var(--text));
+  }
+  .bstat-label {
+    font-family: 'JetBrains Mono'; font-size: 0.62rem; text-transform: uppercase;
+    letter-spacing: 0.5px; color: var(--muted);
+  }
+  .board-filter-bar { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 18px; align-items: center; }
+  .board-filter-label {
+    font-family: 'JetBrains Mono'; font-size: 0.62rem; text-transform: uppercase;
+    letter-spacing: 1px; color: var(--muted); margin-right: 2px;
+  }
   .board-filter {
-    padding: 5px 12px; border-radius: 100px; font-size: 0.72rem; font-weight: 600;
+    padding: 6px 14px; border-radius: 100px; font-size: 0.7rem; font-weight: 600;
     font-family: 'JetBrains Mono'; border: 1px solid var(--border);
-    background: transparent; color: var(--muted); cursor: pointer; transition: all 0.2s;
+    background: transparent; color: var(--muted); cursor: pointer; transition: all 0.18s;
   }
-  .board-filter.active { border-color: var(--accent); color: var(--accent); background: rgba(124,58,237,0.1); }
+  .board-filter.active { border-color: var(--text); color: var(--bg); background: var(--text); }
   .app-table-wrap { overflow-x: auto; }
   .app-table {
     width: 100%; border-collapse: collapse; font-size: 0.83rem;
@@ -7666,15 +7768,22 @@
 
     </div>
   </div>
-  <!-- SECTION 4: JOB DRIVES (Instagram sources) -->
+  <!-- SECTION 4: JOB DRIVES -->
   <div id="drives" class="section">
-    <div class="drive-filters">
-      <button class="drive-filter-btn active" data-filter="all">All (202)</button>
-      <button class="drive-filter-btn" data-filter="Unstop">Unstop Fresher (53)</button>
-      <button class="drive-filter-btn" data-filter="Remote Closing Soon">Remote – Closing Soon (35)</button>
-      <button class="drive-filter-btn" data-filter="Non-Tech 2-Non-Tech">Non-Tech (40)</button>
-      <button class="drive-filter-btn" data-filter="Non-Tech 2-Tech">Tech (24)</button>
-      <button class="drive-filter-btn" data-filter="Remote Companies">Remote Companies (50)</button>
+    <div class="drive-section-header">
+      <h2 class="drive-section-title">Recommended Jobs</h2>
+      <span class="drive-total-badge" id="drive-count-badge">202</span>
+    </div>
+    <div class="drive-filter-bar-wrap">
+      <span class="drive-filter-label">Filter:</span>
+      <div class="drive-filters">
+        <button class="drive-filter-btn active" data-filter="all">All</button>
+        <button class="drive-filter-btn" data-filter="Unstop">Unstop Fresher</button>
+        <button class="drive-filter-btn" data-filter="Remote Closing Soon">Remote – Closing Soon</button>
+        <button class="drive-filter-btn" data-filter="Non-Tech 2-Non-Tech">Non-Tech</button>
+        <button class="drive-filter-btn" data-filter="Non-Tech 2-Tech">Tech</button>
+        <button class="drive-filter-btn" data-filter="Remote Companies">Remote Companies</button>
+      </div>
     </div>
     <div class="drive-grid" id="drive-grid"></div>
   </div>
@@ -7685,7 +7794,18 @@
       <span class="board-title">📋 My Application Board</span>
       <button class="add-app-btn" onclick="openAddModal()">+ Add Application</button>
     </div>
+    <!-- Kanban stat cards -->
+    <div class="board-stats" id="board-stats">
+      <div class="bstat" style="--bstat-color:#94a3b8;"><div class="bstat-num" id="bs-total">0</div><div class="bstat-label">Total</div></div>
+      <div class="bstat" style="--bstat-color:#94a3b8;"><div class="bstat-num" id="bs-toapply">0</div><div class="bstat-label">To Apply</div></div>
+      <div class="bstat" style="--bstat-color:#06b6d4;"><div class="bstat-num" id="bs-applied">0</div><div class="bstat-label">Applied</div></div>
+      <div class="bstat" style="--bstat-color:#f59e0b;"><div class="bstat-num" id="bs-short">0</div><div class="bstat-label">Shortlisted</div></div>
+      <div class="bstat" style="--bstat-color:#a78bfa;"><div class="bstat-num" id="bs-interview">0</div><div class="bstat-label">Interview</div></div>
+      <div class="bstat" style="--bstat-color:#10b981;"><div class="bstat-num" id="bs-selected">0</div><div class="bstat-label">Selected</div></div>
+      <div class="bstat" style="--bstat-color:#f43f5e;"><div class="bstat-num" id="bs-rejected">0</div><div class="bstat-label">Rejected</div></div>
+    </div>
     <div class="board-filter-bar">
+      <span class="board-filter-label">Status:</span>
       <button class="board-filter active" data-status="all">All</button>
       <button class="board-filter" data-status="To Apply">To Apply</button>
       <button class="board-filter" data-status="Applied">Applied</button>
@@ -8679,29 +8799,76 @@
     return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
+  // LuckyJob pastel card palette — rotates by index
+  const LJ_COLORS = [
+    { bg: 'rgba(251,146,60,0.13)',  border: 'rgba(251,146,60,0.28)',  accent: '#fb923c' },
+    { bg: 'rgba(52,211,153,0.12)',  border: 'rgba(52,211,153,0.28)',  accent: '#34d399' },
+    { bg: 'rgba(167,139,250,0.12)', border: 'rgba(167,139,250,0.28)', accent: '#a78bfa' },
+    { bg: 'rgba(56,189,248,0.12)',  border: 'rgba(56,189,248,0.28)',  accent: '#38bdf8' },
+    { bg: 'rgba(244,114,182,0.12)', border: 'rgba(244,114,182,0.28)', accent: '#f472b4' },
+    { bg: 'rgba(250,204,21,0.10)',  border: 'rgba(250,204,21,0.26)',  accent: '#facc15' },
+  ];
+
   function renderDriveGrid(filter) {
     const grid = document.getElementById('drive-grid');
     if (!grid) return;
     const fn = SOURCE_FILTER_MAP[filter] || (() => true);
     const filtered = DRIVE_JOBS.filter(fn);
-    grid.innerHTML = filtered.map(j => {
-      const tagCls = TAG_CLASS[j.tag] || 'tag-remote';
-      const idx = DRIVE_JOBS.indexOf(j);
+
+    // Update count badge
+    const badge = document.getElementById('drive-count-badge');
+    if (badge) badge.textContent = filtered.length;
+
+    grid.innerHTML = filtered.map((j, fi) => {
+      const idx  = DRIVE_JOBS.indexOf(j);
+      const col  = LJ_COLORS[fi % LJ_COLORS.length];
       const hasLink = j.link && j.link.startsWith('http');
-      return '<div class="drive-card">'
-        + '<div class="drive-card-top">'
-        + '<span class="drive-card-title">' + escHtml(j.title) + '</span>'
-        + '<span class="drive-tag ' + tagCls + '">' + j.tag + '</span>'
+      const logo = (j.source || j.title || 'J')[0].toUpperCase();
+      const hasSalary = j.salary && j.salary !== 'nan' && j.salary.trim();
+
+      // Derive tags from tag + source
+      const tagSet = [];
+      if (j.tag)    tagSet.push(j.tag);
+      if (j.source && j.source !== j.tag) tagSet.push(j.source);
+      const tagsHtml = tagSet.slice(0, 3).map(t =>
+        '<span class="lj-tag">' + escHtml(t) + '</span>'
+      ).join('');
+
+      return '<div class="lj-card" style="'
+        + '--lj-bg:' + col.bg + ';'
+        + '--lj-border:' + col.border + ';'
+        + '--lj-accent:' + col.accent + ';">'
+
+        // Header row: date badge + bookmark
+        + '<div class="lj-card-header">'
+        + '<span class="lj-date-badge">Apr 2025</span>'
+        + '<div class="lj-bm">&#x2610;</div>'
         + '</div>'
-        + (j.salary && j.salary !== 'nan' ? '<div class="drive-salary">' + escHtml(j.salary) + '</div>' : '')
-        + '<div class="drive-source">' + escHtml(j.source) + '</div>'
-        + '<div class="drive-actions">'
+
+        // Meta: source + title + logo
+        + '<div class="lj-card-meta">'
+        + '<div class="lj-meta-left">'
+        + '<span class="lj-source">' + escHtml(j.source || '') + '</span>'
+        + '<div class="lj-title">' + escHtml(j.title) + '</div>'
+        + '</div>'
+        + '<div class="lj-logo" style="background:' + col.accent + ';">' + logo + '</div>'
+        + '</div>'
+
+        // Tags
+        + '<div class="lj-tags">' + tagsHtml + '</div>'
+
+        // Footer: salary + actions
+        + '<div class="lj-card-footer">'
+        + '<div class="lj-salary">' + (hasSalary ? escHtml(j.salary) : '—') + '</div>'
+        + '<div class="lj-actions">'
         + (hasLink
-            ? '<a href="' + j.link + '" target="_blank" class="drive-apply-btn">Apply →</a>'
-            : '<span class="drive-apply-btn" style="opacity:0.4;cursor:default;">No Link</span>')
-        + '<button class="drive-track-btn" data-drive-title="' + escHtml(j.title) + '" data-drive-source="' + escHtml(j.source) + '" onclick="trackDriveJob(' + idx + ')">+ Track</button>'
-        + '</div></div>';
-    }).join('') || '<div style="color:var(--muted);padding:32px;">No jobs in this category.</div>';
+            ? '<a href="' + j.link + '" target="_blank" class="lj-apply-btn">Apply ↗</a>'
+            : '<span class="lj-apply-btn disabled">No Link</span>')
+        + '<button class="lj-track-btn" data-drive-title="' + escHtml(j.title) + '" data-drive-source="' + escHtml(j.source) + '" onclick="trackDriveJob(' + idx + ')">+ Track</button>'
+        + '</div>'
+        + '</div>'
+        + '</div>';
+    }).join('') || '<div style="color:var(--muted);padding:48px;text-align:center;font-family:\'JetBrains Mono\';font-size:0.8rem;">No jobs in this category.</div>';
     refreshDriveCardStates();
   }
 
@@ -8948,7 +9115,20 @@
   }
 
   // ── RENDER ───────────────────────────────────────────────────────────────────
+  function updateBoardStats() {
+    const cnt = s => applications.filter(a => a.status === s).length;
+    const set = (id, n) => { const el = document.getElementById(id); if (el) el.textContent = n; };
+    set('bs-total',     applications.length);
+    set('bs-toapply',   cnt('To Apply'));
+    set('bs-applied',   cnt('Applied'));
+    set('bs-short',     cnt('Shortlisted'));
+    set('bs-interview', cnt('Interview lined up'));
+    set('bs-selected',  cnt('Selected'));
+    set('bs-rejected',  cnt('Rejected'));
+  }
+
   function renderBoard() {
+    updateBoardStats();
     const tbody = document.getElementById('app-board-body');
     if (!tbody) return;
     const filtered = boardFilter === 'all'
@@ -9525,7 +9705,7 @@ VIT Vellore \\quad CGPA: X.XX
 
   // ── DRIVE CARD STATE REFRESH ─────────────────────────────────────────────────
   function refreshDriveCardStates() {
-    document.querySelectorAll('.drive-track-btn').forEach(btn => {
+    document.querySelectorAll('.lj-track-btn, .drive-track-btn').forEach(btn => {
       const title  = btn.dataset.driveTitle;
       const source = btn.dataset.driveSource;
       if (!title) return;

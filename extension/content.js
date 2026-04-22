@@ -62,9 +62,19 @@ function scrapeJD() {
 
   // Hirist (hirist.tech / hirist.com)
   else if (location.hostname.includes("hirist")) {
-    result.role    = _text("h1.job-title, .job-detail-header h1, h1") || "";
-    result.company = _text(".company-name, .job-company-name, .comp-name") || "";
-    result.jd_text = _text(".job-description, .jd-text, .job-detail-body, .description-section") || "";
+    result.role    = _text("h1.jd-header-title, h1.job-title, .job-detail-header h1, h1") || "";
+    // Try multiple company selectors — hirist uses several layouts
+    result.company = _text([
+      ".jd-header-comp-name", ".company-name", ".job-company-name",
+      ".comp-name", ".recruiter-company", ".company",
+      "a[href*='/company/']", ".jd-company",
+    ].join(", ")) || "";
+    // Fallback: grab text after "•" separator in header meta (e.g. "Connect2Talent • 1-5 Yrs")
+    if (!result.company) {
+      const meta = _text(".jd-header-meta, .job-meta, .header-meta");
+      if (meta) result.company = meta.split("•")[0].trim();
+    }
+    result.jd_text = _text(".job-description, .jd-text, .job-detail-body, .description-section, #jobDescription") || "";
   }
 
   // Job24x7

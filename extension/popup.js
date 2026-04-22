@@ -75,16 +75,20 @@ function renderJob(job) {
 // ── Init ──────────────────────────────────────────────────────────────────────
 
 async function init() {
-  // 1. Check API health
+  // 1. Health check — direct fetch from popup (avoids MV3 service worker localhost issue)
   try {
-    const h = await chrome.runtime.sendMessage({ action: "CHECK_HEALTH" });
-    apiOnline = h?.status === "ok";
-    statusDot.className = "status-dot " + (apiOnline ? "online" : "offline");
-    statusDot.title = apiOnline
-      ? `API online · Ollama ${h.ollama ? "✓" : "✗"}`
-      : "API offline — start FastAPI on :8000";
+    const res = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(3000) });
+    if (res.ok) {
+      const h = await res.json();
+      apiOnline = true;
+      statusDot.className = "status-dot online";
+      statusDot.title = `API online · Ollama ${h.ollama ? "✓" : "✗ (start: ollama serve)"}`;
+    } else {
+      throw new Error("non-200");
+    }
   } catch {
     statusDot.className = "status-dot offline";
+    statusDot.title = "API offline — run: uvicorn api:app --port 8000";
   }
 
   // 2. Restore cached job
@@ -152,11 +156,17 @@ btnCover.addEventListener("click", async () => {
   coverSection.classList.remove("show");
 
   try {
-    const res = await chrome.runtime.sendMessage({
-      action:   "GENERATE_COVER_LETTER",
-      company:  currentJob.company || "",
-      jd_text:  currentJob.jd_text || "",
+    // Direct fetch — bypasses service worker localhost limitation
+    const raw = await fetch(`${API_BASE}/tailor`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        company_name:     currentJob.company || "",
+        job_description:  currentJob.jd_text || "",
+        generate_star:    false,
+      }),
     });
+    const res = raw.ok ? { ok: true, ...(await raw.json()) } : { ok: false, error: `HTTP ${raw.status}` };
 
     if (res?.ok && res.cover_letter) {
       coverBody.textContent = res.cover_letter;

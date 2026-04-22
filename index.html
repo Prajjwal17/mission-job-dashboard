@@ -11986,7 +11986,9 @@ Format your response in clean markdown with headers for each story.`,
       scope:     _GD_SCOPE,
       callback:  (resp) => {
         if (resp.error) {
-          showToast('Drive auth error: ' + resp.error, 4000);
+          if (!_gdSilentAuth) showToast('Drive auth error: ' + resp.error, 4000);
+          if (resp.error === 'access_denied') localStorage.removeItem('mj_gd_authorized');
+          _gdSilentAuth = false;
           updateDriveStatus();
           return;
         }
@@ -11994,8 +11996,9 @@ Format your response in clean markdown with headers for each story.`,
           access_token: resp.access_token,
           expires_at:   Date.now() + (resp.expires_in - 60) * 1000,
         };
+        localStorage.setItem('mj_gd_authorized', '1'); // remember consent granted
         updateDriveStatus();
-        showToast('✓ Google Drive connected!', 2500);
+        if (!_gdSilentAuth) showToast('✓ Google Drive connected!', 2500);
         // Ensure folder exists after first auth
         ensureDriveFolder().catch(() => {});
       },
@@ -12017,11 +12020,29 @@ Format your response in clean markdown with headers for each story.`,
     showToast('Client ID saved ✓ — now click Connect', 2500);
   }
 
+  let _gdSilentAuth = false;
+
   function connectGoogleDrive() {
     if (!_gdClientId()) return showToast('Save your Client ID first', 2500);
     if (!_gdInitDone) initGDTokenClient();
     if (!_gdTokenClient) return showToast('GIS not loaded — reload page', 3000);
+    _gdSilentAuth = false;
     _gdTokenClient.requestAccessToken({ prompt: 'consent' });
+  }
+
+  function _gdSilentConnect() {
+    if (!_gdClientId() || !localStorage.getItem('mj_gd_authorized')) return;
+    // Wait for GIS to load, then silently re-auth (no popup if consent exists)
+    const attempt = () => {
+      if (typeof google === 'undefined' || !google.accounts) {
+        setTimeout(attempt, 800); return;
+      }
+      if (!_gdInitDone) initGDTokenClient();
+      if (!_gdTokenClient) return;
+      _gdSilentAuth = true;
+      _gdTokenClient.requestAccessToken({ prompt: '' });
+    };
+    setTimeout(attempt, 600);
   }
 
   // ── Ensure "Mission Job — Resumes" folder ────────────────────────────────
@@ -12160,9 +12181,9 @@ Format your response in clean markdown with headers for each story.`,
   }
 
   window.addEventListener('load', () => {
-    // Load saved client ID into input and init token client
     initGDTokenClient();
     updateDriveStatus();
+    _gdSilentConnect(); // auto re-auth silently if previously connected
   });
   </script>
 

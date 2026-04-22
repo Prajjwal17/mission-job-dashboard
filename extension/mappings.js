@@ -2,6 +2,8 @@
  * mappings.js — Candidate profile + fuzzy field matching
  * Injected before content.js on all supported ATS pages.
  */
+if (window.__mjMappingsLoaded) { /* already loaded — skip re-init */ } else {
+window.__mjMappingsLoaded = true;
 
 // ── Candidate data ────────────────────────────────────────────────────────────
 const CANDIDATE = {
@@ -91,3 +93,5 @@ function fuzzyMatch(el) {
 
   return null;
 }
+
+} // end __mjMappingsLoaded guard

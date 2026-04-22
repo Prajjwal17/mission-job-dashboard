@@ -9,6 +9,12 @@
  *   4. Message handler   — listens for commands from popup.js via chrome.runtime
  */
 
+// Guard: prevent double-registration when popup injects programmatically
+if (window.__mjContentLoaded) {
+  // Already running — do nothing
+} else {
+window.__mjContentLoaded = true;
+
 const API_BASE = "http://localhost:8000";
 
 // ── 1. JD Scraping ────────────────────────────────────────────────────────────
@@ -336,3 +342,5 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
 
 // Signal to popup that content script is ready
 chrome.runtime.sendMessage({ action: "CONTENT_READY", url: location.href }).catch(() => {});
+
+} // end __mjContentLoaded guard

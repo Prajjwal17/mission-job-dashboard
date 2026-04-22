@@ -56,15 +56,16 @@ async function sendToContent(action, extra = {}) {
 }
 
 async function ensureContentScript(tabId) {
+  // Always inject — guard inside each script prevents double-init.
+  // This reliably handles: extension reload, pre-opened tabs, SPA navigation.
   try {
-    // Ping — if content script alive it responds immediately
-    await chrome.tabs.sendMessage(tabId, { action: "PING" });
-  } catch {
-    // Not injected yet — inject programmatically
     await chrome.scripting.executeScript({ target: { tabId }, files: ["mappings.js"] });
     await chrome.scripting.executeScript({ target: { tabId }, files: ["content.js"] });
-    // Brief wait for script to register message listener
-    await new Promise(r => setTimeout(r, 80));
+    // Wait for message listener to register
+    await new Promise(r => setTimeout(r, 120));
+  } catch (err) {
+    // executeScript throws if tab is a chrome:// / edge:// page — ignore
+    console.warn("ensureContentScript:", err.message);
   }
 }
 

@@ -10203,8 +10203,11 @@
     const input = document.createElement('input');
     input.type   = 'file';
     input.accept = '.pdf,.doc,.docx';
-    input.onchange = async () => {
+    input.style.display = 'none';
+    document.body.appendChild(input);
+    input.addEventListener('change', async () => {
       const file = input.files[0];
+      document.body.removeChild(input);
       if (!file) return;
       try {
         await _saveResume(appId, file);
@@ -10220,7 +10223,7 @@
           });
         }
       } catch(e) { showToast('Upload failed: ' + e.message, 3000); }
-    };
+    });
     input.click();
   }
 

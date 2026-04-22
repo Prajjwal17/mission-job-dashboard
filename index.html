@@ -10391,9 +10391,9 @@
       const hasResume = resumeAppIds.has(safeId);
       const resumeCell = '<td style="text-align:center;white-space:nowrap;">'
         + (hasResume
-            ? '<button class="resume-dl-btn" onclick="downloadResume(' + JSON.stringify(safeId) + ')" title="Download attached resume">↓ PDF</button>'
-              + '<button class="resume-rm-btn" onclick="removeResume(' + JSON.stringify(safeId) + ')" title="Remove resume">×</button>'
-            : '<button class="resume-up-btn" onclick="uploadResume(' + JSON.stringify(safeId) + ')" title="Attach custom resume">+ Attach</button>')
+            ? '<button class="resume-dl-btn" onclick="downloadResume(\'' + safeId + '\')" title="Download attached resume">↓ PDF</button>'
+              + '<button class="resume-rm-btn" onclick="removeResume(\'' + safeId + '\')" title="Remove resume">×</button>'
+            : '<button class="resume-up-btn" onclick="uploadResume(\'' + safeId + '\')" title="Attach custom resume">+ Attach</button>')
         + '</td>';
       return '<tr>'
         + '<td style="color:var(--muted);font-family:JetBrains Mono,monospace;font-size:0.7rem;">' + (fi + 1) + '</td>'

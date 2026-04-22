@@ -11516,6 +11516,8 @@ Format your response in clean markdown with headers for each story.`,
     // trigger any section-specific init (board stats etc.)
     if (section === 'tracker') renderBoard && renderBoard();
     if (section === 'dashboard') renderAnalytics && renderAnalytics();
+    if (section === 'beyondfaang' && typeof renderFaang === 'function' && !document.getElementById('faang-grid').hasChildNodes()) renderFaang();
+    if (section === 'hrcontacts' && typeof renderHR === 'function' && !document.getElementById('hr-table-body').hasChildNodes()) renderHR();
   }
 
   // close dropdown when clicking outside

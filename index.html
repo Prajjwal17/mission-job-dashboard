@@ -9587,12 +9587,52 @@
       <input type="hidden" id="qt-link" />
       <input type="hidden" id="qt-source" />
 
-      <!-- Magic Tailor -->
-      <button type="button" id="qt-tailor-btn" onclick="runMagicTailor()"
-        style="width:100%;margin-bottom:10px;padding:10px;border-radius:8px;border:1px solid var(--accent);background:rgba(124,58,237,0.12);color:var(--accent);font-weight:700;font-size:0.85rem;cursor:pointer;font-family:'DM Sans';display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.2s;">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="flex-shrink:0;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        Magic Tailor — Generate Cover Letter + STAR Stories
-      </button>
+      <!-- Magic Tailor + Fix Gaps row -->
+      <div style="display:flex;gap:8px;margin-bottom:10px;">
+        <button type="button" id="qt-tailor-btn" onclick="runMagicTailor()"
+          style="flex:3;padding:10px;border-radius:8px;border:1px solid var(--accent);background:rgba(124,58,237,0.12);color:var(--accent);font-weight:700;font-size:0.82rem;cursor:pointer;font-family:'DM Sans';display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.2s;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="flex-shrink:0;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Magic Tailor
+        </button>
+        <button type="button" id="qt-gap-btn" onclick="runGapAnalysis()"
+          style="flex:2;padding:10px;border-radius:8px;border:1px solid var(--accent2);background:rgba(6,182,212,0.1);color:var(--accent2);font-weight:700;font-size:0.82rem;cursor:pointer;font-family:'DM Sans';display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.2s;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Fix Gaps
+        </button>
+      </div>
+
+      <!-- Gap Analysis output panel -->
+      <div id="qt-gap-box" style="display:none;margin-bottom:14px;border:1px solid rgba(6,182,212,0.25);border-radius:10px;overflow:hidden;">
+        <div id="qt-gap-loading" style="display:none;color:var(--muted);font-size:0.8rem;font-family:'JetBrains Mono';padding:12px;text-align:center;">
+          <span style="animation:spin 1s linear infinite;display:inline-block;">⟳</span>&nbsp;Analysing gaps with HF embeddings + Ollama…
+        </div>
+        <div id="qt-gap-result" style="display:none;">
+          <!-- Semantic fit score bar -->
+          <div style="background:rgba(6,182,212,0.08);padding:12px 14px;border-bottom:1px solid rgba(6,182,212,0.15);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <span style="font-size:0.72rem;font-family:'JetBrains Mono';color:var(--muted);">SEMANTIC FIT SCORE</span>
+              <span id="qt-gap-score" style="font-size:0.95rem;font-family:'JetBrains Mono';font-weight:700;color:var(--accent2);">—</span>
+            </div>
+            <div style="height:4px;background:rgba(255,255,255,0.07);border-radius:2px;overflow:hidden;">
+              <div id="qt-gap-score-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#7c3aed,#06b6d4);border-radius:2px;transition:width 0.8s ease;"></div>
+            </div>
+          </div>
+          <!-- Missing skills -->
+          <div style="padding:12px 14px;border-bottom:1px solid rgba(6,182,212,0.1);">
+            <div style="font-size:0.7rem;font-family:'JetBrains Mono';color:var(--muted);margin-bottom:8px;letter-spacing:1px;">MISSING SKILLS</div>
+            <div id="qt-gap-tech" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px;"></div>
+            <div id="qt-gap-soft" style="display:flex;flex-wrap:wrap;gap:5px;"></div>
+          </div>
+          <!-- STAR bullets -->
+          <div style="padding:12px 14px;">
+            <div style="font-size:0.7rem;font-family:'JetBrains Mono';color:var(--muted);margin-bottom:8px;letter-spacing:1px;">STAR BULLETS TO ADD</div>
+            <div id="qt-gap-bullets" style="display:flex;flex-direction:column;gap:8px;"></div>
+          </div>
+          <!-- Fit summary -->
+          <div id="qt-gap-summary-box" style="padding:10px 14px;border-top:1px solid rgba(6,182,212,0.1);font-size:0.75rem;color:var(--muted);font-family:'JetBrains Mono';line-height:1.5;display:none;"></div>
+        </div>
+        <div id="qt-gap-error" style="display:none;padding:10px 14px;font-size:0.78rem;font-family:'JetBrains Mono';color:#f87171;"></div>
+      </div>
       <div id="qt-tailor-box" style="display:none;margin-bottom:14px;">
         <div id="qt-tailor-loading" style="display:none;color:var(--muted);font-size:0.8rem;font-family:'JetBrains Mono';padding:10px 0;text-align:center;">
           <span style="animation:spin 1s linear infinite;display:inline-block;">⟳</span>&nbsp;Ollama is tailoring…
@@ -11892,9 +11932,112 @@ Format your response in clean markdown with headers for each story.`,
     document.getElementById('qt-tailor-result').style.display = 'none';
     document.getElementById('qt-tailor-error').style.display  = 'none';
     document.getElementById('qt-tailor-btn').disabled  = false;
-    document.getElementById('qt-tailor-btn').innerHTML = '✨ Magic Tailor — Generate Cover Letter + STAR Stories';
+    document.getElementById('qt-tailor-btn').innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="flex-shrink:0;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Magic Tailor';
     _tailorData = { cover_letter: '', star_stories: [], email_subject: '' };
+    // Reset gap panel
+    document.getElementById('qt-gap-box').style.display    = 'none';
+    document.getElementById('qt-gap-result').style.display = 'none';
+    document.getElementById('qt-gap-error').style.display  = 'none';
+    document.getElementById('qt-gap-btn').disabled  = false;
+    document.getElementById('qt-gap-btn').innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Fix Gaps';
   };
+
+  // ── Gap Analysis (HuggingFace + LangChain LCEL) ───────────────────────────
+  async function runGapAnalysis() {
+    const jdInput = document.getElementById('qt-notes');
+    const jd = (jdInput?.value || '').trim();
+    if (!jd) {
+      showToast('Paste the Job Description into the Notes field first.', 'warn', 3500);
+      return;
+    }
+
+    const btn     = document.getElementById('qt-gap-btn');
+    const box     = document.getElementById('qt-gap-box');
+    const loading = document.getElementById('qt-gap-loading');
+    const result  = document.getElementById('qt-gap-result');
+    const errDiv  = document.getElementById('qt-gap-error');
+
+    btn.disabled    = true;
+    btn.textContent = '⟳ Analysing…';
+    box.style.display     = 'block';
+    loading.style.display = 'block';
+    result.style.display  = 'none';
+    errDiv.style.display  = 'none';
+
+    try {
+      const res = await fetch(AGENT_URL + '/analyze-gaps', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ jd_text: jd }),
+        signal:  AbortSignal.timeout(120000),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: res.statusText }));
+        throw new Error(err.detail || res.statusText);
+      }
+      const data = await res.json();
+
+      // ── Semantic fit score ──
+      const score = data.semantic_fit_score;
+      const scoreEl = document.getElementById('qt-gap-score');
+      const scoreBar = document.getElementById('qt-gap-score-bar');
+      if (score != null) {
+        scoreEl.textContent = score + '%';
+        scoreEl.style.color = score >= 75 ? '#4ade80' : score >= 55 ? '#f59e0b' : '#f87171';
+        setTimeout(() => { scoreBar.style.width = Math.min(score, 100) + '%'; }, 50);
+      } else {
+        scoreEl.textContent = '—';
+      }
+
+      // ── Missing tech skills ──
+      const techEl = document.getElementById('qt-gap-tech');
+      techEl.innerHTML = (data.missing_tech || []).map(s =>
+        `<span style="background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.35);color:#fca5a5;
+          padding:2px 8px;border-radius:4px;font-size:0.68rem;font-family:'JetBrains Mono';">⚙ ${s}</span>`
+      ).join('');
+
+      // ── Missing soft skills ──
+      const softEl = document.getElementById('qt-gap-soft');
+      softEl.innerHTML = (data.missing_soft || []).map(s =>
+        `<span style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);color:#fcd34d;
+          padding:2px 8px;border-radius:4px;font-size:0.68rem;font-family:'JetBrains Mono';">◇ ${s}</span>`
+      ).join('');
+
+      // ── STAR bullets with copy buttons ──
+      const bulletsEl = document.getElementById('qt-gap-bullets');
+      bulletsEl.innerHTML = (data.star_bullets || []).map((b, i) => {
+        const escaped = b.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        return `<div style="background:rgba(6,182,212,0.06);border:1px solid rgba(6,182,212,0.18);
+                  border-radius:7px;padding:9px 12px;display:flex;gap:8px;align-items:flex-start;">
+          <span style="font-size:0.78rem;color:var(--text);font-family:'DM Sans';line-height:1.5;flex:1;">${b}</span>
+          <button onclick="navigator.clipboard.writeText('${escaped}').then(()=>showToast('Copied!',1500))"
+            style="flex-shrink:0;background:rgba(6,182,212,0.15);border:1px solid rgba(6,182,212,0.3);
+              color:var(--accent2);padding:3px 8px;border-radius:5px;font-size:0.65rem;
+              font-family:'JetBrains Mono';cursor:pointer;white-space:nowrap;">⎘ Copy</button>
+        </div>`;
+      }).join('');
+
+      // ── Fit summary ──
+      const summaryBox = document.getElementById('qt-gap-summary-box');
+      if (data.fit_summary) {
+        summaryBox.textContent = '💡 ' + data.fit_summary;
+        summaryBox.style.display = 'block';
+      }
+
+      loading.style.display = 'none';
+      result.style.display  = 'block';
+
+    } catch(e) {
+      loading.style.display  = 'none';
+      errDiv.style.display   = 'block';
+      errDiv.textContent     = e.message.includes('fetch') || e.message.includes('Failed')
+        ? '⚠ Agent offline — run: uvicorn api:app --port 8000'
+        : '⚠ ' + e.message;
+    } finally {
+      btn.disabled    = false;
+      btn.innerHTML   = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Fix Gaps';
+    }
+  }
   </script>
 
   <!-- ── Google Drive Integration ─────────────────────────────────────────── -->
@@ -11996,10 +12139,11 @@ Format your response in clean markdown with headers for each story.`,
           access_token: resp.access_token,
           expires_at:   Date.now() + (resp.expires_in - 60) * 1000,
         };
-        localStorage.setItem('mj_gd_authorized', '1'); // remember consent granted
+        // Persist token in sessionStorage — survives page refresh, cleared on browser close
+        sessionStorage.setItem('mj_gd_token', JSON.stringify(_gdToken));
+        localStorage.setItem('mj_gd_authorized', '1');
         updateDriveStatus();
         if (!_gdSilentAuth) showToast('✓ Google Drive connected!', 2500);
-        // Ensure folder exists after first auth
         ensureDriveFolder().catch(() => {});
       },
     });
@@ -12031,18 +12175,21 @@ Format your response in clean markdown with headers for each story.`,
   }
 
   function _gdSilentConnect() {
-    if (!_gdClientId() || !localStorage.getItem('mj_gd_authorized')) return;
-    // Wait for GIS to load, then silently re-auth (no popup if consent exists)
-    const attempt = () => {
-      if (typeof google === 'undefined' || !google.accounts) {
-        setTimeout(attempt, 800); return;
+    // Try restoring token from sessionStorage first (survives refresh)
+    try {
+      const stored = sessionStorage.getItem('mj_gd_token');
+      if (stored) {
+        const tok = JSON.parse(stored);
+        if (tok && tok.access_token && Date.now() < tok.expires_at) {
+          _gdToken = tok;
+          updateDriveStatus();
+          return; // still valid — no popup needed
+        }
+        sessionStorage.removeItem('mj_gd_token');
       }
-      if (!_gdInitDone) initGDTokenClient();
-      if (!_gdTokenClient) return;
-      _gdSilentAuth = true;
-      _gdTokenClient.requestAccessToken({ prompt: '' });
-    };
-    setTimeout(attempt, 600);
+    } catch(e) {}
+    // Token expired or missing — nothing we can do silently in modern browsers
+    // User clicks "Connect Google Drive" once per browser session
   }
 
   // ── Ensure "Mission Job — Resumes" folder ────────────────────────────────

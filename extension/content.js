@@ -287,6 +287,10 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   (async () => {
     switch (msg.action) {
 
+      case "PING":
+        sendResponse({ ok: true });
+        break;
+
       case "SCRAPE_JD": {
         const jd = scrapeJD();
         // POST to backend for structured parsing

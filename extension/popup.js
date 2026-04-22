@@ -48,7 +48,24 @@ function showToast(msg, duration = 2200) {
 async function sendToContent(action, extra = {}) {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (!tab?.id) throw new Error("No active tab");
+
+  // Ensure content script is injected (handles already-open tabs)
+  await ensureContentScript(tab.id);
+
   return chrome.tabs.sendMessage(tab.id, { action, ...extra });
+}
+
+async function ensureContentScript(tabId) {
+  try {
+    // Ping — if content script alive it responds immediately
+    await chrome.tabs.sendMessage(tabId, { action: "PING" });
+  } catch {
+    // Not injected yet — inject programmatically
+    await chrome.scripting.executeScript({ target: { tabId }, files: ["mappings.js"] });
+    await chrome.scripting.executeScript({ target: { tabId }, files: ["content.js"] });
+    // Brief wait for script to register message listener
+    await new Promise(r => setTimeout(r, 80));
+  }
 }
 
 function renderJob(job) {

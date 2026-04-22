@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Prajjwal's Job Master Dashboard 2026 — Everything in One Place</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   :root {
     /* ── Blackout — Clean Terminal Dark ── */
@@ -9674,6 +9675,51 @@
     <p style="color:var(--muted);font-size:0.72rem;margin-top:14px;font-family:'JetBrains Mono';text-align:center;">
       Create token: github.com/settings/tokens → New token → check <b>gist</b>
     </p>
+
+    <!-- Google Drive Resume Backup -->
+    <div style="border-top:1px solid var(--border);margin-top:20px;padding-top:18px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div style="font-size:0.82rem;font-weight:700;color:var(--text);font-family:'JetBrains Mono';">
+          <svg width="14" height="14" viewBox="0 0 87.3 78" style="vertical-align:middle;margin-right:6px;" fill="none">
+            <path d="M6.6 66.85l3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8H0c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/>
+            <path d="M43.65 25L29.9 1.2C28.55 2 27.4 3.1 26.6 4.5L1.2 48.55A9.06 9.06 0 000 53.05h27.5z" fill="#00ac47"/>
+            <path d="M73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5H59.85l5.5 9.7z" fill="#ea4335"/>
+            <path d="M43.65 25L57.4 1.2C56.05.4 54.5 0 52.9 0H34.4c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d"/>
+            <path d="M59.85 53.05H27.5L13.75 76.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/>
+            <path d="M73.4 26.5l-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3L43.65 25l16.2 28.05H87.3c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/>
+          </svg>
+          Google Drive — Resume Backup
+        </div>
+        <span id="gd-status" style="font-size:0.72rem;font-family:'JetBrains Mono';color:var(--muted);">○ Not connected</span>
+      </div>
+      <p style="color:var(--muted);font-size:0.75rem;font-family:'JetBrains Mono';line-height:1.5;margin-bottom:10px;">
+        Auto-uploads every resume you attach to Drive.<br>
+        Creates a <b style="color:var(--text)">Mission Job Resumes</b> folder.
+      </p>
+      <label style="font-size:0.78rem;color:var(--muted);font-family:'JetBrains Mono';display:block;margin-bottom:6px;">
+        Google OAuth Client ID
+        <a href="https://console.cloud.google.com/apis/credentials" target="_blank"
+           style="color:var(--accent2);text-decoration:none;font-size:0.7rem;margin-left:6px;">Get one ↗</a>
+      </label>
+      <input id="gd-client-id-input" type="text" placeholder="xxx.apps.googleusercontent.com"
+        style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);
+               padding:10px 12px;border-radius:8px;font-size:0.8rem;font-family:'JetBrains Mono';
+               box-sizing:border-box;margin-bottom:10px;" />
+      <div style="display:flex;gap:8px;">
+        <button onclick="saveGDClientId()"
+          style="flex:1;background:var(--surface);color:var(--text);border:1px solid var(--border);
+                 padding:9px;border-radius:8px;font-size:0.82rem;cursor:pointer;font-family:'JetBrains Mono';">
+          Save ID
+        </button>
+        <button onclick="connectGoogleDrive()"
+          style="flex:2;background:linear-gradient(135deg,rgba(66,133,244,0.2),rgba(52,168,83,0.15));
+                 color:#7eb8ff;border:1px solid rgba(66,133,244,0.35);
+                 padding:9px;border-radius:8px;font-size:0.82rem;font-weight:700;cursor:pointer;font-family:'JetBrains Mono';">
+          Connect Google Drive
+        </button>
+      </div>
+      <p id="gd-folder-hint" style="color:var(--muted);font-size:0.7rem;font-family:'JetBrains Mono';margin-top:8px;display:none;"></p>
+    </div>
   </div>
 </div>
 <script>
@@ -10161,6 +10207,15 @@
         await _saveResume(appId, file);
         renderBoard();
         showToast('Resume attached: ' + file.name, 2500);
+        // Also push to Google Drive if connected
+        if (gdIsConnected()) {
+          showToast('Syncing to Google Drive…', 1800);
+          driveUpload(file, appId).then(() => {
+            showToast('✓ Saved to Google Drive', 2500);
+          }).catch(err => {
+            showToast('Drive sync failed: ' + err.message, 3000);
+          });
+        }
       } catch(e) { showToast('Upload failed: ' + e.message, 3000); }
     };
     input.click();
@@ -10169,12 +10224,20 @@
   async function downloadResume(appId) {
     try {
       const rec = await _getResume(appId);
-      if (!rec) return showToast('No resume found', 2000);
-      const url = URL.createObjectURL(rec.blob);
-      const a   = Object.assign(document.createElement('a'), { href: url, download: rec.filename });
-      document.body.appendChild(a); a.click();
-      document.body.removeChild(a);
-      setTimeout(() => URL.revokeObjectURL(url), 2000);
+      if (rec) {
+        // Prefer local IDB copy
+        const url = URL.createObjectURL(rec.blob);
+        const a   = Object.assign(document.createElement('a'), { href: url, download: rec.filename });
+        document.body.appendChild(a); a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 2000);
+      } else if (gdIsConnected()) {
+        // Fall back to Drive
+        showToast('Fetching from Google Drive…', 1800);
+        await driveDownload(appId);
+      } else {
+        showToast('No resume found', 2000);
+      }
     } catch(e) { showToast('Download failed: ' + e.message, 3000); }
   }
 
@@ -10182,6 +10245,10 @@
     if (!confirm('Remove attached resume for this application?')) return;
     try {
       await _deleteResume(appId);
+      // Also delete from Drive if connected
+      if (gdIsConnected()) {
+        driveDelete(appId).catch(() => {}); // best-effort
+      }
       renderBoard();
       showToast('Resume removed', 2000);
     } catch(e) { showToast('Error: ' + e.message, 3000); }
@@ -11822,6 +11889,275 @@ Format your response in clean markdown with headers for each story.`,
     document.getElementById('qt-tailor-btn').innerHTML = '✨ Magic Tailor — Generate Cover Letter + STAR Stories';
     _tailorData = { cover_letter: '', star_stories: [], email_subject: '' };
   };
+  </script>
+
+  <!-- ── Google Drive Integration ─────────────────────────────────────────── -->
+  <script>
+  /**
+   * Google Drive Resume Backup
+   * Uses Google Identity Services (GIS) implicit flow + Drive REST API v3.
+   *
+   * localStorage keys:
+   *   mj_gd_client_id  — OAuth 2.0 client ID (user enters once)
+   *   mj_gd_folder_id  — Drive folder ID ("Mission Job Resumes") — auto-created
+   *   mj_gd_file_map   — JSON: { appId → driveFileId }
+   *   mj_gd_token      — current access token (short-lived, session only)
+   */
+
+  let _gdTokenClient = null;
+  let _gdToken       = null;     // { access_token, expires_at }
+  let _gdInitDone    = false;
+
+  const _GD_LS_CLIENT  = 'mj_gd_client_id';
+  const _GD_LS_FOLDER  = 'mj_gd_folder_id';
+  const _GD_LS_FILEMAP = 'mj_gd_file_map';
+  const _GD_SCOPE      = 'https://www.googleapis.com/auth/drive.file';
+  const _GD_FOLDER_NAME = 'Mission Job — Resumes';
+
+  // ── helpers ──────────────────────────────────────────────────────────────
+
+  function _gdClientId() { return localStorage.getItem(_GD_LS_CLIENT) || ''; }
+
+  function _gdFileMap() {
+    try { return JSON.parse(localStorage.getItem(_GD_LS_FILEMAP) || '{}'); }
+    catch { return {}; }
+  }
+  function _gdSaveFileMap(map) {
+    localStorage.setItem(_GD_LS_FILEMAP, JSON.stringify(map));
+  }
+  function _gdGetFileId(appId)        { return _gdFileMap()[appId] || null; }
+  function _gdSetFileId(appId, fid)   { const m = _gdFileMap(); m[appId] = fid; _gdSaveFileMap(m); }
+  function _gdClearFileId(appId)      { const m = _gdFileMap(); delete m[appId]; _gdSaveFileMap(m); }
+
+  function gdIsConnected() {
+    return !!(
+      _gdToken &&
+      _gdToken.access_token &&
+      Date.now() < _gdToken.expires_at
+    );
+  }
+
+  function updateDriveStatus() {
+    const el = document.getElementById('gd-status');
+    if (!el) return;
+    if (!_gdClientId()) {
+      el.textContent = '○ No Client ID saved';
+      el.style.color = 'var(--muted)';
+    } else if (gdIsConnected()) {
+      el.textContent = '● Connected';
+      el.style.color = '#4ade80';
+    } else {
+      el.textContent = '○ Not connected';
+      el.style.color = 'var(--muted)';
+    }
+    const hint = document.getElementById('gd-folder-hint');
+    if (hint) {
+      const fid = localStorage.getItem(_GD_LS_FOLDER);
+      if (fid && gdIsConnected()) {
+        hint.textContent = 'Folder: ' + _GD_FOLDER_NAME + ' (ID: ' + fid.slice(0,12) + '…)';
+        hint.style.display = 'block';
+      } else {
+        hint.style.display = 'none';
+      }
+    }
+    // Restore saved client ID into input
+    const inp = document.getElementById('gd-client-id-input');
+    if (inp && !inp.value) inp.value = _gdClientId();
+  }
+
+  // ── OAuth init ────────────────────────────────────────────────────────────
+
+  function initGDTokenClient() {
+    const clientId = _gdClientId();
+    if (!clientId) return;
+    if (typeof google === 'undefined' || !google.accounts) {
+      // GIS not loaded yet — retry once it's ready
+      setTimeout(initGDTokenClient, 1200);
+      return;
+    }
+    _gdTokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: clientId,
+      scope:     _GD_SCOPE,
+      callback:  (resp) => {
+        if (resp.error) {
+          showToast('Drive auth error: ' + resp.error, 4000);
+          updateDriveStatus();
+          return;
+        }
+        _gdToken = {
+          access_token: resp.access_token,
+          expires_at:   Date.now() + (resp.expires_in - 60) * 1000,
+        };
+        updateDriveStatus();
+        showToast('✓ Google Drive connected!', 2500);
+        // Ensure folder exists after first auth
+        ensureDriveFolder().catch(() => {});
+      },
+    });
+    _gdInitDone = true;
+  }
+
+  function saveGDClientId() {
+    const inp = document.getElementById('gd-client-id-input');
+    const val = (inp?.value || '').trim();
+    if (!val) return showToast('Paste your Client ID first', 2500);
+    localStorage.setItem(_GD_LS_CLIENT, val);
+    // Reset any stale folder/file data when client changes
+    localStorage.removeItem(_GD_LS_FOLDER);
+    _gdToken    = null;
+    _gdInitDone = false;
+    initGDTokenClient();
+    updateDriveStatus();
+    showToast('Client ID saved ✓ — now click Connect', 2500);
+  }
+
+  function connectGoogleDrive() {
+    if (!_gdClientId()) return showToast('Save your Client ID first', 2500);
+    if (!_gdInitDone) initGDTokenClient();
+    if (!_gdTokenClient) return showToast('GIS not loaded — reload page', 3000);
+    _gdTokenClient.requestAccessToken({ prompt: 'consent' });
+  }
+
+  // ── Ensure "Mission Job — Resumes" folder ────────────────────────────────
+
+  async function ensureDriveFolder() {
+    const existing = localStorage.getItem(_GD_LS_FOLDER);
+    if (existing) return existing;
+
+    // Search for existing folder
+    const q   = encodeURIComponent(`name='${_GD_FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`);
+    const res = await _gdFetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)`);
+    const data = await res.json();
+
+    if (data.files && data.files.length > 0) {
+      const fid = data.files[0].id;
+      localStorage.setItem(_GD_LS_FOLDER, fid);
+      updateDriveStatus();
+      return fid;
+    }
+
+    // Create folder
+    const cr = await _gdFetch('https://www.googleapis.com/drive/v3/files', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name:     _GD_FOLDER_NAME,
+        mimeType: 'application/vnd.google-apps.folder',
+      }),
+    });
+    const folder = await cr.json();
+    localStorage.setItem(_GD_LS_FOLDER, folder.id);
+    updateDriveStatus();
+    return folder.id;
+  }
+
+  // ── Core Drive fetch (auto-refreshes token if expired) ───────────────────
+
+  async function _gdFetch(url, opts = {}) {
+    if (!gdIsConnected()) {
+      // Silently request a new token (no prompt — user already consented)
+      await new Promise((resolve, reject) => {
+        if (!_gdTokenClient) return reject(new Error('Drive not initialized'));
+        const origCb = _gdTokenClient.callback;
+        _gdTokenClient.callback = (resp) => {
+          _gdTokenClient.callback = origCb;
+          if (resp.error) return reject(new Error(resp.error));
+          _gdToken = {
+            access_token: resp.access_token,
+            expires_at:   Date.now() + (resp.expires_in - 60) * 1000,
+          };
+          updateDriveStatus();
+          resolve();
+        };
+        _gdTokenClient.requestAccessToken({ prompt: '' });
+      });
+    }
+    opts.headers = opts.headers || {};
+    opts.headers['Authorization'] = 'Bearer ' + _gdToken.access_token;
+    return fetch(url, opts);
+  }
+
+  // ── Upload ────────────────────────────────────────────────────────────────
+
+  async function driveUpload(file, appId) {
+    const folderId  = await ensureDriveFolder();
+    const existingId = _gdGetFileId(appId);
+    const metadata  = {
+      name:    appId + '_' + file.name,
+      parents: existingId ? undefined : [folderId],
+    };
+
+    const form = new FormData();
+    form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+    form.append('file',     file);
+
+    let url    = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name';
+    let method = 'POST';
+    if (existingId) {
+      // Update existing file (no parent move needed)
+      url    = `https://www.googleapis.com/upload/drive/v3/files/${existingId}?uploadType=multipart&fields=id,name`;
+      method = 'PATCH';
+      // Remove parents from metadata for update
+      delete metadata.parents;
+      form.set('metadata', new Blob([JSON.stringify({ name: metadata.name })], { type: 'application/json' }));
+    }
+
+    const res  = await _gdFetch(url, { method, body: form });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: { message: res.statusText } }));
+      throw new Error(err?.error?.message || 'Drive upload failed');
+    }
+    const data = await res.json();
+    _gdSetFileId(appId, data.id);
+    return data.id;
+  }
+
+  // ── Download (from Drive → local browser download) ───────────────────────
+
+  async function driveDownload(appId) {
+    const fileId = _gdGetFileId(appId);
+    if (!fileId) throw new Error('No Drive file linked to this application');
+    // Get metadata first to get filename
+    const metaRes = await _gdFetch(`https://www.googleapis.com/drive/v3/files/${fileId}?fields=name,mimeType`);
+    const meta    = await metaRes.json();
+    // Download file content
+    const dlRes   = await _gdFetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`);
+    if (!dlRes.ok) throw new Error('Drive download failed: ' + dlRes.status);
+    const blob  = await dlRes.blob();
+    const url   = URL.createObjectURL(blob);
+    const a     = Object.assign(document.createElement('a'), { href: url, download: meta.name });
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+  }
+
+  // ── Delete ────────────────────────────────────────────────────────────────
+
+  async function driveDelete(appId) {
+    const fileId = _gdGetFileId(appId);
+    if (!fileId) return; // nothing to delete
+    try {
+      await _gdFetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, { method: 'DELETE' });
+      _gdClearFileId(appId);
+    } catch (e) {
+      // Non-fatal — file might already be gone
+      _gdClearFileId(appId);
+    }
+  }
+
+  // ── Init on page load ────────────────────────────────────────────────────
+
+  // Pre-seed the known Drive folder — skips folder creation entirely
+  const _GD_KNOWN_FOLDER = '1Cl_dMRnAsonB72wIOMNB-HyPUqO4sNsN';
+  if (!localStorage.getItem(_GD_LS_FOLDER)) {
+    localStorage.setItem(_GD_LS_FOLDER, _GD_KNOWN_FOLDER);
+  }
+
+  window.addEventListener('load', () => {
+    // Load saved client ID into input and init token client
+    initGDTokenClient();
+    updateDriveStatus();
+  });
   </script>
 
 </body>

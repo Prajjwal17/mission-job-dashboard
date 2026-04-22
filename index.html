@@ -1555,6 +1555,26 @@
     font-size: 1rem; padding: 2px 6px; border-radius: 4px; transition: color 0.2s;
   }
   .del-btn:hover { color: #f43f5e; }
+  /* ── Resume attach buttons ── */
+  .resume-up-btn {
+    background: rgba(124,58,237,0.1); border: 1px dashed rgba(124,58,237,0.4);
+    color: #a78bfa; cursor: pointer; font-size: 0.68rem; font-weight: 600;
+    padding: 3px 7px; border-radius: 5px; white-space: nowrap;
+    font-family: 'JetBrains Mono', monospace; transition: background 0.15s;
+  }
+  .resume-up-btn:hover { background: rgba(124,58,237,0.22); border-style: solid; }
+  .resume-dl-btn {
+    background: rgba(6,182,212,0.12); border: 1px solid rgba(6,182,212,0.35);
+    color: #67e8f9; cursor: pointer; font-size: 0.68rem; font-weight: 700;
+    padding: 3px 8px; border-radius: 5px; font-family: 'JetBrains Mono', monospace;
+    transition: background 0.15s;
+  }
+  .resume-dl-btn:hover { background: rgba(6,182,212,0.25); }
+  .resume-rm-btn {
+    background: none; border: none; color: rgba(244,63,94,0.5); cursor: pointer;
+    font-size: 0.9rem; padding: 2px 4px; border-radius: 3px; transition: color 0.15s;
+  }
+  .resume-rm-btn:hover { color: #f43f5e; }
   .notes-input {
     background: transparent; border: none; color: var(--text); font-size: 0.8rem;
     font-family: 'DM Sans'; width: 100%; min-width: 120px;
@@ -8696,11 +8716,12 @@
             <th>Status</th>
             <th>Date Added</th>
             <th>Notes</th>
+            <th title="Attach custom resume PDF for this application">Resume</th>
             <th></th>
           </tr>
         </thead>
         <tbody id="app-board-body">
-          <tr><td colspan="9" class="board-empty">No applications yet. Add one above or click "Track" on any job card.</td></tr>
+          <tr><td colspan="10" class="board-empty">No applications yet. Add one above or click "Track" on any job card.</td></tr>
         </tbody>
       </table>
     </div>
@@ -10071,8 +10092,103 @@
     setTimeout(function() { dismiss(t); }, duration);
   }
 
+  // ── IndexedDB — Custom Resume Store ─────────────────────────────────────────
+  const _RDB_NAME  = 'MissionJobResumes';
+  const _RDB_VER   = 1;
+  const _RDB_STORE = 'resumes';
+  let _resumeDB    = null;
+  let resumeAppIds = new Set(); // appIds that have a resume attached (in-memory cache)
+
+  function _openResumeDB() {
+    if (_resumeDB) return Promise.resolve(_resumeDB);
+    return new Promise((res, rej) => {
+      const req = indexedDB.open(_RDB_NAME, _RDB_VER);
+      req.onupgradeneeded = e => {
+        if (!e.target.result.objectStoreNames.contains(_RDB_STORE))
+          e.target.result.createObjectStore(_RDB_STORE, { keyPath: 'appId' });
+      };
+      req.onsuccess = e => { _resumeDB = e.target.result; res(_resumeDB); };
+      req.onerror   = e => rej(e.target.error);
+    });
+  }
+
+  async function _loadResumeIds() {
+    const db = await _openResumeDB();
+    return new Promise((res, rej) => {
+      const req = db.transaction(_RDB_STORE, 'readonly').objectStore(_RDB_STORE).getAllKeys();
+      req.onsuccess = e => { resumeAppIds = new Set(e.target.result); res(); };
+      req.onerror   = e => rej(e.target.error);
+    });
+  }
+
+  async function _saveResume(appId, file) {
+    const db = await _openResumeDB();
+    return new Promise((res, rej) => {
+      const req = db.transaction(_RDB_STORE, 'readwrite').objectStore(_RDB_STORE)
+        .put({ appId, filename: file.name, blob: file, uploadedAt: new Date().toISOString() });
+      req.onsuccess = () => { resumeAppIds.add(appId); res(); };
+      req.onerror   = e => rej(e.target.error);
+    });
+  }
+
+  async function _getResume(appId) {
+    const db = await _openResumeDB();
+    return new Promise((res, rej) => {
+      const req = db.transaction(_RDB_STORE, 'readonly').objectStore(_RDB_STORE).get(appId);
+      req.onsuccess = e => res(e.target.result);
+      req.onerror   = e => rej(e.target.error);
+    });
+  }
+
+  async function _deleteResume(appId) {
+    const db = await _openResumeDB();
+    return new Promise((res, rej) => {
+      const req = db.transaction(_RDB_STORE, 'readwrite').objectStore(_RDB_STORE).delete(appId);
+      req.onsuccess = () => { resumeAppIds.delete(appId); res(); };
+      req.onerror   = e => rej(e.target.error);
+    });
+  }
+
+  // Public resume actions (called from board HTML)
+  function uploadResume(appId) {
+    const input = document.createElement('input');
+    input.type   = 'file';
+    input.accept = '.pdf,.doc,.docx';
+    input.onchange = async () => {
+      const file = input.files[0];
+      if (!file) return;
+      try {
+        await _saveResume(appId, file);
+        renderBoard();
+        showToast('Resume attached: ' + file.name, 2500);
+      } catch(e) { showToast('Upload failed: ' + e.message, 3000); }
+    };
+    input.click();
+  }
+
+  async function downloadResume(appId) {
+    try {
+      const rec = await _getResume(appId);
+      if (!rec) return showToast('No resume found', 2000);
+      const url = URL.createObjectURL(rec.blob);
+      const a   = Object.assign(document.createElement('a'), { href: url, download: rec.filename });
+      document.body.appendChild(a); a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+    } catch(e) { showToast('Download failed: ' + e.message, 3000); }
+  }
+
+  async function removeResume(appId) {
+    if (!confirm('Remove attached resume for this application?')) return;
+    try {
+      await _deleteResume(appId);
+      renderBoard();
+      showToast('Resume removed', 2000);
+    } catch(e) { showToast('Error: ' + e.message, 3000); }
+  }
+
   async function initStorage() {
-    await loadBoard();
+    await Promise.all([loadBoard(), _loadResumeIds()]);
   }
 
   // ── BOARD CRUD (localStorage + Gist) ────────────────────────────────────────
@@ -10166,7 +10282,7 @@
       : applications.filter(a => a.status === boardFilter);
     if (filtered.length === 0) {
       const msg = boardFilter !== 'all' ? ' with status "' + boardFilter + '"' : '';
-      tbody.innerHTML = '<tr><td colspan="9" class="board-empty">No applications' + msg
+      tbody.innerHTML = '<tr><td colspan="10" class="board-empty">No applications' + msg
         + '. Click "+ Add Application" or "+ Track" on any Job Drive card.</td></tr>';
       return;
     }
@@ -10199,6 +10315,13 @@
                      + 'cursor:default;">'
                      + (atsScore != null ? atsScore : '—')
                      + '</span></td>';
+      const hasResume = resumeAppIds.has(safeId);
+      const resumeCell = '<td style="text-align:center;white-space:nowrap;">'
+        + (hasResume
+            ? '<button class="resume-dl-btn" onclick="downloadResume(' + JSON.stringify(safeId) + ')" title="Download attached resume">↓ PDF</button>'
+              + '<button class="resume-rm-btn" onclick="removeResume(' + JSON.stringify(safeId) + ')" title="Remove resume">×</button>'
+            : '<button class="resume-up-btn" onclick="uploadResume(' + JSON.stringify(safeId) + ')" title="Attach custom resume">+ Attach</button>')
+        + '</td>';
       return '<tr>'
         + '<td style="color:var(--muted);font-family:JetBrains Mono,monospace;font-size:0.7rem;">' + (fi + 1) + '</td>'
         + '<td><strong>' + titleCell + '</strong></td>'
@@ -10208,6 +10331,7 @@
         + '<td><select class="status-select ' + sc + '" onchange="updateStatus(' + JSON.stringify(safeId) + ', this)">' + opts + '</select></td>'
         + '<td style="font-size:0.75rem;color:var(--muted);font-family:JetBrains Mono,monospace;white-space:nowrap;">' + (escHtml(app.date) || '-') + '</td>'
         + '<td><input class="notes-input" value="' + escHtml(app.notes || '') + '" placeholder="Add note..." onchange="updateNotes(' + JSON.stringify(safeId) + ', this.value)"/></td>'
+        + resumeCell
         + '<td><button class="del-btn" onclick="deleteApp(' + JSON.stringify(safeId) + ')" title="Delete">x</button></td>'
         + '</tr>';
     }).join('');

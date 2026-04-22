@@ -91,12 +91,14 @@ function _pageScrapeFn() {
     }
 
     // 3. Scan all short elements for "Name • digit" separator pattern
+    // NOTE: hirist renders "CompanyName • 1-5 Yrs • ₹Range" as multiple sibling spans
+    // inside one container — so we check innerText (concatenated) not children limit
     if (!company) {
       const sepRx = /^(.+?)\s*[•·|]\s*\d/;
       for (const el of document.querySelectorAll("p,div,span,h2,h3,li")) {
         const t = (el.innerText || "").trim();
         const mx = t.match(sepRx);
-        if (mx && el.children.length < 4 && t.length < 200) {
+        if (mx && t.length < 300) {
           company = mx[1].trim();
           break;
         }
@@ -116,7 +118,8 @@ function _pageScrapeFn() {
               ".jd-content", ".description-wrapper", ".description-section",
               "#jobDescription", ".desc-box", ".jd-desc", ".job-desc",
               "section.description", ".posting-content", ".job-detail-section",
-              ".description", "article", "main section", "main");
+              ".description", "article", "main section", "main")
+         || (document.querySelector("main")?.innerText?.trim() || "");
   } else if (h.includes("naukri.com")) {
     role    = qAll("h1.jd-header-title", "h1");
     company = qAll(".jd-header-comp-name a", ".comp-name a", ".jd-header-comp-name");

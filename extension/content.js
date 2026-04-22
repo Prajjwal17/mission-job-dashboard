@@ -53,11 +53,77 @@ function scrapeJD() {
     result.jd_text = _text(".ashby-application-form-container, .job-posting-description") || "";
   }
 
-  // Generic fallback
+  // Naukri
+  else if (location.hostname.includes("naukri.com")) {
+    result.role    = _text("h1.jd-header-title, .jd-header-title, h1") || "";
+    result.company = _text(".jd-header-comp-name a, .comp-name a, .jd-header-comp-name") || "";
+    result.jd_text = _text("#job_description, .job-desc, .dang-inner-html, .jd-description") || "";
+  }
+
+  // Hirist (hirist.tech / hirist.com)
+  else if (location.hostname.includes("hirist")) {
+    result.role    = _text("h1.job-title, .job-detail-header h1, h1") || "";
+    result.company = _text(".company-name, .job-company-name, .comp-name") || "";
+    result.jd_text = _text(".job-description, .jd-text, .job-detail-body, .description-section") || "";
+  }
+
+  // Job24x7
+  else if (location.hostname.includes("job24x7")) {
+    result.role    = _text("h1.job-title, .job-header h1, h1") || "";
+    result.company = _text(".company-name, .employer-name, h2.company") || "";
+    result.jd_text = _text(".job-description, .job-details, .description") || "";
+  }
+
+  // Hyred (hyred.io)
+  else if (location.hostname.includes("hyred")) {
+    result.role    = _text("h1.role-title, .job-title, h1") || "";
+    result.company = _text(".company-name, .org-name, .employer") || "";
+    result.jd_text = _text(".job-description, .role-description, .about-role") || "";
+  }
+
+  // thejob.dev
+  else if (location.hostname.includes("thejob.dev")) {
+    result.role    = _text("h1.job-title, h1.title, h1") || "";
+    result.company = _text(".company, .employer, .org-name, h2") || "";
+    result.jd_text = _text(".job-description, .description, .content, main article") || "";
+  }
+
+  // Instahyre
+  else if (location.hostname.includes("instahyre")) {
+    result.role    = _text("h1.job-title, .job-position, h1") || "";
+    result.company = _text(".company-name, .employer-name") || "";
+    result.jd_text = _text(".job-description, .job-detail-description, .jd-content") || "";
+  }
+
+  // Foundit (formerly Monster India)
+  else if (location.hostname.includes("foundit")) {
+    result.role    = _text("h1.job-title, .jobTitle, h1") || "";
+    result.company = _text(".company-name, .companyName, .comp-name") || "";
+    result.jd_text = _text(".job-description, .jobDescription, #JobDescription") || "";
+  }
+
+  // Shine
+  else if (location.hostname.includes("shine.com")) {
+    result.role    = _text("h1.job-title, .title, h1") || "";
+    result.company = _text(".company-name, .comp-name") || "";
+    result.jd_text = _text(".job-description, .description, .job-detail") || "";
+  }
+
+  // Internshala
+  else if (location.hostname.includes("internshala")) {
+    result.role    = _text("h1.profile-heading, .profile, h1") || "";
+    result.company = _text(".company-name a, .company_name, .company") || "";
+    result.jd_text = _text(".internship_details, .job-description, #about_internship") || "";
+  }
+
+  // Generic fallback (works surprisingly well on most job boards)
   else {
     result.role    = _text("h1") || document.title || "";
-    result.company = document.title.split(/[-|@]/).slice(-1)[0]?.trim() || "";
-    result.jd_text = _text("main, article, .job-description, #job-description, .description") || "";
+    result.company = document.title.split(/[-|@·]/).slice(-1)[0]?.trim() || "";
+    result.jd_text = _text([
+      "main", "article", "#job-description", ".job-description",
+      ".description", "#description", ".job-details", ".posting-content",
+    ].join(", ")) || "";
   }
 
   // Trim

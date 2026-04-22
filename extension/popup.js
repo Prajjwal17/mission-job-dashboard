@@ -78,20 +78,45 @@ function _pageScrapeFn() {
     company = document.title.split("|").slice(-1)[0]?.trim() || "";
     jd      = qAll("[data-automation-id='jobPostingDescription']", ".wd-text", "main");
   } else if (h.includes("hirist")) {
-    role    = qAll("h1.jd-header-title", "h1");
-    // Company sits in the meta line: "Connect2Talent • 1-5 Years • ₹8-16 LPA"
-    company = qAll(".jd-header-comp-name", ".company-name", ".recruiter-company", ".comp-name");
+    role = qAll("h1.jd-header-title", "h1");
+
+    // 1. Dedicated CSS selectors
+    company = qAll(".jd-header-comp-name", ".company-name", ".recruiter-company",
+                   ".comp-name", ".jd-company", ".employer-name");
+
+    // 2. document.title — hirist often: "Role at Company | hirist.tech"
     if (!company) {
-      // Walk siblings of h1 for "CompanyName • X Yrs" pattern
-      const h1 = document.querySelector("h1");
-      let sib = h1?.nextElementSibling;
-      for (let i = 0; i < 5 && sib; i++, sib = sib.nextElementSibling) {
-        const t = sib.innerText || "";
-        if (t.includes("•")) { company = t.split("•")[0].trim(); break; }
+      const m = document.title.match(/\bat\s+([^|\-–\n]+)/i);
+      if (m) company = m[1].trim();
+    }
+
+    // 3. Scan all short elements for "Name • digit" separator pattern
+    if (!company) {
+      const sepRx = /^(.+?)\s*[•·|]\s*\d/;
+      for (const el of document.querySelectorAll("p,div,span,h2,h3,li")) {
+        const t = (el.innerText || "").trim();
+        const mx = t.match(sepRx);
+        if (mx && el.children.length < 4 && t.length < 200) {
+          company = mx[1].trim();
+          break;
+        }
       }
     }
+
+    // 4. h1 next-sibling walk
+    if (!company) {
+      let sib = document.querySelector("h1")?.nextElementSibling;
+      for (let i = 0; i < 8 && sib; i++, sib = sib.nextElementSibling) {
+        const t = (sib.innerText || "").trim();
+        if (/[•·|]/.test(t) && t.length < 200) { company = t.split(/[•·|]/)[0].trim(); break; }
+      }
+    }
+
     jd = qAll(".job-description", ".jd-text", ".job-detail-body", ".inner-desc",
-              ".jd-content", ".description-wrapper", ".description-section", "#jobDescription");
+              ".jd-content", ".description-wrapper", ".description-section",
+              "#jobDescription", ".desc-box", ".jd-desc", ".job-desc",
+              "section.description", ".posting-content", ".job-detail-section",
+              ".description", "article", "main section", "main");
   } else if (h.includes("naukri.com")) {
     role    = qAll("h1.jd-header-title", "h1");
     company = qAll(".jd-header-comp-name a", ".comp-name a", ".jd-header-comp-name");

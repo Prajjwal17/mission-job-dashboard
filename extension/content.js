@@ -1,0 +1,216 @@
+/**
+ * content.js — Mission Job content script (Manifest v3)
+ * Runs on LinkedIn / Workday / Lever / Greenhouse / Ashby / SmartRecruiters
+ *
+ * Responsibilities:
+ *   1. scrapeJD()        — extract job title + description text from page
+ *   2. detectFields()    — find all fillable form inputs + fuzzy-match them
+ *   3. fillForm(data)    — set values on matched inputs, trigger React/Vue events
+ *   4. Message handler   — listens for commands from popup.js via chrome.runtime
+ */
+
+const API_BASE = "http://localhost:8000";
+
+// ── 1. JD Scraping ────────────────────────────────────────────────────────────
+
+function scrapeJD() {
+  const result = { company: "", role: "", jd_text: "", url: location.href };
+
+  // LinkedIn Easy Apply
+  if (location.hostname.includes("linkedin.com")) {
+    result.role    = _text(".jobs-unified-top-card__job-title, h1.t-24") || "";
+    result.company = _text(".jobs-unified-top-card__company-name, .job-details-jobs-unified-top-card__company-name") || "";
+    result.jd_text = _text(".jobs-description__content, .jobs-box__html-content") || "";
+  }
+
+  // Lever
+  else if (location.hostname.includes("lever.co")) {
+    result.role    = _text(".posting-headline h2") || _text("h2") || "";
+    result.company = _text(".main-header-logo img")
+      ? document.querySelector(".main-header-logo img")?.alt || ""
+      : _text(".posting-categories .sort-by-team") || "";
+    result.jd_text = _text(".posting-description") || "";
+  }
+
+  // Greenhouse
+  else if (location.hostname.includes("greenhouse.io")) {
+    result.role    = _text("h1.app-title") || _text("h1") || "";
+    result.company = document.title.split("|").slice(-1)[0]?.trim() || "";
+    result.jd_text = _text("#content") || _text(".job-post-content") || "";
+  }
+
+  // Workday / myworkdayjobs
+  else if (location.hostname.includes("workday.com") || location.hostname.includes("myworkdayjobs.com")) {
+    result.role    = _text("[data-automation-id='jobPostingHeader'] h2, h2[data-automation-id]") || _text("h2") || "";
+    result.company = document.title.split("|").slice(-1)[0]?.trim() || "";
+    result.jd_text = _text("[data-automation-id='jobPostingDescription'], .wd-text") || "";
+  }
+
+  // Ashby
+  else if (location.hostname.includes("ashbyhq.com")) {
+    result.role    = _text("h1") || "";
+    result.company = _text(".ashby-job-posting-company-name") || document.title.split("|").slice(-1)[0]?.trim() || "";
+    result.jd_text = _text(".ashby-application-form-container, .job-posting-description") || "";
+  }
+
+  // Generic fallback
+  else {
+    result.role    = _text("h1") || document.title || "";
+    result.company = document.title.split(/[-|@]/).slice(-1)[0]?.trim() || "";
+    result.jd_text = _text("main, article, .job-description, #job-description, .description") || "";
+  }
+
+  // Trim
+  result.jd_text = result.jd_text.slice(0, 6000).trim();
+  result.role    = result.role.trim();
+  result.company = result.company.trim();
+
+  return result;
+}
+
+function _text(selector) {
+  const el = document.querySelector(selector);
+  return el ? el.innerText || el.textContent : null;
+}
+
+
+// ── 2. Field Detection ────────────────────────────────────────────────────────
+
+function detectFields() {
+  const inputs = [
+    ...document.querySelectorAll("input:not([type=hidden]):not([type=submit]):not([type=button]):not([type=file])"),
+    ...document.querySelectorAll("textarea"),
+    ...document.querySelectorAll("select"),
+  ];
+
+  const detected = [];
+  for (const el of inputs) {
+    const key = fuzzyMatch(el);  // from mappings.js
+    if (key) {
+      detected.push({
+        key,
+        tag:         el.tagName.toLowerCase(),
+        type:        el.type || "text",
+        id:          el.id,
+        name:        el.name,
+        placeholder: el.placeholder,
+      });
+    }
+  }
+  return detected;
+}
+
+
+// ── 3. Form Fill ──────────────────────────────────────────────────────────────
+
+/**
+ * Fill all matched form fields with candidate profile values.
+ * Handles React synthetic events (Workday uses React internally).
+ */
+async function fillForm(profile) {
+  // Merge cached cover letter into profile
+  const stored = await chrome.storage.local.get("cover_letter");
+  if (stored.cover_letter) profile.cover_letter = stored.cover_letter;
+
+  const inputs = [
+    ...document.querySelectorAll("input:not([type=hidden]):not([type=submit]):not([type=button]):not([type=file])"),
+    ...document.querySelectorAll("textarea"),
+  ];
+
+  let filled = 0;
+  for (const el of inputs) {
+    const key = fuzzyMatch(el);
+    if (!key || !profile[key]) continue;
+
+    const value = profile[key];
+
+    // Native input value setter (bypasses React's controlled component lock)
+    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+      el.tagName === "TEXTAREA" ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype,
+      "value"
+    )?.set;
+
+    if (nativeInputValueSetter) {
+      nativeInputValueSetter.call(el, value);
+    } else {
+      el.value = value;
+    }
+
+    // Fire events React/Vue/Angular listen to
+    el.dispatchEvent(new Event("input",  { bubbles: true }));
+    el.dispatchEvent(new Event("change", { bubbles: true }));
+    el.dispatchEvent(new Event("blur",   { bubbles: true }));
+    filled++;
+  }
+
+  // Handle <select> dropdowns (country, state, etc.)
+  const selects = document.querySelectorAll("select");
+  for (const sel of selects) {
+    const key = fuzzyMatch(sel);
+    if (!key || !profile[key]) continue;
+    const val = profile[key].toLowerCase();
+    for (const opt of sel.options) {
+      if (opt.text.toLowerCase().includes(val) || opt.value.toLowerCase().includes(val)) {
+        sel.value = opt.value;
+        sel.dispatchEvent(new Event("change", { bubbles: true }));
+        filled++;
+        break;
+      }
+    }
+  }
+
+  return filled;
+}
+
+
+// ── 4. Message Handler ────────────────────────────────────────────────────────
+
+chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
+  (async () => {
+    switch (msg.action) {
+
+      case "SCRAPE_JD": {
+        const jd = scrapeJD();
+        // POST to backend for structured parsing
+        try {
+          const res = await fetch(`${API_BASE}/scrape-job`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(jd),
+          });
+          if (!res.ok) throw new Error(`API ${res.status}`);
+          const parsed = await res.json();
+          // Cache parsed JD
+          await chrome.storage.local.set({ current_job: parsed });
+          sendResponse({ ok: true, data: parsed });
+        } catch (err) {
+          // Fallback: return raw scrape without AI parsing
+          await chrome.storage.local.set({ current_job: jd });
+          sendResponse({ ok: false, data: jd, error: err.message });
+        }
+        break;
+      }
+
+      case "DETECT_FIELDS": {
+        const fields = detectFields();
+        sendResponse({ ok: true, fields });
+        break;
+      }
+
+      case "FILL_FORM": {
+        const profile = { ...CANDIDATE, ...(msg.overrides || {}) };
+        const count = await fillForm(profile);
+        sendResponse({ ok: true, filled: count });
+        break;
+      }
+
+      default:
+        sendResponse({ ok: false, error: `Unknown action: ${msg.action}` });
+    }
+  })();
+
+  return true; // keep message channel open for async response
+});
+
+// Signal to popup that content script is ready
+chrome.runtime.sendMessage({ action: "CONTENT_READY", url: location.href }).catch(() => {});

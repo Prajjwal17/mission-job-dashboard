@@ -1,0 +1,43 @@
+{
+  "manifest_version": 3,
+  "name": "Mission Job Assistant",
+  "version": "1.0.0",
+  "description": "Auto-fill job applications, scrape JDs, generate tailored cover letters via your local FastAPI backend.",
+
+  "permissions": ["storage", "activeTab", "scripting", "tabs"],
+  "host_permissions": [
+    "http://localhost:8000/*",
+    "https://*.linkedin.com/*",
+    "https://*.workday.com/*",
+    "https://*.myworkdayjobs.com/*",
+    "https://*.lever.co/*",
+    "https://*.greenhouse.io/*",
+    "https://*.ashbyhq.com/*",
+    "https://*.smartrecruiters.com/*"
+  ],
+
+  "background": {
+    "service_worker": "background.js"
+  },
+
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Mission Job"
+  },
+
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.linkedin.com/*",
+        "https://*.workday.com/*",
+        "https://*.myworkdayjobs.com/*",
+        "https://*.lever.co/*",
+        "https://*.greenhouse.io/*",
+        "https://*.ashbyhq.com/*",
+        "https://*.smartrecruiters.com/*"
+      ],
+      "js": ["mappings.js", "content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

@@ -62,19 +62,44 @@ function scrapeJD() {
 
   // Hirist (hirist.tech / hirist.com)
   else if (location.hostname.includes("hirist")) {
-    result.role    = _text("h1.jd-header-title, h1.job-title, .job-detail-header h1, h1") || "";
-    // Try multiple company selectors — hirist uses several layouts
+    result.role = _text("h1") || "";
+
+    // Company: hirist shows "CompanyName • X Years • ₹ Range • City" as a <p>/<div> under h1
+    // Try dedicated selectors first, then parse the meta line
     result.company = _text([
       ".jd-header-comp-name", ".company-name", ".job-company-name",
-      ".comp-name", ".recruiter-company", ".company",
-      "a[href*='/company/']", ".jd-company",
+      ".comp-name", ".recruiter-company", ".jd-company",
+      "a[href*='/company/']",
     ].join(", ")) || "";
-    // Fallback: grab text after "•" separator in header meta (e.g. "Connect2Talent • 1-5 Yrs")
+
     if (!result.company) {
-      const meta = _text(".jd-header-meta, .job-meta, .header-meta");
-      if (meta) result.company = meta.split("•")[0].trim();
+      // Parse the "Connect2Talent • 1 - 5 Years • ₹8-16 LPA • Bangalore" meta line
+      const h1 = document.querySelector("h1");
+      if (h1) {
+        // Grab the next sibling element — usually a <p> or <div> with the meta
+        let sibling = h1.nextElementSibling;
+        while (sibling && !sibling.innerText?.includes("•")) sibling = sibling.nextElementSibling;
+        if (sibling) result.company = sibling.innerText.split("•")[0].trim();
+      }
     }
-    result.jd_text = _text(".job-description, .jd-text, .job-detail-body, .description-section, #jobDescription") || "";
+
+    if (!result.company) {
+      // Last resort: scan all <p> and <div> for one containing "• Years •" pattern
+      for (const el of document.querySelectorAll("p, div, span")) {
+        const t = el.innerText || "";
+        if (/•\s*\d.*(years?|yrs?)/i.test(t) && el.children.length < 4) {
+          result.company = t.split("•")[0].trim();
+          break;
+        }
+      }
+    }
+
+    result.jd_text = _text([
+      ".job-description", ".jd-text", ".job-detail-body",
+      ".description-section", "#jobDescription", ".inner-desc",
+      ".jd-content", ".description-wrapper", ".desc-content",
+      ".job-detail", "section.description", ".posting-description",
+    ].join(", ")) || "";
   }
 
   // Job24x7
@@ -134,6 +159,23 @@ function scrapeJD() {
       "main", "article", "#job-description", ".job-description",
       ".description", "#description", ".job-details", ".posting-content",
     ].join(", ")) || "";
+  }
+
+  // Universal fallback — if platform scraper got no JD text, grab largest text block on page
+  if (!result.jd_text) {
+    const candidates = [...document.querySelectorAll("div, section, article")];
+    let best = null, bestLen = 0;
+    for (const el of candidates) {
+      // Skip nav/header/footer/script areas
+      const tag = el.tagName.toLowerCase();
+      const cls = (el.className + " " + el.id).toLowerCase();
+      if (/nav|header|footer|sidebar|menu|cookie|chat|modal/.test(cls)) continue;
+      const t = (el.innerText || "").trim();
+      if (t.length > bestLen && t.length < 15000 && el.children.length < 50) {
+        best = t; bestLen = t.length;
+      }
+    }
+    if (best) result.jd_text = best;
   }
 
   // Trim

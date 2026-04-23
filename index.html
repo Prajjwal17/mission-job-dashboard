@@ -10291,13 +10291,26 @@
 
   // ── SUPABASE + APPLICATION BOARD ──
   // ── STORAGE: localStorage + GitHub Gist ─────────────────────────────────────
-  const LS_APPS  = 'mj_applications';
-  const LS_TOKEN = 'mj_gh_token';
-  const LS_GIST  = 'mj_gist_id';
-  const LS_MODE  = 'mj_device_mode'; // 'primary' | 'secondary'
+  const LS_APPS     = 'mj_applications';
+  const LS_TOKEN    = 'mj_gh_token';
+  const LS_GIST     = 'mj_gist_id';
+  const LS_MODE     = 'mj_device_mode'; // 'primary' | 'secondary'
+  const LS_HR_FLAGS = 'mj_hr_flags';
 
   function lsLoad() { try { return JSON.parse(localStorage.getItem(LS_APPS) || '[]'); } catch { return []; } }
   function lsSave(apps) { localStorage.setItem(LS_APPS, JSON.stringify(apps)); }
+
+  let hrFlags = {};
+  function _loadHRFlags() { try { hrFlags = JSON.parse(localStorage.getItem(LS_HR_FLAGS) || '{}'); } catch { hrFlags = {}; } }
+  function _saveHRFlags() { localStorage.setItem(LS_HR_FLAGS, JSON.stringify(hrFlags)); }
+  _loadHRFlags();
+  // Pre-flag known invalid/moved contacts (user-verified 2026-04-23)
+  (function() {
+    var invalid = ['akhila@estuate.com','akriti@elsner.in','albino@pixis.ai','aman.khan@areteanstech.com','amiit.avaasthi@altudo.co'];
+    var changed = false;
+    invalid.forEach(function(e) { if (!hrFlags[e]) { hrFlags[e] = 'invalid'; changed = true; } });
+    if (changed) _saveHRFlags();
+  })();
   function getToken() { return localStorage.getItem(LS_TOKEN) || ''; }
   function getGistId() { return localStorage.getItem(LS_GIST) || ''; }
   function isSecondary() { return localStorage.getItem(LS_MODE) === 'secondary'; }
@@ -12125,9 +12138,25 @@ Format your response in clean markdown with headers for each story.`,
     if (!append) tbody.innerHTML = '';
     tbody.innerHTML += chunk.map(function(c,i) {
       const sent = contactedEmails.has(c.e) || contactedNames.has(c.n.trim().toLowerCase());
-      const emailBtn = sent
-        ? '<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;border:1px solid rgba(74,222,128,0.35);background:rgba(74,222,128,0.08);color:#4ade80;font-size:0.72rem;font-weight:700;font-family:\'DM Sans\';white-space:nowrap;" title="Cold email already sent">✅ Sent</span>'
-        : '<button data-hrn="' + _esc(c.n) + '" data-hrc="' + _esc(c.c||'') + '" data-hre="' + _esc(c.e) + '" data-hrt="' + _esc(c.t||'') + '" onclick="openHREmail(this.dataset.hrn,this.dataset.hrc,this.dataset.hre,this.dataset.hrt)" style="padding:4px 10px;border-radius:6px;border:1px solid rgba(244,63,94,0.35);background:rgba(244,63,94,0.08);color:#f43f5e;font-size:0.72rem;font-weight:600;cursor:pointer;font-family:\'DM Sans\';white-space:nowrap;transition:all 0.15s;" onmouseover="this.style.background=\'rgba(244,63,94,0.18)\'" onmouseout="this.style.background=\'rgba(244,63,94,0.08)\'">📧 Email</button>';
+      const flag  = hrFlags[c.e];
+      const esc_e = c.e.replace(/'/g, "\\'");
+      const flagBtn = '<button onclick="(function(b){var m=b.nextElementSibling;m.style.display=m.style.display===\'block\'?\'none\':\'block\';setTimeout(function(){document.addEventListener(\'click\',function h(){m.style.display=\'none\';document.removeEventListener(\'click\',h)},{once:true})},0)})(this)" style="padding:2px 5px;background:transparent;border:1px solid var(--border);border-radius:4px;color:var(--muted);font-size:0.65rem;cursor:pointer;line-height:1;" title="Flag contact">⚑</button>'
+               + '<div style="display:none;position:absolute;right:0;top:100%;z-index:999;background:#1a1b26;border:1px solid var(--border);border-radius:6px;min-width:150px;box-shadow:0 4px 16px rgba(0,0,0,0.5);overflow:hidden;">'
+               +   '<div onclick="flagHR(\'' + esc_e + '\',\'invalid\');event.stopPropagation()" style="padding:7px 12px;font-size:0.75rem;cursor:pointer;color:#f87171;" onmouseover="this.style.background=\'rgba(248,113,113,0.1)\'" onmouseout="this.style.background=\'\'">❌ Invalid Email</div>'
+               +   '<div onclick="flagHR(\'' + esc_e + '\',\'moved\');event.stopPropagation()" style="padding:7px 12px;font-size:0.75rem;cursor:pointer;color:#facc15;" onmouseover="this.style.background=\'rgba(250,204,21,0.1)\'" onmouseout="this.style.background=\'\'">🔄 Company Changed</div>'
+               +   (flag ? '<div onclick="flagHR(\'' + esc_e + '\',\'clear\');event.stopPropagation()" style="padding:7px 12px;font-size:0.75rem;cursor:pointer;color:var(--muted);border-top:1px solid var(--border);" onmouseover="this.style.background=\'rgba(255,255,255,0.05)\'" onmouseout="this.style.background=\'\'">✕ Clear Flag</div>' : '')
+               + '</div>';
+      let mainBadge;
+      if (flag === 'invalid') {
+        mainBadge = '<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;border:1px solid rgba(248,113,113,0.35);background:rgba(248,113,113,0.08);color:#f87171;font-size:0.72rem;font-weight:700;font-family:\'DM Sans\';white-space:nowrap;" title="Email does not exist">❌ Invalid</span>';
+      } else if (flag === 'moved') {
+        mainBadge = '<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;border:1px solid rgba(250,204,21,0.35);background:rgba(250,204,21,0.08);color:#facc15;font-size:0.72rem;font-weight:700;font-family:\'DM Sans\';white-space:nowrap;" title="Person has changed company">🔄 Moved</span>';
+      } else if (sent) {
+        mainBadge = '<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;border:1px solid rgba(74,222,128,0.35);background:rgba(74,222,128,0.08);color:#4ade80;font-size:0.72rem;font-weight:700;font-family:\'DM Sans\';white-space:nowrap;" title="Cold email already sent">✅ Sent</span>';
+      } else {
+        mainBadge = '<button data-hrn="' + _esc(c.n) + '" data-hrc="' + _esc(c.c||'') + '" data-hre="' + _esc(c.e) + '" data-hrt="' + _esc(c.t||'') + '" onclick="openHREmail(this.dataset.hrn,this.dataset.hrc,this.dataset.hre,this.dataset.hrt)" style="padding:4px 10px;border-radius:6px;border:1px solid rgba(244,63,94,0.35);background:rgba(244,63,94,0.08);color:#f43f5e;font-size:0.72rem;font-weight:600;cursor:pointer;font-family:\'DM Sans\';white-space:nowrap;transition:all 0.15s;" onmouseover="this.style.background=\'rgba(244,63,94,0.18)\'" onmouseout="this.style.background=\'rgba(244,63,94,0.08)\'">📧 Email</button>';
+      }
+      const emailBtn = '<div style="display:inline-flex;align-items:center;gap:4px;position:relative;">' + mainBadge + flagBtn + '</div>';
       return '<tr style="border-bottom:1px solid var(--border);" onmouseover="this.style.background=\'rgba(255,255,255,0.02)\'" onmouseout="this.style.background=\'\'">' +
         '<td style="padding:9px 12px;color:var(--muted);font-family:\'JetBrains Mono\';font-size:0.7rem;">' + (start+i+1) + '</td>' +
         '<td style="padding:9px 12px;font-weight:500;">' + _esc(c.n) + '</td>' +
@@ -12140,6 +12169,13 @@ Format your response in clean markdown with headers for each story.`,
     }).join('');
     const btn = document.getElementById('hr-load-more');
     if (btn) btn.style.display = end >= total ? 'none' : 'inline-block';
+  }
+
+  function flagHR(email, flag) {
+    if (flag === 'clear') { delete hrFlags[email]; }
+    else { hrFlags[email] = flag; }
+    _saveHRFlags();
+    hrPage = 0; renderHR();
   }
 
   function copyAllEmails() {

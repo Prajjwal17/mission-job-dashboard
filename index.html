@@ -11666,9 +11666,16 @@ Format your response in clean markdown with headers for each story.`,
     window.open(gmailUrl, '_blank');
 
     const newApp = {
-      id: Date.now(), company, role: focusLabels[focus] + ' Outreach',
-      status: 'Cold Outreach', date: new Date().toISOString().split('T')[0],
-      contact: name, notes: 'Cold email sent via Dashboard. Focus: ' + focus + '.'
+      id: Date.now(),
+      title: name + ' @ ' + company,
+      company,
+      role: focusLabels[focus] + ' Outreach',
+      source: 'Mail',
+      status: 'Cold Outreach',
+      date: new Date().toISOString().split('T')[0],
+      contact: name,
+      hr_email: email,
+      notes: 'Cold email sent via Dashboard. Focus: ' + focus + '.'
     };
     applications.push(newApp);
     lsSave(applications);
@@ -11676,6 +11683,8 @@ Format your response in clean markdown with headers for each story.`,
     gistSync(applications);
     showToast('Logged outreach to ' + company + ' ✅', 'success', 3000);
     closeHREmailModal();
+    const hrTbody = document.getElementById('hr-table-body');
+    if (hrTbody && hrTbody.children.length) { hrPage = 0; renderHR(); }
   }
 
   function openHREmail(name, company, email, title) {
@@ -12095,11 +12104,16 @@ Format your response in clean markdown with headers for each story.`,
     const total = filtered.length;
     const end = (hrPage+1)*HR_PAGE_SIZE;
     document.getElementById('hr-count-label').textContent = 'Showing ' + Math.min(end,total) + ' of ' + total + ' contacts';
+    const contactedEmails = new Set(applications.filter(function(a){ return a.hr_email; }).map(function(a){ return a.hr_email; }));
     const tbody = document.getElementById('hr-table-body');
     const start = append ? hrPage*HR_PAGE_SIZE : 0;
     const chunk = filtered.slice(start, end);
     if (!append) tbody.innerHTML = '';
     tbody.innerHTML += chunk.map(function(c,i) {
+      const sent = contactedEmails.has(c.e);
+      const emailBtn = sent
+        ? '<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;border:1px solid rgba(74,222,128,0.35);background:rgba(74,222,128,0.08);color:#4ade80;font-size:0.72rem;font-weight:700;font-family:\'DM Sans\';white-space:nowrap;" title="Cold email already sent">✅ Sent</span>'
+        : '<button data-hrn="' + _esc(c.n) + '" data-hrc="' + _esc(c.c||'') + '" data-hre="' + _esc(c.e) + '" data-hrt="' + _esc(c.t||'') + '" onclick="openHREmail(this.dataset.hrn,this.dataset.hrc,this.dataset.hre,this.dataset.hrt)" style="padding:4px 10px;border-radius:6px;border:1px solid rgba(244,63,94,0.35);background:rgba(244,63,94,0.08);color:#f43f5e;font-size:0.72rem;font-weight:600;cursor:pointer;font-family:\'DM Sans\';white-space:nowrap;transition:all 0.15s;" onmouseover="this.style.background=\'rgba(244,63,94,0.18)\'" onmouseout="this.style.background=\'rgba(244,63,94,0.08)\'">📧 Email</button>';
       return '<tr style="border-bottom:1px solid var(--border);" onmouseover="this.style.background=\'rgba(255,255,255,0.02)\'" onmouseout="this.style.background=\'\'">' +
         '<td style="padding:9px 12px;color:var(--muted);font-family:\'JetBrains Mono\';font-size:0.7rem;">' + (start+i+1) + '</td>' +
         '<td style="padding:9px 12px;font-weight:500;">' + _esc(c.n) + '</td>' +
@@ -12107,7 +12121,7 @@ Format your response in clean markdown with headers for each story.`,
         '<td style="padding:9px 12px;color:var(--muted);font-size:0.75rem;">' + _esc(c.t) + '</td>' +
         '<td style="padding:9px 12px;"><a href="mailto:' + _esc(c.e) + '" style="color:var(--accent3);text-decoration:none;font-family:\'JetBrains Mono\';font-size:0.75rem;">' + _esc(c.e) + '</a></td>' +
         '<td style="padding:9px 12px;"><button onclick="navigator.clipboard.writeText(\'' + c.e.replace(/'/g,"\\'") + '\').then(function(){this.textContent=\'✓\';var b=this;setTimeout(function(){b.textContent=\'📋\'},1000)}.bind(this))" style="background:transparent;border:none;cursor:pointer;color:var(--muted);font-size:0.85rem;" title="Copy email"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="9" y1="12" x2="15" y2="12"/></svg></button></td>' +
-        '<td style="padding:9px 12px;"><button data-hrn="' + _esc(c.n) + '" data-hrc="' + _esc(c.c||'') + '" data-hre="' + _esc(c.e) + '" data-hrt="' + _esc(c.t||'') + '" onclick="openHREmail(this.dataset.hrn,this.dataset.hrc,this.dataset.hre,this.dataset.hrt)" style="padding:4px 10px;border-radius:6px;border:1px solid rgba(244,63,94,0.35);background:rgba(244,63,94,0.08);color:#f43f5e;font-size:0.72rem;font-weight:600;cursor:pointer;font-family:\'DM Sans\';white-space:nowrap;transition:all 0.15s;" onmouseover="this.style.background=\'rgba(244,63,94,0.18)\'" onmouseout="this.style.background=\'rgba(244,63,94,0.08)\'">📧 Email</button></td>' +
+        '<td style="padding:9px 12px;">' + emailBtn + '</td>' +
         '</tr>';
     }).join('');
     const btn = document.getElementById('hr-load-more');

@@ -9591,6 +9591,78 @@
 
 
 <!-- APPLICATION LOGGER MODAL -->
+<!-- HR Cold Email Modal -->
+<div id="hrEmailModal" class="modal" onclick="if(event.target===this)closeHREmailModal()">
+  <div class="modal-content" style="max-width:680px;width:95%;max-height:92vh;overflow-y:auto;">
+    <div class="modal-header" style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
+      <div>
+        <div style="font-family:'Bebas Neue';font-size:1.4rem;letter-spacing:1px;color:#f43f5e;">📧 COLD EMAIL</div>
+        <div id="hrEmailModal-for" style="font-size:0.78rem;color:var(--muted);font-family:'JetBrains Mono';margin-top:2px;"></div>
+      </div>
+      <button onclick="closeHREmailModal()" style="background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer;line-height:1;padding:0 4px;">&times;</button>
+    </div>
+
+    <!-- TO: bar -->
+    <div style="display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:14px;">
+      <span style="font-size:0.7rem;color:var(--muted);font-family:'JetBrains Mono';white-space:nowrap;">TO:</span>
+      <span id="hrEmailModal-addr" style="flex:1;font-family:'JetBrains Mono';font-size:0.82rem;color:var(--accent3);"></span>
+      <button onclick="hrEmailCopyAddr()" id="hrEmail-copy-addr-btn" style="padding:4px 10px;border-radius:5px;border:1px solid var(--border);background:none;color:var(--muted);font-size:0.72rem;cursor:pointer;font-family:'JetBrains Mono';transition:all 0.15s;" onmouseover="this.style.borderColor='var(--accent3)';this.style.color='var(--accent3)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">Copy</button>
+      <a id="hrEmail-mailto-btn" href="#" style="padding:4px 10px;border-radius:5px;border:1px solid rgba(6,182,212,0.3);background:rgba(6,182,212,0.08);color:var(--accent2);font-size:0.72rem;font-family:'JetBrains Mono';text-decoration:none;white-space:nowrap;">Open Gmail ↗</a>
+    </div>
+
+    <!-- Controls row -->
+    <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;margin-bottom:14px;align-items:flex-end;">
+      <div>
+        <label class="ce-label">Email Focus</label>
+        <select class="ce-select" id="hrce-focus" onchange="hrEmailGenerate()">
+          <option value="ai">AI / Agentic Systems</option>
+          <option value="data">Data Engineering / Analytics</option>
+          <option value="fullstack">Full-Stack / Web Dev</option>
+          <option value="embedded">Embedded / Hardware</option>
+          <option value="general">General (any role)</option>
+        </select>
+      </div>
+      <div>
+        <label class="ce-label">Specific area <span style="opacity:0.5">(optional)</span></label>
+        <input class="ce-input" id="hrce-specific" placeholder="e.g. their fraud detection pipeline…" oninput="hrEmailGenerate()" />
+      </div>
+      <button class="ce-generate-btn" style="padding:8px 14px;font-size:0.82rem;" onclick="hrEmailGenerate()">↺ Regenerate</button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="ce-tabs" style="margin-bottom:10px;">
+      <button class="ce-tab active" id="hrce-tab-initial"  onclick="switchHRCeTab('initial')">Initial Email</button>
+      <button class="ce-tab"        id="hrce-tab-followup" onclick="switchHRCeTab('followup')">Follow-Up (Day 4–5)</button>
+    </div>
+
+    <!-- Initial panel -->
+    <div id="hrce-panel-initial" style="display:flex;flex-direction:column;gap:8px;">
+      <div class="ce-subject-row">
+        <span class="ce-subject-label">SUBJECT</span>
+        <span class="ce-subject-text" id="hrce-subj-initial"></span>
+        <button class="ce-copy-small" onclick="ceCopyText('hrce-subj-initial',this)">Copy</button>
+      </div>
+      <div class="ce-body-text" id="hrce-body-initial"></div>
+      <button class="ce-copy-body" style="align-self:flex-end;" onclick="ceCopyBody('hrce-body-initial',this)">Copy Email Body</button>
+    </div>
+
+    <!-- Follow-up panel -->
+    <div id="hrce-panel-followup" style="display:none;flex-direction:column;gap:8px;">
+      <div class="ce-subject-row">
+        <span class="ce-subject-label">SUBJECT</span>
+        <span class="ce-subject-text" id="hrce-subj-followup"></span>
+        <button class="ce-copy-small" onclick="ceCopyText('hrce-subj-followup',this)">Copy</button>
+      </div>
+      <div class="ce-body-text" id="hrce-body-followup"></div>
+      <button class="ce-copy-body" style="align-self:flex-end;" onclick="ceCopyBody('hrce-body-followup',this)">Copy Email Body</button>
+    </div>
+
+    <div class="ce-tip" style="margin-top:14px;">
+      <strong>Workflow:</strong> Copy subject → Gmail subject. Copy body → Gmail compose. ▾ next to Send → <strong>Schedule send</strong> for follow-up.
+    </div>
+  </div>
+</div>
+
 <!-- Legacy logModal (kept for backward compat with company card 📋 buttons) -->
 <div id="logModal" class="modal" style="display:none;"></div>
 
@@ -11517,6 +11589,53 @@ Format your response in clean markdown with headers for each story.`,
     document.getElementById('ce-tab-followup').classList.toggle('active', tab === 'followup');
   }
 
+  /* ── HR Email Modal ── */
+  let _hrEmailCurrent = { name: '', company: '', email: '', title: '' };
+
+  function openHREmail(name, company, email, title) {
+    _hrEmailCurrent = { name, company, email, title };
+    document.getElementById('hrEmailModal-for').textContent = name + (title ? ' · ' + title : '') + (company ? ' · ' + company : '');
+    document.getElementById('hrEmailModal-addr').textContent = email;
+    document.getElementById('hrEmail-mailto-btn').href = 'mailto:' + email;
+    document.getElementById('hrce-specific').value = '';
+    hrEmailGenerate();
+    document.getElementById('hrEmailModal').classList.add('show');
+  }
+
+  function closeHREmailModal() {
+    document.getElementById('hrEmailModal').classList.remove('show');
+  }
+
+  function hrEmailGenerate() {
+    const { name, company, email } = _hrEmailCurrent;
+    const focus    = document.getElementById('hrce-focus').value;
+    const specific = document.getElementById('hrce-specific').value.trim();
+    const focusLabels = { ai: 'Agentic AI & LangChain systems', data: 'data engineering & analytics', fullstack: 'full-stack development', embedded: 'embedded systems & signal processing', general: 'AI and engineering' };
+    const hook = CE_HOOKS[focus];
+    const role = 'a suitable role';
+    document.getElementById('hrce-subj-initial').textContent  = hook.subject(role, company);
+    document.getElementById('hrce-body-initial').textContent  = hook.body(name || 'there', company, specific);
+    document.getElementById('hrce-subj-followup').textContent = 'Follow-Up: Application – Prajjwal Pandey';
+    document.getElementById('hrce-body-followup').textContent =
+      'Hi ' + (name || 'there') + ',\n\nI hope you\'re doing well.\n\nI wanted to follow up on my recent application at ' + company + '. I\'m genuinely excited about the opportunity and believe my background in ' + focusLabels[focus] + ' could be a strong fit for your team.\n\nIf there are any open roles or updates, please do let me know.\n\nThank you for your time!\n\nBest regards,\nPrajjwal Pandey\n+91 8278674540 | prajjwalp1707@gmail.com';
+    switchHRCeTab('initial');
+  }
+
+  function switchHRCeTab(tab) {
+    document.getElementById('hrce-panel-initial').style.display  = tab === 'initial'  ? 'flex' : 'none';
+    document.getElementById('hrce-panel-followup').style.display = tab === 'followup' ? 'flex' : 'none';
+    document.getElementById('hrce-tab-initial').classList.toggle('active',  tab === 'initial');
+    document.getElementById('hrce-tab-followup').classList.toggle('active', tab === 'followup');
+  }
+
+  function hrEmailCopyAddr() {
+    const btn = document.getElementById('hrEmail-copy-addr-btn');
+    navigator.clipboard.writeText(_hrEmailCurrent.email).then(() => {
+      btn.textContent = 'Copied!'; btn.style.color = 'var(--accent4)'; btn.style.borderColor = 'var(--accent4)';
+      setTimeout(() => { btn.textContent = 'Copy'; btn.style.color = ''; btn.style.borderColor = ''; }, 2000);
+    });
+  }
+
   function ceCopyText(id, btn) {
     navigator.clipboard.writeText(document.getElementById(id).textContent).then(() => {
       const orig = btn.textContent; btn.textContent = 'Copied!';
@@ -11793,6 +11912,7 @@ Format your response in clean markdown with headers for each story.`,
             <th style="padding:10px 12px;text-align:left;color:var(--muted);font-size:0.72rem;font-family:'JetBrains Mono';font-weight:600;">TITLE</th>
             <th style="padding:10px 12px;text-align:left;color:var(--muted);font-size:0.72rem;font-family:'JetBrains Mono';font-weight:600;">EMAIL</th>
             <th style="padding:10px 12px;"></th>
+            <th style="padding:10px 12px;text-align:left;color:var(--muted);font-size:0.72rem;font-family:'JetBrains Mono';font-weight:600;">COLD EMAIL</th>
           </tr>
         </thead>
         <tbody id="hr-table-body"></tbody>
@@ -11862,6 +11982,7 @@ Format your response in clean markdown with headers for each story.`,
         '<td style="padding:9px 12px;color:var(--muted);font-size:0.75rem;">' + _esc(c.t) + '</td>' +
         '<td style="padding:9px 12px;"><a href="mailto:' + _esc(c.e) + '" style="color:var(--accent3);text-decoration:none;font-family:\'JetBrains Mono\';font-size:0.75rem;">' + _esc(c.e) + '</a></td>' +
         '<td style="padding:9px 12px;"><button onclick="navigator.clipboard.writeText(\'' + c.e.replace(/'/g,"\\'") + '\').then(function(){this.textContent=\'✓\';var b=this;setTimeout(function(){b.textContent=\'📋\'},1000)}.bind(this))" style="background:transparent;border:none;cursor:pointer;color:var(--muted);font-size:0.85rem;" title="Copy email"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="9" y1="12" x2="15" y2="12"/></svg></button></td>' +
+        '<td style="padding:9px 12px;"><button onclick="openHREmail(' + JSON.stringify(c.n) + ',' + JSON.stringify(c.c) + ',' + JSON.stringify(c.e) + ',' + JSON.stringify(c.t||'') + ')" style="padding:4px 10px;border-radius:6px;border:1px solid rgba(244,63,94,0.35);background:rgba(244,63,94,0.08);color:#f43f5e;font-size:0.72rem;font-weight:600;cursor:pointer;font-family:\'DM Sans\';white-space:nowrap;transition:all 0.15s;" onmouseover="this.style.background=\'rgba(244,63,94,0.18)\'" onmouseout="this.style.background=\'rgba(244,63,94,0.08)\'">📧 Email</button></td>' +
         '</tr>';
     }).join('');
     const btn = document.getElementById('hr-load-more');

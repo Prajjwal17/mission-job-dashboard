@@ -10592,6 +10592,19 @@
       _setSyncStatus('error');
       console.warn('loadBoard gist:', e);
     }
+    // Migrate old Cold Outreach entries that lack title / hr_email
+    let migrated = false;
+    applications.forEach(function(a) {
+      if (a.status === 'Cold Outreach') {
+        if (!a.title && (a.contact || a.company)) {
+          a.title = (a.contact || '') + (a.contact && a.company ? ' @ ' : '') + (a.company || '');
+          migrated = true;
+        }
+        if (!a.source) { a.source = 'Mail'; migrated = true; }
+      }
+    });
+    if (migrated) lsSave(applications);
+
     document.getElementById('apps-logged').textContent = applications.length;
     renderBoard();
   }

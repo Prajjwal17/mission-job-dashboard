@@ -8803,6 +8803,7 @@
       <div class="bstat" style="--bstat-color:#94a3b8;"><div class="bstat-num" id="bs-total">0</div><div class="bstat-label">Total</div></div>
       <div class="bstat" style="--bstat-color:#94a3b8;"><div class="bstat-num" id="bs-toapply">0</div><div class="bstat-label">To Apply</div></div>
       <div class="bstat" style="--bstat-color:#06b6d4;"><div class="bstat-num" id="bs-applied">0</div><div class="bstat-label">Applied</div></div>
+      <div class="bstat" style="--bstat-color:#f43f5e;"><div class="bstat-num" id="bs-coldoutreach">0</div><div class="bstat-label">Cold Outreach</div></div>
       <div class="bstat" style="--bstat-color:#f59e0b;"><div class="bstat-num" id="bs-short">0</div><div class="bstat-label">Shortlisted</div></div>
       <div class="bstat" style="--bstat-color:#a78bfa;"><div class="bstat-num" id="bs-interview">0</div><div class="bstat-label">Interview</div></div>
       <div class="bstat" style="--bstat-color:#10b981;"><div class="bstat-num" id="bs-selected">0</div><div class="bstat-label">Selected</div></div>
@@ -8814,6 +8815,7 @@
       <button class="board-filter active" data-status="all">All</button>
       <button class="board-filter" data-status="To Apply">To Apply</button>
       <button class="board-filter" data-status="Applied">Applied</button>
+      <button class="board-filter" data-status="Cold Outreach">Cold Outreach</button>
       <button class="board-filter" data-status="Shortlisted">Shortlisted</button>
       <button class="board-filter" data-status="Interview lined up">Interview</button>
       <button class="board-filter" data-status="Selected">Selected</button>
@@ -10673,9 +10675,10 @@
     const cnt = s => applications.filter(a => a.status === s).length;
     const set = (id, n) => { const el = document.getElementById(id); if (el) el.textContent = n; };
     set('bs-total',     applications.length);
-    set('bs-toapply',   cnt('To Apply'));
-    set('bs-applied',   cnt('Applied'));
-    set('bs-short',     cnt('Shortlisted'));
+    set('bs-toapply',      cnt('To Apply'));
+    set('bs-applied',      cnt('Applied'));
+    set('bs-coldoutreach', cnt('Cold Outreach'));
+    set('bs-short',        cnt('Shortlisted'));
     set('bs-interview', cnt('Interview lined up'));
     set('bs-selected',  cnt('Selected'));
     set('bs-rejected',  cnt('Rejected'));

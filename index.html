@@ -9687,8 +9687,9 @@
 
     <!-- Tabs -->
     <div class="ce-tabs" style="margin-bottom:10px;">
-      <button class="ce-tab active" id="hrce-tab-initial"  onclick="switchHRCeTab('initial')">Initial Email</button>
-      <button class="ce-tab"        id="hrce-tab-followup" onclick="switchHRCeTab('followup')">Follow-Up (Day 4–5)</button>
+      <button class="ce-tab active" id="hrce-tab-initial"      onclick="switchHRCeTab('initial')">Initial Email</button>
+      <button class="ce-tab"        id="hrce-tab-followup"     onclick="switchHRCeTab('followup')">Follow-Up (Day 4–5)</button>
+      <button class="ce-tab"        id="hrce-tab-coverletter"  onclick="switchHRCeTab('coverletter')">📄 Cover Letter</button>
     </div>
 
     <!-- Initial panel -->
@@ -9711,6 +9712,22 @@
       </div>
       <div class="ce-body-text" id="hrce-body-followup"></div>
       <button class="ce-copy-body" style="align-self:flex-end;" onclick="ceCopyBody('hrce-body-followup',this)">Copy Email Body</button>
+    </div>
+
+    <!-- Cover Letter panel -->
+    <div id="hrce-panel-coverletter" style="display:none;flex-direction:column;gap:8px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+        <span style="font-size:0.68rem;color:var(--muted);font-family:'JetBrains Mono';text-transform:uppercase;letter-spacing:1px;">Format</span>
+        <select id="hrce-cl-format" onchange="hrCLGenerate()" style="background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:5px;padding:3px 8px;font-size:0.75rem;font-family:'DM Sans';cursor:pointer;">
+          <option value="standard">Standard (3-para)</option>
+          <option value="story">Story-driven</option>
+          <option value="bullet">Bullet-proof</option>
+        </select>
+      </div>
+      <div class="ce-body-text" id="hrce-body-coverletter" style="min-height:200px;white-space:pre-wrap;line-height:1.7;"></div>
+      <div style="display:flex;gap:8px;align-self:flex-end;">
+        <button class="ce-copy-body" onclick="ceCopyBody('hrce-body-coverletter',this)">Copy Cover Letter</button>
+      </div>
     </div>
 
     <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
@@ -11742,14 +11759,65 @@ Format your response in clean markdown with headers for each story.`,
     document.getElementById('hrce-subj-followup').textContent = 'Follow-Up: Application – Prajjwal Pandey';
     document.getElementById('hrce-body-followup').textContent =
       'Hi ' + (name || 'there') + ',\n\nI hope you\'re doing well.\n\nI wanted to follow up on my recent application at ' + company + '. I\'m genuinely excited about the opportunity and believe my background in ' + focusLabels[focus] + ' could be a strong fit for your team.\n\nIf there are any open roles or updates, please do let me know.\n\nThank you for your time!\n\nBest regards,\nPrajjwal Pandey\n+91 8278674540 | prajjwalp1707@gmail.com';
+    document.getElementById('hrce-body-coverletter').textContent = '';
     switchHRCeTab('initial');
   }
 
   function switchHRCeTab(tab) {
-    document.getElementById('hrce-panel-initial').style.display  = tab === 'initial'  ? 'flex' : 'none';
-    document.getElementById('hrce-panel-followup').style.display = tab === 'followup' ? 'flex' : 'none';
-    document.getElementById('hrce-tab-initial').classList.toggle('active',  tab === 'initial');
-    document.getElementById('hrce-tab-followup').classList.toggle('active', tab === 'followup');
+    ['initial','followup','coverletter'].forEach(function(t) {
+      document.getElementById('hrce-panel-' + t).style.display = tab === t ? 'flex' : 'none';
+      document.getElementById('hrce-tab-'   + t).classList.toggle('active', tab === t);
+    });
+    if (tab === 'coverletter' && !document.getElementById('hrce-body-coverletter').textContent.trim()) hrCLGenerate();
+  }
+
+  function hrCLGenerate() {
+    const { name, company } = _hrEmailCurrent;
+    const focus = document.getElementById('hrce-focus').value;
+    const specific = (document.getElementById('hrce-specific').value || '').trim();
+    const format = (document.getElementById('hrce-cl-format') || {}).value || 'standard';
+    const focusLabels = { ai:'Agentic AI & LangChain', data:'Data Engineering & Analytics', fullstack:'Full-Stack Development', embedded:'Embedded Systems & Signal Processing', general:'Applied AI Engineering' };
+    const focusLabel = focusLabels[focus] || 'Applied AI Engineering';
+
+    const accomplishments = {
+      ai:         ['Engineered a 5-agent LangChain pipeline, reducing manual application time by 15+ hrs/week', 'Achieved 70% increase in resume-to-JD alignment scores across 50+ test cases using RAG integration', 'Built LangGraph Researcher→Writer→Reviewer iterative loop with ATS scoring'],
+      data:       ['Architected end-to-end EDA pipelines reducing processing latency by 40% for 5+ stakeholders', 'Translated 20+ complex datasets into Power BI executive dashboards, improving decision speed by 25%', 'Designed automated data-cleaning workflows cutting manual processing from hours to minutes'],
+      fullstack:  ['Solo-developed 3D cultural platform (Teerth) using Three.js + WebGL, achieving stable 60FPS on mobile', 'Built real-time Mapbox visualization for FMCW radar target detection on ESP32', 'Engineered responsive dashboards serving complex data pipelines with sub-second render times'],
+      embedded:   ['Migrated system architecture from STM32 to ESP32, reducing signal processing latency by 30%', 'Integrated 16-bit ADC achieving 98.5% signal integrity for real-time FMCW radar target detection', 'Standardized DCS protocols at Radico Khaitan, increasing plant operational uptime by 15%'],
+      general:    ['Engineered a 5-agent LangChain pipeline cutting manual work by 15+ hrs/week', 'Achieved 40% latency reduction via automated EDA pipelines at Trainity internship', 'Built YOLOv5 Smart Traffic system with dynamic signal algorithm for Delhi-NCR congestion']
+    };
+    const accs = accomplishments[focus] || accomplishments.general;
+    const salutation = name ? 'Dear ' + name.split(' ')[0] + ',' : 'Dear Hiring Manager,';
+    const roleHint = specific || focusLabel + ' roles';
+
+    let body = '';
+    if (format === 'standard') {
+      body = salutation + '\n\n'
+        + 'I am writing to express my interest in ' + roleHint + ' at ' + (company || 'your organization') + '. As a final-year ECE student at VIT Vellore specializing in ' + focusLabel + ', I have spent the past year building production-grade AI systems that bridge research and real-world impact.\n\n'
+        + 'Three accomplishments that directly reflect what I can bring to ' + (company || 'your team') + ':\n'
+        + '• ' + accs[0] + '\n'
+        + '• ' + accs[1] + '\n'
+        + '• ' + accs[2] + '\n\n'
+        + 'I am particularly drawn to ' + (company || 'your organization') + ' because of the caliber of problems you work on. I would welcome a 15-minute conversation to discuss how my background aligns with your current needs.\n\n'
+        + 'Thank you for your time.\n\nWarm regards,\nPrajjwal Pandey\n+91 8278674540 | prajjwalp1707@gmail.com\nlinkedin.com/in/prajjwal-pandey | github.com/Prajjwal17';
+    } else if (format === 'story') {
+      body = salutation + '\n\n'
+        + 'Six months ago I was manually spending 15+ hours a week on job applications. So I built a 5-agent LangChain pipeline to automate it — and cut that to under 30 minutes. That instinct to engineer solutions rather than endure problems is why I am reaching out to ' + (company || 'you') + '.\n\n'
+        + 'During my internship at Trainity I inherited a messy data stack, rebuilt the EDA pipelines end-to-end, and delivered a 40% reduction in processing latency for 5 internal teams. At my capstone project I migrated a radar system from STM32 to ESP32, dropped latency by 30%, and hit 98.5% signal integrity — all while a deadline was two weeks out.\n\n'
+        + 'I am graduating in May 2026 and actively looking for ' + roleHint + ' roles. If the work at ' + (company || 'your company') + ' excites me enough to cold-email you, it probably excites me enough to do great work there. I would love 15 minutes of your time.\n\n'
+        + 'Prajjwal Pandey\n+91 8278674540 | prajjwalp1707@gmail.com\nlinkedin.com/in/prajjwal-pandey';
+    } else {
+      body = salutation + '\n\n'
+        + 'I am a final-year ECE student at VIT Vellore applying for ' + roleHint + ' at ' + (company || 'your organization') + '. Here is why I am worth a conversation:\n\n'
+        + '✦ ' + accs[0] + '\n'
+        + '✦ ' + accs[1] + '\n'
+        + '✦ ' + accs[2] + '\n\n'
+        + 'SKILLS: Python · LangChain · RAG · LangGraph · FastAPI · React · Three.js · Docker · PyTorch · SQL · ESP32\n\n'
+        + 'EDUCATION: B.Tech ECE, VIT Vellore — graduating May 2026\n\n'
+        + 'I keep things short because I respect your time. Happy to send my resume or jump on a 15-minute call.\n\n'
+        + 'Prajjwal Pandey | +91 8278674540 | prajjwalp1707@gmail.com';
+    }
+    document.getElementById('hrce-body-coverletter').textContent = body;
   }
 
   function hrEmailCopyAddr() {

@@ -1168,6 +1168,67 @@
   .ai-copy-btn.visible { display: flex; align-items: center; justify-content: center; }
   .ai-copy-btn:hover { border-color: var(--accent2); color: var(--accent2); }
 
+  /* ── Cold Email Generator ── */
+  .ai-card-title.coldemail { color: var(--accent5); }
+  .ce-card { grid-column: 1 / -1; }
+  .ce-body { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 900px) { .ce-body { grid-template-columns: 1fr; } }
+  .ce-form { display: flex; flex-direction: column; gap: 10px; }
+  .ce-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .ce-label { font-size: 0.7rem; color: var(--muted); font-family: 'JetBrains Mono'; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 3px; display: block; }
+  .ce-input {
+    width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text);
+    padding: 8px 10px; border-radius: 6px; font-family: 'DM Sans'; font-size: 0.82rem; box-sizing: border-box;
+  }
+  .ce-input:focus { outline: none; border-color: var(--accent5); }
+  .ce-select {
+    width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text);
+    padding: 8px 10px; border-radius: 6px; font-family: 'DM Sans'; font-size: 0.82rem; cursor: pointer;
+  }
+  .ce-select:focus { outline: none; border-color: var(--accent5); }
+  .ce-generate-btn {
+    padding: 10px; border: none; border-radius: 8px; font-weight: 700; font-family: 'DM Sans';
+    font-size: 0.88rem; cursor: pointer; transition: opacity 0.2s;
+    background: linear-gradient(135deg, var(--accent5), #be123c); color: #fff;
+  }
+  .ce-generate-btn:hover { opacity: 0.85; }
+  .ce-output { display: flex; flex-direction: column; gap: 12px; }
+  .ce-tabs { display: flex; gap: 6px; }
+  .ce-tab {
+    padding: 5px 14px; border-radius: 100px; border: 1px solid var(--border);
+    background: transparent; color: var(--muted); font-size: 0.75rem; font-weight: 600;
+    cursor: pointer; font-family: 'DM Sans'; transition: all 0.18s;
+  }
+  .ce-tab.active { border-color: var(--accent5); background: rgba(244,63,94,0.12); color: var(--accent5); }
+  .ce-subject-row {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px;
+  }
+  .ce-subject-label { font-size: 0.7rem; color: var(--muted); font-family: 'JetBrains Mono'; white-space: nowrap; }
+  .ce-subject-text { flex: 1; font-size: 0.8rem; color: var(--text); font-family: 'DM Sans'; }
+  .ce-copy-small {
+    background: none; border: 1px solid var(--border); color: var(--muted); border-radius: 4px;
+    padding: 3px 8px; font-size: 0.68rem; cursor: pointer; font-family: 'JetBrains Mono'; white-space: nowrap; transition: all 0.15s;
+  }
+  .ce-copy-small:hover { border-color: var(--accent5); color: var(--accent5); }
+  .ce-body-text {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    padding: 14px; font-size: 0.82rem; line-height: 1.7; color: var(--text);
+    white-space: pre-wrap; font-family: 'DM Sans'; min-height: 200px;
+  }
+  .ce-copy-body {
+    background: rgba(244,63,94,0.12); border: 1px solid rgba(244,63,94,0.3); color: var(--accent5);
+    padding: 7px 16px; border-radius: 6px; font-size: 0.78rem; font-weight: 700;
+    cursor: pointer; font-family: 'DM Sans'; align-self: flex-end; transition: all 0.2s;
+  }
+  .ce-copy-body:hover { background: rgba(244,63,94,0.22); }
+  .ce-copy-body.copied { background: rgba(16,185,129,0.15); border-color: rgba(16,185,129,0.3); color: var(--accent4); }
+  .ce-tip {
+    font-size: 0.72rem; color: var(--muted); font-family: 'JetBrains Mono';
+    background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; line-height: 1.6;
+  }
+  .ce-tip strong { color: var(--accent2); }
+
   /* ── Animated copy button (copy-code-button port) ── */
   .anim-copy-progress {
     position: absolute; left: 0; top: 0; bottom: 0; width: 0%;
@@ -8822,6 +8883,85 @@
         </button>
       </div>
 
+      <!-- Cold Email Generator -->
+      <div class="ai-card ce-card">
+        <div class="ai-card-title coldemail">📧 Cold Email Generator</div>
+        <p style="font-size:0.82rem;color:var(--muted);margin:0;">Fill in the contact details → get a ready-to-copy cold email + follow-up. No API needed.</p>
+        <div class="ce-body">
+
+          <!-- Left: Form -->
+          <div class="ce-form">
+            <div class="ce-form-row">
+              <div>
+                <label class="ce-label">HR / Recruiter Name</label>
+                <input class="ce-input" id="ce-hr" placeholder="e.g. Priya Sharma" />
+              </div>
+              <div>
+                <label class="ce-label">Company Name</label>
+                <input class="ce-input" id="ce-company" placeholder="e.g. Razorpay" />
+              </div>
+            </div>
+            <div class="ce-form-row">
+              <div>
+                <label class="ce-label">Role / Position</label>
+                <input class="ce-input" id="ce-role" placeholder="e.g. AI Engineer Intern" />
+              </div>
+              <div>
+                <label class="ce-label">Email Focus</label>
+                <select class="ce-select" id="ce-focus">
+                  <option value="ai">AI / Agentic Systems</option>
+                  <option value="data">Data Engineering / Analytics</option>
+                  <option value="fullstack">Full-Stack / Web Dev</option>
+                  <option value="embedded">Embedded / Hardware</option>
+                  <option value="general">General (any role)</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label class="ce-label">Specific area / project they work on <span style="opacity:0.5">(optional)</span></label>
+              <input class="ce-input" id="ce-specific" placeholder="e.g. their AI chatbot platform, fraud detection pipeline…" />
+            </div>
+            <button class="ce-generate-btn" onclick="generateColdEmail()">📧 Generate Emails</button>
+            <div class="ce-tip">
+              <strong>How to send:</strong> Copy subject → paste into Gmail subject line.<br>
+              Copy body → paste into Gmail compose. Use Gmail's <strong>Schedule send</strong> (▾ next to Send) for follow-up.
+            </div>
+          </div>
+
+          <!-- Right: Output -->
+          <div class="ce-output" id="ce-output" style="display:none;">
+            <div class="ce-tabs">
+              <button class="ce-tab active" id="ce-tab-initial" onclick="switchCeTab('initial')">Initial Email</button>
+              <button class="ce-tab" id="ce-tab-followup" onclick="switchCeTab('followup')">Follow-Up (Day 4–5)</button>
+            </div>
+            <div id="ce-panel-initial">
+              <div class="ce-subject-row" style="margin-bottom:8px;">
+                <span class="ce-subject-label">SUBJECT</span>
+                <span class="ce-subject-text" id="ce-subj-initial"></span>
+                <button class="ce-copy-small" onclick="ceCopyText('ce-subj-initial', this)">Copy</button>
+              </div>
+              <div class="ce-body-text" id="ce-body-initial"></div>
+              <button class="ce-copy-body" onclick="ceCopyBody('ce-body-initial', this)">Copy Email Body</button>
+            </div>
+            <div id="ce-panel-followup" style="display:none;">
+              <div class="ce-subject-row" style="margin-bottom:8px;">
+                <span class="ce-subject-label">SUBJECT</span>
+                <span class="ce-subject-text" id="ce-subj-followup"></span>
+                <button class="ce-copy-small" onclick="ceCopyText('ce-subj-followup', this)">Copy</button>
+              </div>
+              <div class="ce-body-text" id="ce-body-followup"></div>
+              <button class="ce-copy-body" onclick="ceCopyBody('ce-body-followup', this)">Copy Email Body</button>
+            </div>
+          </div>
+
+          <!-- Placeholder when not yet generated -->
+          <div id="ce-placeholder" style="display:flex;align-items:center;justify-content:center;border:1px dashed rgba(244,63,94,0.2);border-radius:10px;color:var(--muted);font-size:0.8rem;font-family:'JetBrains Mono';text-align:center;padding:40px 20px;">
+            Fill the form →<br>click Generate
+          </div>
+
+        </div>
+      </div>
+
       <!-- Interview Story Bank -->
       <div class="ai-card story-bank-card">
         <div class="ai-card-title story" style="display:flex;align-items:center;gap:9px;">
@@ -11311,6 +11451,84 @@ Format your response in clean markdown with headers for each story.`,
     </div>`;
 
     chartsEl.innerHTML = timelineHtml + statusHtml + barChart('Top Sources', sourceEntries, 'var(--accent)');
+  }
+
+  /* ── Cold Email Generator ── */
+  const CE_HOOKS = {
+    ai: {
+      subject: (role, company) => `${role} Application – Prajjwal Pandey | Agentic AI & LangChain`,
+      body: (hr, company, specific) => {
+        const area = specific || 'your AI/automation initiatives';
+        return `Hi ${hr},\n\nI came across ${company} and was genuinely excited about ${area}.\n\nI'm Prajjwal — an Applied AI Engineer at VIT specialising in Agentic AI systems and LangChain-based RAG pipelines. A few things I've built:\n\n• Autonomous 5-agent LangChain pipeline → 70% improvement in resume-to-JD alignment across 50+ test cases\n• End-to-end EDA pipelines → 40% reduction in processing latency for 5+ stakeholders\n• Reduced manual workflow time by 15+ hrs/week via AI automation\n\nI believe my experience building production-grade multi-agent systems could add real value at ${company}.\n\nI've attached my resume. Would you have 15 minutes this week for a quick chat?\n\nBest regards,\nPrajjwal Pandey\n+91 8278674540 | prajjwalp1707@gmail.com`;
+      }
+    },
+    data: {
+      subject: (role, company) => `${role} Application – Prajjwal Pandey | Data Engineering & Analytics`,
+      body: (hr, company, specific) => {
+        const area = specific || 'your data infrastructure and analytics work';
+        return `Hi ${hr},\n\nI'm reaching out regarding ${company}'s work on ${area} — it aligns closely with what I've been building.\n\nI'm Prajjwal — an Applied AI Engineer at VIT with hands-on experience in data pipelines and analytics:\n\n• Architected end-to-end EDA pipelines → 40% reduction in processing latency for 5+ stakeholders\n• Translated 20+ complex datasets into Power BI executive dashboards → 25% faster decision-making\n• Built AI-driven traffic analytics using YOLOv5 + regression models for Delhi-NCR\n\nI'd love to bring this to ${company}. My resume is attached.\n\nWould you be open to a 15-minute call this week?\n\nBest regards,\nPrajjwal Pandey\n+91 8278674540 | prajjwalp1707@gmail.com`;
+      }
+    },
+    fullstack: {
+      subject: (role, company) => `${role} Application – Prajjwal Pandey | Full-Stack & Web Dev`,
+      body: (hr, company, specific) => {
+        const area = specific || 'your product development';
+        return `Hi ${hr},\n\nI've been following ${company}'s work on ${area} and would love to contribute.\n\nI'm Prajjwal — an Applied AI Engineer at VIT with full-stack experience across React, Three.js, Firebase, and Python backends:\n\n• Solo-built Teerth — a 3D WebGL cultural exploration platform → 40% rendering optimisation, stable 60FPS on mobile\n• Built AI-powered dashboards and real-time UIs for traffic management systems\n• Integrated LangChain + RAG pipelines with web-based front ends\n\nI'd love to bring both AI and front-end depth to ${company}. Resume attached.\n\nDo you have 15 minutes this week?\n\nBest regards,\nPrajjwal Pandey\n+91 8278674540 | prajjwalp1707@gmail.com`;
+      }
+    },
+    embedded: {
+      subject: (role, company) => `${role} Application – Prajjwal Pandey | Embedded Systems & Signal Processing`,
+      body: (hr, company, specific) => {
+        const area = specific || 'your embedded systems / hardware work';
+        return `Hi ${hr},\n\nI came across ${company}'s work on ${area} — it maps directly to my capstone project experience.\n\nI'm Prajjwal — ECE student at VIT with hands-on embedded systems and signal processing work:\n\n• Portable FMCW Radar + GPS on ESP32 with 16-bit ADC → 98.5% signal integrity, real-time Mapbox visualisation\n• Reduced signal processing latency by 30% via STM32 → ESP32 architecture migration\n• Increased plant operational uptime by 15% at Radico Khaitan through DCS protocol standardisation\n\nResume attached. Available for a call this week?\n\nBest regards,\nPrajjwal Pandey\n+91 8278674540 | prajjwalp1707@gmail.com`;
+      }
+    },
+    general: {
+      subject: (role, company) => `${role} Application – Prajjwal Pandey | Applied AI Engineer`,
+      body: (hr, company, specific) => {
+        const area = specific || "your team's initiatives";
+        return `Hi ${hr},\n\nI'm reaching out about opportunities at ${company}, particularly around ${area}.\n\nI'm Prajjwal — an Applied AI Engineer at VIT with experience spanning Agentic AI, data pipelines, and embedded systems:\n\n• Autonomous 5-agent LangChain pipeline → 70% resume-to-JD alignment improvement\n• 40% latency reduction via end-to-end EDA pipelines for 5+ stakeholders\n• FMCW Radar on ESP32 → 98.5% signal integrity for real-time detection\n\nI'd love to explore how I can add value at ${company}. Resume attached.\n\nWould you have 15 minutes this week?\n\nBest regards,\nPrajjwal Pandey\n+91 8278674540 | prajjwalp1707@gmail.com`;
+      }
+    }
+  };
+
+  function generateColdEmail() {
+    const hr       = document.getElementById('ce-hr').value.trim() || 'there';
+    const company  = document.getElementById('ce-company').value.trim() || '[Company Name]';
+    const role     = document.getElementById('ce-role').value.trim() || '[Role]';
+    const focus    = document.getElementById('ce-focus').value;
+    const specific = document.getElementById('ce-specific').value.trim();
+    const focusLabels = { ai: 'Agentic AI & LangChain systems', data: 'data engineering & analytics', fullstack: 'full-stack development', embedded: 'embedded systems & signal processing', general: 'AI and engineering' };
+    const hook = CE_HOOKS[focus];
+    document.getElementById('ce-subj-initial').textContent  = hook.subject(role, company);
+    document.getElementById('ce-body-initial').textContent  = hook.body(hr, company, specific);
+    document.getElementById('ce-subj-followup').textContent = `Follow-Up: ${role} Application – Prajjwal Pandey`;
+    document.getElementById('ce-body-followup').textContent =
+      `Hi ${hr},\n\nI hope you're doing well.\n\nI wanted to follow up on my application for the ${role} role at ${company}. I'm genuinely excited about the opportunity and believe my background in ${focusLabels[focus]} could be a strong fit.\n\nIf there are any updates on my application, or if you need anything additional from me, please let me know.\n\nThank you for your time!\n\nBest regards,\nPrajjwal Pandey\n+91 8278674540 | prajjwalp1707@gmail.com`;
+    document.getElementById('ce-output').style.display = 'flex';
+    document.getElementById('ce-placeholder').style.display = 'none';
+    switchCeTab('initial');
+  }
+
+  function switchCeTab(tab) {
+    document.getElementById('ce-panel-initial').style.display  = tab === 'initial'  ? 'block' : 'none';
+    document.getElementById('ce-panel-followup').style.display = tab === 'followup' ? 'block' : 'none';
+    document.getElementById('ce-tab-initial').classList.toggle('active',  tab === 'initial');
+    document.getElementById('ce-tab-followup').classList.toggle('active', tab === 'followup');
+  }
+
+  function ceCopyText(id, btn) {
+    navigator.clipboard.writeText(document.getElementById(id).textContent).then(() => {
+      const orig = btn.textContent; btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = orig, 2000);
+    });
+  }
+
+  function ceCopyBody(id, btn) {
+    navigator.clipboard.writeText(document.getElementById(id).textContent).then(() => {
+      btn.textContent = 'Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy Email Body'; btn.classList.remove('copied'); }, 2500);
+    });
   }
 
   const _origRenderBoard = renderBoard;

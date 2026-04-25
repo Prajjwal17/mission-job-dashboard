@@ -11749,7 +11749,7 @@ Format your response in clean markdown with headers for each story.`,
     showToast('Logged outreach to ' + company + ' ✅', 'success', 3000);
     closeHREmailModal();
     const hrTbody = document.getElementById('hr-table-body');
-    if (hrTbody && hrTbody.children.length) { hrPage = 0; renderHR(); }
+    if (hrTbody && hrTbody.children.length) { renderHR(); }
   }
 
   function openHREmail(name, company, email, title) {
@@ -12271,7 +12271,7 @@ Format your response in clean markdown with headers for each story.`,
     if (flag === 'clear') { delete hrFlags[email]; }
     else { hrFlags[email] = flag; }
     _saveHRFlags();
-    hrPage = 0; renderHR();
+    renderHR();
   }
 
   function markHRSent(email, name, company) {
@@ -12292,7 +12292,7 @@ Format your response in clean markdown with headers for each story.`,
     lsSave(applications);
     gistSync(applications).catch(function(e){ console.warn('Gist sync:', e); });
     renderBoard();
-    hrPage = 0; renderHR();
+    renderHR();
     showToast('Marked as Sent ✅', 'success', 2000);
   }
 
@@ -12303,7 +12303,7 @@ Format your response in clean markdown with headers for each story.`,
     lsSave(applications);
     gistSync(applications).catch(function(e){ console.warn('Gist sync:', e); });
     renderBoard();
-    hrPage = 0; renderHR();
+    renderHR();
     showToast('Unmarked sent', 'info', 2000);
   }
 
@@ -12333,7 +12333,7 @@ Format your response in clean markdown with headers for each story.`,
     lsSave(applications);
     gistSync(applications).catch(function(e){ console.warn('Gist sync:', e); });
     renderBoard();
-    hrPage = 0; renderHR();
+    renderHR();
     showToast('Marked ' + added + ' contacts as Sent ✅', 'success', 3000);
   }
 

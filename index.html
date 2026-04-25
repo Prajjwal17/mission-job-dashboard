@@ -10609,20 +10609,34 @@
   }
 
   // ── BOARD CRUD (localStorage + Gist) ────────────────────────────────────────
+  function _mergeApps(gistApps, localApps) {
+    // Union by id — local wins on conflict (local is always more recent)
+    const map = new Map();
+    gistApps.forEach(function(a) { map.set(a.id, a); });
+    localApps.forEach(function(a) { map.set(a.id, a); }); // local overwrites gist
+    return Array.from(map.values()).sort(function(a,b){ return (a.id||0)-(b.id||0); });
+  }
+
   async function loadBoard() {
     _setSyncStatus('loading');
     try {
       const gistData = await gistLoad();
+      const localData = lsLoad();
       if (gistData) {
-        applications = gistData;
-        lsSave(applications); // cache on both primary and secondary
+        const merged = _mergeApps(gistData, localData);
+        applications = merged;
+        lsSave(applications);
+        // If local had entries Gist didn't, push merged state back up
+        if (merged.length > gistData.length) {
+          gistSync(applications).catch(function(e){ console.warn('Re-sync after merge:', e); });
+        }
         _setSyncStatus('synced');
       } else {
-        applications = lsLoad(); // both modes fall back to local cache
+        applications = localData;
         _setSyncStatus(getToken() ? 'error' : 'local');
       }
     } catch(e) {
-      applications = lsLoad(); // both modes fall back to local cache
+      applications = lsLoad();
       _setSyncStatus('error');
       console.warn('loadBoard gist:', e);
     }
@@ -11728,7 +11742,10 @@ Format your response in clean markdown with headers for each story.`,
     applications.push(newApp);
     lsSave(applications);
     renderBoard();
-    gistSync(applications);
+    gistSync(applications).catch(function(e){
+      console.warn('Gist sync failed:', e);
+      showToast('Saved locally — Gist sync failed (check token)', 'error', 5000);
+    });
     showToast('Logged outreach to ' + company + ' ✅', 'success', 3000);
     closeHREmailModal();
     const hrTbody = document.getElementById('hr-table-body');
@@ -12124,6 +12141,7 @@ Format your response in clean markdown with headers for each story.`,
         <input type="text" id="hr-search" oninput="hrPage=0;renderHR()" placeholder="🔍 Search by name, company, or job title..." />
       </div>
       <button onclick="copyAllEmails()" style="padding:8px 18px;border-radius:8px;border:1px solid var(--accent3);background:rgba(245,158,11,0.1);color:var(--accent3);font-weight:600;cursor:pointer;font-size:0.8rem;white-space:nowrap;">📋 Copy Filtered Emails</button>
+      <button onclick="openBulkMarkModal()" style="padding:8px 18px;border-radius:8px;border:1px solid rgba(74,222,128,0.4);background:rgba(74,222,128,0.08);color:#4ade80;font-weight:600;cursor:pointer;font-size:0.8rem;white-space:nowrap;" title="Bulk-mark a row range as Sent (for recovery)">✅ Bulk Mark Sent</button>
     </div>
     <div style="display:flex;gap:10px;margin-bottom:16px;align-items:center;flex-wrap:wrap;">
       <span id="hr-count-label" style="font-family:'JetBrains Mono';font-size:0.75rem;color:var(--muted);">Showing 80 of 1842 contacts</span>
@@ -12213,8 +12231,13 @@ Format your response in clean markdown with headers for each story.`,
       const sent = contactedEmails.has(c.e) || contactedNames.has(c.n.trim().toLowerCase());
       const flag  = hrFlags[c.e];
       const esc_e = c.e.replace(/'/g, "\\'");
+      const markSentItem = !sent
+        ? '<div onclick="markHRSent(\'' + esc_e + '\',\'' + _esc(c.n).replace(/'/g,"\\'") + '\',\'' + _esc(c.c||'').replace(/'/g,"\\'") + '\');event.stopPropagation()" style="padding:7px 12px;font-size:0.75rem;cursor:pointer;color:#4ade80;" onmouseover="this.style.background=\'rgba(74,222,128,0.1)\'" onmouseout="this.style.background=\'\'">✅ Mark as Sent</div>'
+        : '<div onclick="unmarkHRSent(\'' + esc_e + '\');event.stopPropagation()" style="padding:7px 12px;font-size:0.75rem;cursor:pointer;color:var(--muted);" onmouseover="this.style.background=\'rgba(255,255,255,0.05)\'" onmouseout="this.style.background=\'\'">↩ Unmark Sent</div>';
       const flagBtn = '<button onclick="(function(b){var m=b.nextElementSibling;m.style.display=m.style.display===\'block\'?\'none\':\'block\';setTimeout(function(){document.addEventListener(\'click\',function h(){m.style.display=\'none\';document.removeEventListener(\'click\',h)},{once:true})},0)})(this)" style="padding:2px 5px;background:transparent;border:1px solid var(--border);border-radius:4px;color:var(--muted);font-size:0.65rem;cursor:pointer;line-height:1;" title="Flag contact">⚑</button>'
-               + '<div style="display:none;position:absolute;right:0;top:100%;z-index:999;background:#1a1b26;border:1px solid var(--border);border-radius:6px;min-width:150px;box-shadow:0 4px 16px rgba(0,0,0,0.5);overflow:hidden;">'
+               + '<div style="display:none;position:absolute;right:0;top:100%;z-index:999;background:#1a1b26;border:1px solid var(--border);border-radius:6px;min-width:165px;box-shadow:0 4px 16px rgba(0,0,0,0.5);overflow:hidden;">'
+               +   markSentItem
+               +   '<div style="height:1px;background:var(--border);margin:2px 0;"></div>'
                +   '<div onclick="flagHR(\'' + esc_e + '\',\'invalid\');event.stopPropagation()" style="padding:7px 12px;font-size:0.75rem;cursor:pointer;color:#f87171;" onmouseover="this.style.background=\'rgba(248,113,113,0.1)\'" onmouseout="this.style.background=\'\'">❌ Invalid Email</div>'
                +   '<div onclick="flagHR(\'' + esc_e + '\',\'moved\');event.stopPropagation()" style="padding:7px 12px;font-size:0.75rem;cursor:pointer;color:#facc15;" onmouseover="this.style.background=\'rgba(250,204,21,0.1)\'" onmouseout="this.style.background=\'\'">🔄 Company Changed</div>'
                +   (flag ? '<div onclick="flagHR(\'' + esc_e + '\',\'clear\');event.stopPropagation()" style="padding:7px 12px;font-size:0.75rem;cursor:pointer;color:var(--muted);border-top:1px solid var(--border);" onmouseover="this.style.background=\'rgba(255,255,255,0.05)\'" onmouseout="this.style.background=\'\'">✕ Clear Flag</div>' : '')
@@ -12249,6 +12272,91 @@ Format your response in clean markdown with headers for each story.`,
     else { hrFlags[email] = flag; }
     _saveHRFlags();
     hrPage = 0; renderHR();
+  }
+
+  function markHRSent(email, name, company) {
+    const already = applications.some(function(a){ return a.hr_email === email; });
+    if (already) return;
+    applications.push({
+      id: Date.now() + Math.random(),
+      title: name + (company ? ' @ ' + company : ''),
+      company: company,
+      role: 'Cold Outreach',
+      source: 'Mail',
+      status: 'Cold Outreach',
+      date: new Date().toISOString().split('T')[0],
+      contact: name,
+      hr_email: email,
+      notes: 'Manually marked as sent (recovery).'
+    });
+    lsSave(applications);
+    gistSync(applications).catch(function(e){ console.warn('Gist sync:', e); });
+    renderBoard();
+    hrPage = 0; renderHR();
+    showToast('Marked as Sent ✅', 'success', 2000);
+  }
+
+  function unmarkHRSent(email) {
+    const before = applications.length;
+    applications = applications.filter(function(a){ return a.hr_email !== email; });
+    if (applications.length === before) return;
+    lsSave(applications);
+    gistSync(applications).catch(function(e){ console.warn('Gist sync:', e); });
+    renderBoard();
+    hrPage = 0; renderHR();
+    showToast('Unmarked sent', 'info', 2000);
+  }
+
+  function bulkMarkSent(from1, to1) {
+    // from1/to1 are 1-based row numbers (as shown in UI)
+    const chunk = HR_DATA.slice(from1 - 1, to1);
+    let added = 0;
+    const existingEmails = new Set(applications.filter(function(a){ return a.hr_email; }).map(function(a){ return a.hr_email; }));
+    chunk.forEach(function(c) {
+      if (!existingEmails.has(c.e) && (!hrFlags[c.e] || hrFlags[c.e] === 'moved')) {
+        applications.push({
+          id: Date.now() + Math.random(),
+          title: c.n + (c.c ? ' @ ' + c.c : ''),
+          company: c.c || '',
+          role: 'Cold Outreach',
+          source: 'Mail',
+          status: 'Cold Outreach',
+          date: new Date().toISOString().split('T')[0],
+          contact: c.n,
+          hr_email: c.e,
+          notes: 'Bulk recovery mark (rows ' + from1 + '–' + to1 + ').'
+        });
+        added++;
+      }
+    });
+    if (!added) { showToast('Nothing new to mark in that range', 'info', 3000); return; }
+    lsSave(applications);
+    gistSync(applications).catch(function(e){ console.warn('Gist sync:', e); });
+    renderBoard();
+    hrPage = 0; renderHR();
+    showToast('Marked ' + added + ' contacts as Sent ✅', 'success', 3000);
+  }
+
+  function openBulkMarkModal() {
+    var existing = document.getElementById('bulk-mark-modal');
+    if (existing) { existing.style.display = 'flex'; return; }
+    var modal = document.createElement('div');
+    modal.id = 'bulk-mark-modal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:9999;';
+    modal.innerHTML = '<div style="background:#1a1b26;border:1px solid var(--border);border-radius:12px;padding:28px 32px;min-width:320px;max-width:400px;">'
+      + '<h3 style="margin:0 0 8px;font-size:1rem;color:var(--text);">Bulk Mark as Sent</h3>'
+      + '<p style="margin:0 0 18px;font-size:0.78rem;color:var(--muted);">Marks a row range as Cold Outreach (skips already-sent & invalid).</p>'
+      + '<div style="display:flex;gap:10px;margin-bottom:18px;">'
+      +   '<div style="flex:1;"><label style="font-size:0.72rem;color:var(--muted);display:block;margin-bottom:4px;">From row</label><input id="bulk-from" type="number" min="1" value="51" style="width:100%;padding:7px 10px;background:#0d0e17;border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.85rem;box-sizing:border-box;"></div>'
+      +   '<div style="flex:1;"><label style="font-size:0.72rem;color:var(--muted);display:block;margin-bottom:4px;">To row</label><input id="bulk-to" type="number" min="1" value="100" style="width:100%;padding:7px 10px;background:#0d0e17;border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.85rem;box-sizing:border-box;"></div>'
+      + '</div>'
+      + '<div style="display:flex;gap:10px;justify-content:flex-end;">'
+      +   '<button onclick="document.getElementById(\'bulk-mark-modal\').style.display=\'none\'" style="padding:8px 16px;background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--muted);font-size:0.8rem;cursor:pointer;">Cancel</button>'
+      +   '<button onclick="var f=parseInt(document.getElementById(\'bulk-from\').value),t=parseInt(document.getElementById(\'bulk-to\').value);if(f>0&&t>=f){bulkMarkSent(f,t);document.getElementById(\'bulk-mark-modal\').style.display=\'none\';}else{alert(\'Invalid range\');}" style="padding:8px 16px;background:rgba(74,222,128,0.15);border:1px solid rgba(74,222,128,0.4);border-radius:6px;color:#4ade80;font-size:0.8rem;cursor:pointer;font-weight:600;">✅ Mark Range</button>'
+      + '</div>'
+      + '</div>';
+    document.body.appendChild(modal);
+    modal.addEventListener('click', function(e){ if (e.target === modal) modal.style.display = 'none'; });
   }
 
   function copyAllEmails() {
